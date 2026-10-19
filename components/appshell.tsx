@@ -50,9 +50,8 @@ export default function AppShell({ titulo, paginaAtiva, children, }: AppShellPro
           {/* MENU */}
           <View style={styles.menu}>
             <MenuItem icon="home" title="Início" ativo={paginaAtiva === 'inicio'} rota="/" />
-            <MenuItem icon="book" title="Aprender" ativo={paginaAtiva === 'aprender'} rota="/aprede"/>
+            <MenuItem icon="book" title="Aprender" ativo={paginaAtiva === 'aprender'} rota="/aprender"/>
             <MenuItem icon="folder-open" title="Meus Projetos" ativo={paginaAtiva === 'projetos'} rota="/projetos"/>
-            <MenuItem icon="trophy" title="Desafios" ativo={paginaAtiva === 'desafios'} rota="/desafios" />
             <MenuItem icon="podium" title="Ranking" ativo={paginaAtiva === 'ranking'} rota="/ranking" />
             <MenuItem icon="help-circle" title="Ajuda" ativo={paginaAtiva === 'ajuda'} rota="/ajudar" />
           </View>

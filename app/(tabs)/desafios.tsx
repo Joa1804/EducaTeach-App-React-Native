@@ -19,20 +19,10 @@ export default function DesafiosScreen() {
           </View> 
 
             <View style={styles.informacoes}> 
-              <Text style={styles.titulo}> Título da Atividade </Text> 
-              <Text style={styles.professor}> Professor: Nome do Professor </Text> 
+              <Text style={styles.titulo}> Título da Atividade </Text>  
               </View> 
             </View> 
-              
-              {/* PRAZO */} 
-              <View style={styles.prazoCard}> 
-                <Ionicons name="calendar" size={24} color={BLUE} /> 
-                <View style={styles.prazoInfo}> 
-                  <Text style={styles.prazoTitulo}> Prazo de Entrega </Text> 
-                  <Text style={styles.data}> 00/00/0000 </Text> 
-                </View> 
-                </View> 
-
+            
                 {/* STATUS */} 
                 <View style={styles.statusCard}> 
                   <Ionicons name="time" size={24} color="#F59E0B" /> 
