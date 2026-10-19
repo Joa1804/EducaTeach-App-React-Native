@@ -1,8 +1,62 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView, TextInput } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient} from 'expo-linear-gradient';
+import React, { useState } from "react";
 
 const PURPLE = '#6c63ff';
 
-export default function CadastroScreen() {}
+export default function CadastroScreen() {
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [mostrarSenha, setMostrarSenha] = useState(false);
+    
+    return (
+    <LinearGradient colors={['#6c63ff', '#8b7cf6', '#c4b5fd']} style={styles.container}>
+        <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                
+                {/* CARD */}
+                <View style={styles.card}>
+                    
+                    {/* ÍCONE */}
+                    <View style={styles.iconeContainer}>
+                        <Ionicons name="person" size={42} color={PURPLE}/>
+                    </View>
+                    
+                     {/* TÍTULO */}
+                     <Text style={styles.titulo}>EducaTeach</Text>
+                     <Text style={styles.subtitulo}>Aprenda a ensinar com tecnologia</Text>
+                     
+                     {/* EMAIL */}
+                     <Text style={styles.label}> Email ou usuario</Text>
+                     
+                     <View style={styles.InputContainer}>
+                        <Ionicons name="person-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
+                        <TextInput style={styles.input} placeholder="seu@email.com" placeholderTextColor="#94A3B8" autoCapitalize="none" keyboardType="email-address"/>
+                        </View>
+                        
+                        {/* SENHA */}
+                        <Text style={styles.label}> Senha</Text>
+                        
+                            <View style={styles.InputContainer}>
+                                <Ionicons name="lock-closed-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
+                                <TextInput style={styles.input} placeholder="********" placeholderTextColor="#94A3B8" secureTextEntry={!mostrarSenha}/>
+                                <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+                                    <Ionicons  name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#94a3b8"/>
+                                </TouchableOpacity>
+                            </View>
+    
+                            {/* ENTRAR */}
+                            <TouchableOpacity style={styles.botaoEntrar}>
+                                <Text style={styles.botaoTexto}>Entrar</Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+              </LinearGradient>
+        );
+}
 
 
 const styles = StyleSheet.create({
