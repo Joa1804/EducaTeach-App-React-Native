@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, View, Text, Switch, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import AppShell from '../../components/appshell';
 
 function OpcaoSwitch({
   icon,

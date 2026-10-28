@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 
 const PURPLE = '#673AB7';
 
@@ -16,7 +15,8 @@ type AppShellProps = {
     | 'desafios'
     | 'ranking'
     | 'ajuda'
-    | 'configuracao';
+    | 'configuracao'
+    | 'forum';
   children: ReactNode;
 };
 
@@ -50,10 +50,11 @@ export default function AppShell({ titulo, paginaAtiva, children, }: AppShellPro
           {/* MENU */}
           <View style={styles.menu}>
             <MenuItem icon="home" title="Início" ativo={paginaAtiva === 'inicio'} rota="/" />
-            <MenuItem icon="book" title="Aprender" ativo={paginaAtiva === 'aprender'} rota="/aprender"/>
-            <MenuItem icon="folder-open" title="Meus Projetos" ativo={paginaAtiva === 'projetos'} rota="/projetos"/>
-            <MenuItem icon="podium" title="Ranking" ativo={paginaAtiva === 'ranking'} rota="/ranking" />
-            <MenuItem icon="help-circle" title="Ajuda" ativo={paginaAtiva === 'ajuda'} rota="/ajudar" />
+            <MenuItem icon="book" title="Aprender" ativo={paginaAtiva === 'aprender'} rota="/(tabs)/aprede" />
+            <MenuItem icon="chatbubbles" title="Fórum" ativo={paginaAtiva === 'forum'} rota="/(tabs)/Forum" />
+            <MenuItem icon="folder-open" title="Meus Projetos" ativo={paginaAtiva === 'projetos'} rota="/(tabs)/projetos" />
+            <MenuItem icon="podium" title="Ranking" ativo={paginaAtiva === 'ranking'} rota="/(tabs)/ranking" />
+            <MenuItem icon="help-circle" title="Ajuda" ativo={paginaAtiva === 'ajuda'} rota="/(tabs)/ajudar" />
           </View>
 
           {/* RODAPÉ */}
