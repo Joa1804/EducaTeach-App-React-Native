@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import AppShell from '../../components/appshell';
+import { useConfiguracao } from '../../context/ConfiguracaoContext';
 
 function OpcaoSwitch({
   icon,
@@ -17,22 +18,24 @@ function OpcaoSwitch({
   valor: boolean;
   aoMudar: (value: boolean) => void;
 }) {
+  const { cores, fonte } = useConfiguracao();
+
   return (
     <View style={styles.opcaoLinha}>
-      <View style={styles.opcaoIcone}>
-        <Ionicons name={icon} size={18} color={PURPLE} />
+      <View style={[styles.opcaoIcone, { backgroundColor: cores.iconeFundo }]}>
+        <Ionicons name={icon} size={18} color={cores.primaria} />
       </View>
 
       <View style={{ flex: 1 }}>
-        <Text style={styles.opcaoTitulo}>{titulo}</Text>
-        <Text style={styles.opcaoDescricao}>{descricao}</Text>
+        <Text style={[styles.opcaoTitulo, { color: cores.texto, fontSize: fonte(14) }]}>{titulo}</Text>
+        <Text style={[styles.opcaoDescricao, { color: cores.textoSuave, fontSize: fonte(12) }]}>{descricao}</Text>
       </View>
 
       <Switch
         value={valor}
         onValueChange={aoMudar}
-        trackColor={{ false: '#E0E0E0', true: '#D1C4E9' }}
-        thumbColor={valor ? '#673AB7' : '#F5F5F5'}
+        trackColor={{ false: '#E0E0E0', true: cores.primariaClara }}
+        thumbColor={valor ? cores.primaria : '#F5F5F5'}
       />
     </View>
   );
@@ -40,45 +43,44 @@ function OpcaoSwitch({
 
 export default function ConfiguracaoScreen() {
   const router = useRouter();
-
-  const [altoContraste, setAltoContraste] = useState(false);
-  const [fonteGrande, setFonteGrande] = useState(false);
-  const [notificacoes, setNotificacoes] = useState(true);
-  const [som, setSom] = useState(true);
+  const { altoContraste, fonteGrande, notificacoes, som, alterar, cores, fonte } = useConfiguracao();
 
   function sair() {
     router.replace('/login');
   }
 
+  // Estilo comum dos cartões de seção, que muda junto com o tema
+  const secao = [styles.secao, { backgroundColor: cores.superficie, borderColor: cores.borda }];
+  const secaoTitulo = [styles.secaoTitulo, { color: cores.textoSuave, fontSize: fonte(14) }];
+
   return (
-    <AppShell titulo="configuração" paginaAtiva="configuracao">
+    <AppShell titulo="Configuração" paginaAtiva="configuracao">
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
         {/* PERFIL */}
-        <View style={styles.secao}>
+        <View style={secao}>
           <View style={styles.perfilLinha}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarLetra}>M</Text>
+            <View style={[styles.avatar, { backgroundColor: cores.primaria }]}>
+              <Text style={[styles.avatarLetra, { color: cores.textoPrimaria, fontSize: fonte(22) }]}>M</Text>
             </View>
 
             <View>
-              <Text style={styles.perfilNome}>Maria Silva</Text>
-              <Text style={styles.perfilEmail}>Maria@Test.com</Text>
+              <Text style={[styles.perfilNome, { color: cores.texto, fontSize: fonte(16) }]}>Maria Silva</Text>
+              <Text style={[styles.perfilEmail, { color: cores.textoSuave, fontSize: fonte(13) }]}>maria@teste.com</Text>
             </View>
           </View>
         </View>
 
-
         {/* ACESSIBILIDADE */}
-        <View style={styles.secao}>
-          <Text style={styles.secaoTitulo}>Acessabilidade</Text>
+        <View style={secao}>
+          <Text style={secaoTitulo}>Acessibilidade</Text>
 
           <OpcaoSwitch
             icon="contrast-outline"
             titulo="Alto contraste"
             descricao="Aumenta o contraste de cores da tela"
             valor={altoContraste}
-            aoMudar={setAltoContraste}
+            aoMudar={(valor) => alterar('altoContraste', valor)}
           />
 
           <OpcaoSwitch
@@ -86,20 +88,20 @@ export default function ConfiguracaoScreen() {
             titulo="Fonte grande"
             descricao="Aumenta o tamanho da fonte da interface"
             valor={fonteGrande}
-            aoMudar={setFonteGrande}
+            aoMudar={(valor) => alterar('fonteGrande', valor)}
           />
         </View>
 
         {/* PREFERÊNCIAS */}
-        <View style={styles.secao}>
-            <Text style={styles.secaoTitulo}>Preferências</Text>
+        <View style={secao}>
+          <Text style={secaoTitulo}>Preferências</Text>
 
-             <OpcaoSwitch
+          <OpcaoSwitch
             icon="notifications-outline"
             titulo="Notificações"
             descricao="Receba alertas e lembretes"
             valor={notificacoes}
-            aoMudar={setNotificacoes}
+            aoMudar={(valor) => alterar('notificacoes', valor)}
           />
 
           <OpcaoSwitch
@@ -107,41 +109,38 @@ export default function ConfiguracaoScreen() {
             titulo="Som"
             descricao="Ativa os sons de notificações"
             valor={som}
-            aoMudar={setSom}
-            />
+            aoMudar={(valor) => alterar('som', valor)}
+          />
         </View>
 
-
         {/* CONTA */}
-      <View style={styles.secao}>
+        <View style={secao}>
           <TouchableOpacity style={styles.sairButton} onPress={sair}>
-            <Ionicons name="log-out-outline" size={20} color="#E53935" />
-            <Text style={styles.sairTexto}>Sair da conta</Text>
+            <Ionicons name="log-out-outline" size={20} color={cores.perigo} />
+            <Text style={[styles.sairTexto, { color: cores.perigo, fontSize: fonte(14) }]}>Sair da conta</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.versao}>EducaTeach · versão 1.0.0</Text>
+        <Text style={[styles.versao, { color: cores.textoSuave, fontSize: fonte(12) }]}>
+          EducaTeach · versão 1.0.0
+        </Text>
       </ScrollView>
     </AppShell>
   );
 }
-
-const PURPLE = '#673AB7';
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 25, paddingBottom: 40 },
 
   secao: {
-    backgroundColor: '#fff',
     borderRadius: 16,
+    borderWidth: 1,
     padding: 18,
     marginBottom: 16,
   },
   secaoTitulo: {
-    fontSize: 14,
     fontWeight: 'bold',
-    color: '#757575',
     marginBottom: 12,
     textTransform: 'uppercase',
   },
@@ -151,13 +150,12 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: PURPLE,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarLetra: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
-  perfilNome: { fontSize: 16, fontWeight: 'bold', color: '#212121' },
-  perfilEmail: { fontSize: 13, color: '#757575', marginTop: 2 },
+  avatarLetra: { fontWeight: 'bold' },
+  perfilNome: { fontWeight: 'bold' },
+  perfilEmail: { marginTop: 2 },
 
   opcaoLinha: {
     flexDirection: 'row',
@@ -169,15 +167,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: '#EDE7F6',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  opcaoTitulo: { fontSize: 14, fontWeight: '600', color: '#212121' },
-  opcaoDescricao: { fontSize: 12, color: '#9E9E9E', marginTop: 2 },
+  opcaoTitulo: { fontWeight: '600' },
+  opcaoDescricao: { marginTop: 2 },
 
   sairButton: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  sairTexto: { color: '#E53935', fontWeight: 'bold', fontSize: 14 },
+  sairTexto: { fontWeight: 'bold' },
 
-  versao: { textAlign: 'center', color: '#B0B0B8', fontSize: 12, marginTop: 8 },
+  versao: { textAlign: 'center', marginTop: 8 },
 });
