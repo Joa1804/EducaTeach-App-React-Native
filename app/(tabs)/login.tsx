@@ -2,10 +2,12 @@ import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingVi
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient} from 'expo-linear-gradient';
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 
 const PURPLE = '#6c63ff';
 
 export default function LoginScreen() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -47,7 +49,7 @@ export default function LoginScreen() {
                         </View>
 
                         {/* ENTRAR */}
-                        <TouchableOpacity style={styles.botaoEntrar}>
+                        <TouchableOpacity style={styles.botaoEntrar} onPress={() => router.push('/(tabs)/aprede')}>
                             <Text style={styles.botaoTexto}>Entrar</Text>
                         </TouchableOpacity>
 
@@ -57,7 +59,7 @@ export default function LoginScreen() {
                                 Ainda não tem uma conta?{' '}
                             </Text>
 
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => router.push('/(tabs)/Cadastro')}>
                                 <Text style={styles.linkCadastro}>Cadastre-se</Text>
                             </TouchableOpacity>
                         </View>
