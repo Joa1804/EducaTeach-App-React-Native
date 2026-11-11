@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import AppShell from '../../components/appshell';
+import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
 
 
 type Categoria = 'Geral' | 'Duvidas' | 'Projetos' | 'Desafios' | 'Eventos';
@@ -94,6 +95,9 @@ export default function ForumScreen() {
 
     const postsFiltrados = filtroAtivo === 'todos' ? POSTS : POSTS.filter((post) => post.categoria === filtroAtivo);
 
+       const { cores, fonte } = useConfiguracao();
+        const styles = criarEstilos(cores, fonte);
+
     return (
         <AppShell titulo="Fórum" paginaAtiva="forum">
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -121,7 +125,7 @@ export default function ForumScreen() {
                     {postsFiltrados.length === 0? (
                         <Text style={styles.vazio}>Nenhum post encontrado.</Text>
                     ) : (
-                        postsFiltrados.map((post) => <PostCard key={post.id} post={post} />)
+                        postsFiltrados.map((post) => <PostCard key={post.id} post={post} styles={styles} />)
                     )}
 
             </ScrollView>
@@ -129,7 +133,7 @@ export default function ForumScreen() {
     );
 }
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post, styles }: { post: Post; styles: ReturnType<typeof criarEstilos> }) {
     const categoriaInfo = CATEGORIAS_INFO[post.categoria];
 
     return (
@@ -168,142 +172,117 @@ function PostCard({ post }: { post: Post }) {
 
 const PURPLE = '#673AB7';
 
-const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    content: {
-        padding: 16,
-        paddingBottom: 40,
-    },
+const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.fundo },
+    content: { padding: 25, paddingBottom: 40 },
+
     forumHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 12,
-        marginBottom: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 18,
     },
-    forumTitle: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#212121',
-    },
+    forumTitle: { fontSize: f(22), fontWeight: 'bold', color: c.texto },
     newPostButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        backgroundColor: PURPLE,
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.primaria,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
     },
-    newPostButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
- 
-    filtrosRow: { 
-        flexDirection: 'row', 
-        flexWrap: 'wrap', 
-        gap: 8, 
-        marginBottom: 16 
-    },
+    newPostButtonText: { color: '#fff', fontWeight: '600', marginLeft: 6 },
+
+    filtrosRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 18, gap: 8 },
     chip: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: c.iconeFundo,
+      borderWidth: 1,
+      borderColor: c.borda,
     },
-    chipAtivo: { 
-        backgroundColor: PURPLE, 
-        borderColor: PURPLE 
-    },
-    chipTexto: { 
-        color: '#424242', 
-        fontWeight: '600', 
-        fontSize: 13 
-    },
-    chipTextoAtivo: { 
-        color: '#fff' 
-    },
- 
+    chipAtivo: { backgroundColor: c.primaria, borderColor: c.primaria },
+    chipTexto: { fontSize: f(12), color: c.textoSuave, fontWeight: '600' },
+    chipTextoAtivo: { color: c.textoPrimaria },
+
     card: {
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
+      backgroundColor: c.superficie,
+      borderRadius: 18,
+      padding: 16,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: c.borda,
     },
-    cardTopo: { 
-        flexDirection: 'row',
-        alignItems: 'center', 
-        gap: 10, 
-        marginBottom: 12 
-        },
+    cardTopo: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
     avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#EDE7F6',
-        alignItems: 'center',
-        justifyContent: 'center',
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: c.primariaClara,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
     },
-    avatarLetra: { 
-        color: PURPLE, 
-        fontWeight: 'bold', 
-        fontSize: 16 
+    avatarLetra: { color: c.primaria, fontWeight: 'bold', fontSize: f(16) },
+    autor: { fontSize: f(14), fontWeight: 'bold', color: c.texto },
+    tempo: { fontSize: f(12), color: c.textoSuave, marginTop: 2 },
+    etiqueta: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      alignSelf: 'flex-start',
     },
-    autor: { 
-        fontWeight: 'bold', 
-        fontSize: 14, 
-        color: '#212121' 
+    etiquetaTexto: { fontSize: f(11), fontWeight: '700' },
+    postTitulo: { fontSize: f(16), fontWeight: 'bold', color: c.texto, marginBottom: 8 },
+    postTexto: { fontSize: f(13), color: c.textoSuave, lineHeight: f(20) },
+    cardAcoes: { flexDirection: 'row', marginTop: 14, gap: 18 },
+    acaoItem: { flexDirection: 'row', alignItems: 'center' },
+    acaoTexto: { marginLeft: 6, fontSize: f(12), color: c.textoSuave },
+    vazio: { fontSize: f(14), color: c.textoSuave, textAlign: 'center', marginTop: 20 },
+
+    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
+    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
+    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
+    statsRow: { flexDirection: 'row', gap: 12 },
+    statBox: {
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      flex: 1,
     },
-    tempo: { 
-        fontSize: 12, 
-        color: '#9E9E9E', 
-        marginTop: 1 
+    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
+    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
+
+    trilhaSection: {
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 20,
+      marginBottom: 20,
     },
-    etiqueta: { 
-        paddingVertical: 4, 
-        paddingHorizontal: 10, 
-        borderRadius: 10 
+    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
+
+    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
+    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+    trilhaNumero: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
     },
-    etiquetaTexto: { 
-        fontSize: 11,
-        fontWeight: 'bold'
-     },
-    postTitulo: { 
-        fontSize: 16, 
-        fontWeight: 'bold', 
-        color: '#212121', 
-        marginBottom: 6 
-    },
-    postTexto: { 
-        fontSize: 14, 
-        color: '#616161', 
-        lineHeight: 20, 
-        marginBottom: 12 
-    },
-    cardAcoes: { 
-        flexDirection: 'row', 
-        gap: 18 
-    },
-    acaoItem: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 5 
-    },
-    acaoTexto: { 
-        color: '#757575', 
-        fontSize: 13 
-    },
- 
-    vazio: { 
-        textAlign: 'center', 
-        color: '#9E9E9E', 
-        marginTop: 32 
-    },
-});
+    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
+    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
+    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
+    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
+    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: c.primaria },
+  });
+
