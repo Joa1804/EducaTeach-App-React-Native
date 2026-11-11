@@ -3,6 +3,7 @@ import { useRouter, type Href } from 'expo-router';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
+import { useConfiguracao, type Cores, } from '../context/ConfiguracaoContext';
 
 const PURPLE = '#673AB7';
 
@@ -25,91 +26,108 @@ type MenuItemProps = {
   title: string;
   ativo?: boolean;
   rota: Href;
+  cores: Cores;
+  fonte: (tamanho: number) => number;
 };
 
 export default function AppShell({ titulo, paginaAtiva, children, }: AppShellProps) {
   const [menuAberto, setMenuAberto] = useState(true);
   const router = useRouter();
+  const { cores, fonte } = useConfiguracao();
 
-  return (
-    <View style={styles.app}>
-      {/*MENU LATERAL */}
-      {menuAberto && (
-        <View style={styles.sidebar}>
+   return (
+    <View style={[ styles.app, { backgroundColor: cores.fundo },]}>
+
+      {/* MENU LATERAL */}
+      {menuAberto && (<View style={[ styles.sidebar, { backgroundColor: cores.superficie, borderRightColor: cores.borda,},]}>
 
           {/* LOGO */}
           <View style={styles.logoArea}>
-            <View style={styles.logoIcon}>
-              <Ionicons name="code-slash" size={24} color="#fff"/>
+            <View style={[ styles.logoIcon, { backgroundColor: cores.primaria },]}>
+              <Ionicons name="code-slash" size={24} color={cores.textoPrimaria}/>
             </View>
-            <Text style={styles.logoText}>
+
+            <Text style={[ styles.logoText, { color: cores.primaria, fontSize: fonte(20),},]}>
               EducaTeach
             </Text>
           </View>
 
           {/* MENU */}
           <View style={styles.menu}>
-            <MenuItem icon="home" title="Início" ativo={paginaAtiva === 'inicio'} rota="/" />
-            <MenuItem icon="book" title="Aprender" ativo={paginaAtiva === 'aprender'} rota="/(tabs)/aprede" />
-            <MenuItem icon="chatbubbles" title="Fórum" ativo={paginaAtiva === 'forum'} rota="/(tabs)/Forum" />
-            <MenuItem icon="folder-open" title="Meus Projetos" ativo={paginaAtiva === 'projetos'} rota="/(tabs)/projetos" />
-            <MenuItem icon="podium" title="Ranking" ativo={paginaAtiva === 'ranking'} rota="/(tabs)/ranking" />
-            <MenuItem icon="help-circle" title="Ajuda" ativo={paginaAtiva === 'ajuda'} rota="/(tabs)/ajudar" />
+            <MenuItem icon="home" title="Início" ativo={paginaAtiva === 'inicio'} rota="/" cores={cores} fonte={fonte} />
+            <MenuItem icon="book" title="Aprender"  ativo={paginaAtiva === 'aprender'} rota="/(tabs)/aprede" cores={cores} fonte={fonte}/>
+            <MenuItem icon="chatbubbles" title="Fórum" ativo={paginaAtiva === 'forum'} rota="/(tabs)/Forum" cores={cores} fonte={fonte}/>
+            <MenuItem icon="folder-open" title="Meus Projetos" ativo={paginaAtiva === 'projetos'} rota="/(tabs)/projetos" cores={cores} fonte={fonte}/>
+            <MenuItem icon="podium" title="Ranking" ativo={paginaAtiva === 'ranking'} rota="/(tabs)/ranking" cores={cores} fonte={fonte}/>
+            <MenuItem icon="help-circle" title="Ajuda" ativo={paginaAtiva === 'ajuda'} rota="/(tabs)/ajudar" cores={cores} fonte={fonte}/>
           </View>
 
           {/* RODAPÉ */}
           <View style={styles.sidebarFooter}>
 
             {/* LOGIN */}
-            <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/login')}>
-              <Ionicons name="log-in-outline" size={21} color={PURPLE} />
-              <Text style={styles.loginText}> Entrar </Text> 
-            </TouchableOpacity>
-          </View>
+            <TouchableOpacity
+              style={[ styles.loginButton, { backgroundColor: cores.iconeFundo },]} onPress={() => router.push('/login')}>
 
-          {/* CONFIGURAÇÃO */}
-          <TouchableOpacity
-            style={[styles.configButton, paginaAtiva === 'configuracao' && styles.menuItemAtivo]}
-            onPress={() => router.push('/configuracao')}
-          >
-            <Ionicons name="settings-outline" size={20} color={paginaAtiva === 'configuracao' ? '#fff' : '#757575'} />
-            <Text style={[styles.footerText, paginaAtiva === 'configuracao' && styles.menuItemTextAtivo]}> Configuração </Text>
-          </TouchableOpacity>
+              <Ionicons name="log-in-outline" size={21} color={cores.primaria}/>
+
+              <Text style={[ styles.loginText, { color: cores.primaria,fontSize: fonte(14),},]}>
+                Entrar
+              </Text>
+            </TouchableOpacity>
+
+            {/* CONFIGURAÇÃO */}
+            <TouchableOpacity style={[ styles.configButton, paginaAtiva === 'configuracao' && { backgroundColor: cores.primaria,},]} onPress={() => router.push('/configuracao')}>
+              <Ionicons name="settings-outline" size={20} color={ paginaAtiva === 'configuracao' ? cores.textoPrimaria : cores.textoSuave}/>
+
+              <Text style={[ styles.footerText, { color: paginaAtiva === 'configuracao' ? cores.textoPrimaria : cores.textoSuave, fontSize: fonte(13), fontWeight:  paginaAtiva === 'configuracao'  ? 'bold' : 'normal',},]}>
+                Configuração
+              </Text>
+            </TouchableOpacity>
+
+          </View>
         </View>
       )}
 
-      {/*ÁREA PRINCIPAL*/}
-      <View style={styles.main}>
+
+      {/* ÁREA PRINCIPAL */}
+      <View style={[ styles.main, { backgroundColor: cores.fundo },]}>
 
         {/* HEADER */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setMenuAberto(!menuAberto)} style={styles.menuButton} >
-            <Ionicons name={ menuAberto ? 'menu' : 'menu-outline'} size={26} color={PURPLE} />
+        <View style={[styles.header, { backgroundColor: cores.superficie, borderBottomColor: cores.borda,},]}>
+          <TouchableOpacity onPress={() => setMenuAberto(!menuAberto)} style={styles.menuButton}>
+            <Ionicons name={menuAberto ? 'menu' : 'menu-outline'} size={26} color={cores.primaria}/>
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>
+          <Text style={[ styles.headerTitle,{ color: cores.texto, fontSize: fonte(22),},]}>
             {titulo}
           </Text>
-
         </View>
 
         {/* CONTEÚDO DA PÁGINA */}
         {children}
-
       </View>
     </View>
   );
 }
 
-function MenuItem({ icon, title, ativo = false, rota,}: MenuItemProps) {
+function MenuItem({ icon, title, ativo = false, rota, cores, fonte }: MenuItemProps) {
   const router = useRouter();
 
   return (
-    <TouchableOpacity style={[ styles.menuItem, ativo && styles.menuItemAtivo,]} onPress={() => router.push(rota)}>
-      <Ionicons name={icon} size={21} color={ ativo ? '#fff' : '#555'} />
-      <Text style={[ styles.menuItemText, ativo && styles.menuItemTextAtivo,]}>
-        {title}
-      </Text>
+    <TouchableOpacity
+      style={[styles.menuItem, ativo && { backgroundColor: cores.primaria }]}
+      onPress={() => router.push(rota)}
+    >
+      <Ionicons name={icon} size={21} color={ativo ? cores.textoPrimaria : cores.textoSuave} />
+      <Text style={[
+        styles.menuItemText,
+        {
+          color: ativo ? cores.textoPrimaria : cores.textoSuave,
+          fontSize: fonte(14),
+          fontWeight: ativo ? 'bold' : '500',
+        },
+      ]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -119,14 +137,11 @@ const styles = StyleSheet.create({
   app: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#F5F5F7',
   },
 
   sidebar: {
     width: 220,
-    backgroundColor: '#FFFFFF',
     borderRightWidth: 1,
-    borderRightColor: '#E5E5E5',
     paddingHorizontal: 14,
     paddingTop: 40,
     paddingBottom: 20,
@@ -143,16 +158,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: PURPLE,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
   },
 
   logoText: {
-    fontSize: 20,
     fontWeight: 'bold',
-    color: PURPLE,
   },
 
   menu: {
@@ -167,34 +179,38 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
 
-  menuItemAtivo: {
-    backgroundColor: PURPLE,
-  },
-
   menuItemText: {
     marginLeft: 12,
-    fontSize: 14,
-    color: '#555',
-    fontWeight: '500',
-  },
-
-  menuItemTextAtivo: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
   },
 
   sidebarFooter: {
     marginTop: 'auto',
+    gap: 8,
+  },
+
+  loginButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+
+  loginText: {
+    marginLeft: 12,
+    fontWeight: 'bold',
+  },
+
+  configButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 12,
+    borderRadius: 12,
   },
 
   footerText: {
     marginLeft: 12,
-    color: '#757575',
-    fontSize: 13,
   },
 
   main: {
@@ -203,12 +219,10 @@ const styles = StyleSheet.create({
 
   header: {
     height: 70,
-    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8',
   },
 
   menuButton: {
@@ -216,33 +230,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 22,
     fontWeight: 'bold',
-    color: '#212121',
   },
-
- loginButton: { 
-  flexDirection: 'row', 
-  alignItems: 'center', 
-  paddingVertical: 13, 
-  paddingHorizontal: 12, 
-  borderRadius: 12, 
-  backgroundColor: '#EDE7F6', 
-  marginBottom: 8, 
-}, 
-
-  loginText: { 
-    marginLeft: 12, 
-    fontSize: 14, 
-    color: PURPLE, 
-    fontWeight: 'bold', 
-  }, 
-
-    configButton: { 
-      flexDirection: 'row',
-       alignItems: 'center', 
-       paddingHorizontal: 12, 
-       paddingVertical: 12, 
-      },  
 
 });
