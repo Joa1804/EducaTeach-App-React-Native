@@ -1,11 +1,15 @@
 import { View,Text,StyleSheet,ScrollView,TextInput,TouchableOpacity,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppShell from '../../components/appshell';
+import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
 import React from 'react';
 
 const BLUE = '#2563EB';
 
 export default function DesafiosScreen() {
+
+     const { cores, fonte } = useConfiguracao();
+   const styles = criarEstilos(cores, fonte);
 
   return (
     <AppShell titulo="Desafios" paginaAtiva="desafios">
@@ -61,143 +65,124 @@ export default function DesafiosScreen() {
 }
 
 
-const styles = StyleSheet.create({ 
-  container: { 
-    flex: 1, 
-    backgroundColor: '#F8FAFC', 
-  }, 
-  content: { 
-    padding: 25, 
-    paddingBottom: 40, 
-  }, 
-  cabecalho: { 
-    backgroundColor: '#FFFFFF', 
-    borderRadius: 16, 
-    padding: 20, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 2, }, 
-    shadowOpacity: 0.08, 
-    shadowRadius: 5, 
-    elevation: 3,
-   }, 
-  iconeDesafio: { 
-    width: 58, 
-    height: 58, 
-    borderRadius: 29, 
-    backgroundColor: BLUE, 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    marginRight: 15, 
-  }, 
-  informacoes: { 
-    flex: 1, 
-  }, 
-    titulo: { 
-      fontSize: 23, 
-      fontWeight: 'bold', 
-      color: '#1E293B', 
-    }, 
-    professor: { 
-      marginTop: 5, 
-      fontSize: 14, 
-      color: '#64748B', 
-    }, 
-  prazoCard: { 
-    marginTop: 18,
-     backgroundColor: '#EFF6FF', 
-     borderRadius: 12, 
-     padding: 15, 
-     flexDirection: 'row', 
-     alignItems: 'center',
-     }, 
-  prazoInfo: { 
-    marginLeft: 12,
-   }, 
-   prazoTitulo: { 
-    fontSize: 13,
-     color: '#64748B', 
-    }, 
-    data: { 
-      marginTop: 3, 
-      fontSize: 16, 
-      fontWeight: 'bold', 
-      color: '#1E293B', 
-    }, 
-  statusCard: { 
-    marginTop: 10, 
-    backgroundColor: '#FFFBEB', 
-    borderRadius: 12, 
-    padding: 15, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-  }, 
-  statusInfo: { 
-    marginLeft: 12, 
-  }, statusTitulo: { 
-    fontSize: 13, 
-    color: '#64748B', 
-  }, 
-  statusTexto: { 
-    marginTop: 3, 
-    fontSize: 16, 
-    fontWeight: 'bold', 
-    color: '#F59E0B', 
-  }, 
-  label: { 
-    marginTop:
-    24, fontSize: 17, 
-    fontWeight: 'bold', 
-    color: '#1E293B', 
-  }, 
-  enunciadoCard: {
-     marginTop: 8, 
-     backgroundColor: '#FFFFFF',
-      borderRadius: 12, 
-      padding: 18, 
-      borderWidth: 1, 
-      borderColor: '#E2E8F0', 
-    }, 
-  enunciado: { 
-    fontSize: 15, 
-    lineHeight: 23, 
-    color: '#334155',
-   }, 
-  input: { 
-    minHeight: 250, 
-    marginTop: 8, 
-    padding: 15, 
-    backgroundColor: '#FFFFFF', 
-    borderWidth: 1, 
-    borderColor: '#CBD5E1', 
-    borderRadius: 10, 
-    fontSize: 15,
-     color: '#1E293B', 
-    }, 
-  /* BOTÕES */ 
-  botaoEnviar: { 
-    marginTop: 20, 
-    height: 48,
-     backgroundColor: BLUE, 
-     borderRadius: 8, 
-     flexDirection: 'row', 
-     alignItems: 'center', 
-     justifyContent: 'center', 
-    }, 
-  botaoVoltar: { 
-    marginTop: 10, 
-    height: 48, 
-    backgroundColor: '#64748B', 
-    borderRadius: 8, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
-  }, 
-  botaoTexto: { 
-    marginLeft: 8, 
-    color: '#FFFFFF', 
-    fontSize: 15,
-     fontWeight: 'bold',
-     }, 
-});
+const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.fundo },
+    content: { padding: 25, paddingBottom: 40 },
+
+    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
+    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
+    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
+    statsRow: { flexDirection: 'row', gap: 12 },
+    statBox: {
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      flex: 1,
+    },
+    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
+    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
+
+    trilhaSection: {
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 20,
+      marginBottom: 20,
+    },
+    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
+
+    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
+    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+    trilhaNumero: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
+    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
+    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
+    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
+    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: c.primaria },
+
+    cabecalho: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+    iconeDesafio: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    informacoes: { flex: 1 },
+    titulo: { fontSize: f(24), fontWeight: 'bold', color: c.texto },
+
+    statusCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 16,
+      marginBottom: 20,
+    },
+    statusInfo: { marginLeft: 12, flex: 1 },
+    statusTitulo: { fontSize: f(13), color: c.textoSuave, marginBottom: 2 },
+    statusTexto: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
+
+    label: { fontSize: f(14), fontWeight: '700', color: c.texto, marginBottom: 10 },
+    enunciadoCard: {
+      backgroundColor: c.superficie,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 16,
+      marginBottom: 20,
+    },
+    enunciado: { fontSize: f(15), color: c.texto, lineHeight: 22 },
+
+    input: {
+      backgroundColor: c.superficie,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.borda,
+      minHeight: 140,
+      padding: 16,
+      paddingTop: 16,
+      color: c.texto,
+      fontSize: f(15),
+      marginBottom: 20,
+      textAlignVertical: 'top',
+    },
+
+    botaoEnviar: {
+      backgroundColor: c.primaria,
+      borderRadius: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      marginBottom: 12,
+      gap: 8,
+    },
+    botaoVoltar: {
+      backgroundColor: c.primaria,
+      borderRadius: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      gap: 8,
+    },
+    botaoTexto: { color: '#FFFFFF', fontSize: f(15), fontWeight: 'bold' },
+  });

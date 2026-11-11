@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient} from 'expo-linear-gradient';
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
+import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
 
 const PURPLE = '#6c63ff';
 
@@ -11,6 +12,8 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const { cores, fonte } = useConfiguracao();
+   const styles = criarEstilos(cores, fonte);
 
     return (
           <LinearGradient colors={['#6c63ff', '#8b7cf6', '#c4b5fd']} style={styles.container}>
@@ -172,3 +175,121 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 })
+
+function criarEstilos(
+    cores: {
+        caixaSobrePrimaria: string;
+        fundo: string;
+        superficie: string;
+        texto: string;
+        textoSuave: string;
+        borda: string;
+        primaria: string;
+        primariaClara: string;
+        textoPrimaria: string;
+        iconeFundo: string;
+        perigo: string;
+    },
+    fonte: (tamanho: number) => number
+) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: cores.fundo,
+        },
+        card: {
+            backgroundColor: cores.superficie,
+            borderRadius: 20,
+            padding: 28,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 5 },
+            shadowOpacity: 0.2,
+            shadowRadius: 10,
+            elevation: 8,
+        },
+        iconeContainer: {
+            width: 72,
+            height: 72,
+            borderRadius: 36,
+            backgroundColor: cores.iconeFundo,
+            alignSelf: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        titulo: {
+            marginTop: 16,
+            fontSize: fonte(26),
+            fontWeight: 'bold',
+            color: cores.texto,
+            textAlign: 'center',
+        },
+        subtitulo: {
+            fontSize: fonte(14),
+            color: cores.textoSuave,
+            textAlign: 'center',
+            marginTop: 2,
+            marginBottom: 24,
+        },
+        label: {
+            fontSize: fonte(13),
+            fontWeight: '500',
+            marginBottom: 5,
+            color: cores.texto,
+        },
+        InputContainer: {
+            height: 52,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: cores.caixaSobrePrimaria,
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            marginTop: 8,
+        },
+        inputIcon: {},
+        input: {
+            flex: 1,
+            marginLeft: 10,
+            fontSize: fonte(15),
+            color: cores.texto,
+        },
+        botaoEntrar: {
+            height: 56,
+            marginTop: 8,
+            marginBottom: 16,
+            backgroundColor: cores.primaria,
+            borderRadius: 10,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        botaoTexto: {
+            color: cores.textoPrimaria,
+            fontSize: fonte(16),
+            fontWeight: 'bold',
+        },
+        keyboard: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        scroll: {
+            flexGrow: 1,
+            justifyContent: 'center',
+            padding: 20,
+        },
+        cadastroContainer: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        cadastroTexto: {
+            fontSize: fonte(14),
+            color: cores.textoSuave,
+        },
+        linkCadastro: {
+            marginLeft: 4,
+            fontSize: fonte(14),
+            color: cores.primaria,
+            fontWeight: 'bold',
+        },
+    });
+}
