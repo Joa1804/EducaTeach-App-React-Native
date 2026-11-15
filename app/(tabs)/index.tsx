@@ -3,27 +3,40 @@ import { Ionicons } from '@expo/vector-icons';
 import AppShell from '../../components/appshell';
 import { Cores, useConfiguracao} from '../../context/ConfiguracaoContext';
 import React from 'react';
+import { useUsuario } from '../../context/UsuarioContext';
+import { ATIVIDADE } from '../../data/atividade';
+import { useProgresso } from '../../hooks/use-progresso';
 
 export default function HomeScreen() {
   const {cores, fonte} = useConfiguracao();
   const styles = criarEstilos(cores, fonte);
+  const { usuario } = useUsuario();
+  const { progresso, carregando } = useProgresso();
+
+  const primeiroNome = usuario?.nome.trim().split(/\s+/)[0] ?? '';
+  const concluidas = progresso.length;
 
   return (
     <AppShell titulo="Início" paginaAtiva="inicio">
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.greetingCard}>
-          <Text style={styles.greeting}>Olá, Maria Silva! 👋</Text>
+          <Text style={styles.greeting}>Olá{primeiroNome ? `, ${primeiroNome}` : ''}! 👋</Text>
           <Text style={styles.greetingSubtitle}>Continue sua jornada de programação!</Text>
           <View style={styles.statsRow}>
 
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>1250</Text>
+              <Text style={styles.statValue}>{usuario?.pontos ?? 0}</Text>
               <Text style={styles.statLabel}>Pontos</Text>
             </View>
-            
+
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>Nível 5</Text>
-              <Text style={styles.statLabel}>Progresso</Text>
+              <Text style={styles.statValue}>{usuario?.moedas ?? 0}</Text>
+              <Text style={styles.statLabel}>Moedas</Text>
+            </View>
+
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>{carregando ? '…' : `${concluidas}/${ATIVIDADE.length}`}</Text>
+              <Text style={styles.statLabel}>Atividades</Text>
             </View>
           </View>
         </View>
@@ -75,7 +88,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       backgroundColor: c.caixaSobrePrimaria,
       borderRadius: 12,
       paddingVertical: 12,
-      paddingHorizontal: 20,
+      paddingHorizontal: 12,
       flex: 1,
     },
     statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },

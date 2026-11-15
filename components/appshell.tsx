@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
 import { useConfiguracao, type Cores, } from '../context/ConfiguracaoContext';
+import { useUsuario } from '../context/UsuarioContext';
 
 const PURPLE = '#673AB7';
 
@@ -34,6 +35,16 @@ export default function AppShell({ titulo, paginaAtiva, children, }: AppShellPro
   const [menuAberto, setMenuAberto] = useState(true);
   const router = useRouter();
   const { cores, fonte } = useConfiguracao();
+  const { usuario, sair } = useUsuario();
+  const [saindo, setSaindo] = useState(false);
+
+  async function handleSair() {
+    if (saindo) return;
+    setSaindo(true);
+    // O guard de rotas leva ao login assim que a sessão é encerrada.
+    await sair();
+    setSaindo(false);
+  }
 
    return (
     <View style={[ styles.app, { backgroundColor: cores.fundo },]}>
@@ -65,14 +76,25 @@ export default function AppShell({ titulo, paginaAtiva, children, }: AppShellPro
           {/* RODAPÉ */}
           <View style={styles.sidebarFooter}>
 
-            {/* LOGIN */}
-            <TouchableOpacity
-              style={[ styles.loginButton, { backgroundColor: cores.iconeFundo },]} onPress={() => router.push('/login')}>
+            {/* USUÁRIO DA SESSÃO */}
+            {usuario && (
+              <Text numberOfLines={1} style={[ styles.usuarioNome, { color: cores.texto, fontSize: fonte(13) },]}>
+                {usuario.nome}
+              </Text>
+            )}
 
-              <Ionicons name="log-in-outline" size={21} color={cores.primaria}/>
+            {/* SAIR */}
+            <TouchableOpacity
+              style={[ styles.loginButton, { backgroundColor: cores.iconeFundo }, saindo && { opacity: 0.7 },]}
+              onPress={handleSair}
+              disabled={saindo}
+              accessibilityRole="button"
+              accessibilityLabel="Sair da conta">
+
+              <Ionicons name="log-out-outline" size={21} color={cores.primaria}/>
 
               <Text style={[ styles.loginText, { color: cores.primaria,fontSize: fonte(14),},]}>
-                Entrar
+                Sair
               </Text>
             </TouchableOpacity>
 
@@ -188,6 +210,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
+  usuarioNome: {
+    fontWeight: '600',
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
   loginButton: {
     flexDirection: 'row',
     alignItems: 'center',

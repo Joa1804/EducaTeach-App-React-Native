@@ -2,8 +2,8 @@ import { ScrollView, StyleSheet, View, Text, Switch, TouchableOpacity } from 're
 import { Ionicons } from '@expo/vector-icons';
 import AppShell from '../../components/appshell';
 import React from 'react';
-import { useRouter } from 'expo-router';
 import { useConfiguracao } from '../../context/ConfiguracaoContext';
+import { useUsuario } from '../../context/UsuarioContext';
 
 function OpcaoSwitch({
   icon,
@@ -42,12 +42,11 @@ function OpcaoSwitch({
 }
 
 export default function ConfiguracaoScreen() {
-  const router = useRouter();
   const { altoContraste, fonteGrande, notificacoes, som, alterar, cores, fonte } = useConfiguracao();
+  const { usuario, sair } = useUsuario();
 
-  function sair() {
-    router.replace('/login');
-  }
+  const nome = usuario?.nome ?? '';
+  const inicial = nome.trim().charAt(0).toUpperCase() || '?';
 
   // Estilo comum dos cartões de seção, que muda junto com o tema
   const secao = [styles.secao, { backgroundColor: cores.superficie, borderColor: cores.borda }];
@@ -61,12 +60,12 @@ export default function ConfiguracaoScreen() {
         <View style={secao}>
           <View style={styles.perfilLinha}>
             <View style={[styles.avatar, { backgroundColor: cores.primaria }]}>
-              <Text style={[styles.avatarLetra, { color: cores.textoPrimaria, fontSize: fonte(22) }]}>M</Text>
+              <Text style={[styles.avatarLetra, { color: cores.textoPrimaria, fontSize: fonte(22) }]}>{inicial}</Text>
             </View>
 
             <View>
-              <Text style={[styles.perfilNome, { color: cores.texto, fontSize: fonte(16) }]}>Maria Silva</Text>
-              <Text style={[styles.perfilEmail, { color: cores.textoSuave, fontSize: fonte(13) }]}>maria@teste.com</Text>
+              <Text style={[styles.perfilNome, { color: cores.texto, fontSize: fonte(16) }]}>{nome}</Text>
+              <Text style={[styles.perfilEmail, { color: cores.textoSuave, fontSize: fonte(13) }]}>{usuario?.email ?? ''}</Text>
             </View>
           </View>
         </View>
