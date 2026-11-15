@@ -1,7 +1,6 @@
 import {View,Text,StyleSheet,ScrollView,TouchableOpacity,TextInput,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
 const PURPLE = '#673AB7';
@@ -12,7 +11,6 @@ export default function AjudarScreen() {
     
 
     return (
-        <AppShell titulo="Ajuda" paginaAtiva="ajuda">
             <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
                 {/* CABEÇALHO */}
@@ -170,7 +168,6 @@ export default function AjudarScreen() {
 
                 </View>
             </ScrollView>
-        </AppShell>
     );
 }
 

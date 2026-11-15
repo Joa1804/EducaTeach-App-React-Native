@@ -1,9 +1,8 @@
 import { ScrollView, StyleSheet, View, Text, Switch, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
 import React from 'react';
-import { useConfiguracao } from '../../context/ConfiguracaoContext';
-import { useUsuario } from '../../context/UsuarioContext';
+import { useConfiguracao } from '@/context/ConfiguracaoContext';
+import { useUsuario } from '@/context/UsuarioContext';
 
 function OpcaoSwitch({
   icon,
@@ -53,7 +52,6 @@ export default function ConfiguracaoScreen() {
   const secaoTitulo = [styles.secaoTitulo, { color: cores.textoSuave, fontSize: fonte(14) }];
 
   return (
-    <AppShell titulo="Configuração" paginaAtiva="configuracao">
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
         {/* PERFIL */}
@@ -124,7 +122,6 @@ export default function ConfiguracaoScreen() {
           EducaTeach · versão 1.0.0
         </Text>
       </ScrollView>
-    </AppShell>
   );
 }
 

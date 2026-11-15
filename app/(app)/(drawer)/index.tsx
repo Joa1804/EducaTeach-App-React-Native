@@ -1,11 +1,10 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import { Cores, useConfiguracao} from '../../context/ConfiguracaoContext';
+import { Cores, useConfiguracao} from '@/context/ConfiguracaoContext';
 import React from 'react';
-import { useUsuario } from '../../context/UsuarioContext';
-import { ATIVIDADE } from '../../data/atividade';
-import { useProgresso } from '../../hooks/use-progresso';
+import { useUsuario } from '@/context/UsuarioContext';
+import { ATIVIDADE } from '@/data/atividade';
+import { useProgresso } from '@/hooks/use-progresso';
 
 export default function HomeScreen() {
   const {cores, fonte} = useConfiguracao();
@@ -17,7 +16,6 @@ export default function HomeScreen() {
   const concluidas = progresso.length;
 
   return (
-    <AppShell titulo="Início" paginaAtiva="inicio">
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.greetingCard}>
           <Text style={styles.greeting}>Olá{primeiroNome ? `, ${primeiroNome}` : ''}! 👋</Text>
@@ -50,7 +48,6 @@ export default function HomeScreen() {
           <TrilhaCard styles={styles} numero={2} titulo="Repetições e Loops" info="6 módulos · Iniciante" progresso={60} />
         </View>
       </ScrollView>
-    </AppShell>
   );
 }
 
