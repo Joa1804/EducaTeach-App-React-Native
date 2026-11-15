@@ -4,7 +4,6 @@ import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
 const PURPLE = '#673AB7';
-const BLUE = '#2563EB';
 
 type ProjetosScreenProps = {
     id: string;
