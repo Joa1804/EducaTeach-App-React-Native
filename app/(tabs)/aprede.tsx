@@ -3,9 +3,14 @@ import { Ionicons } from '@expo/vector-icons';
 import  Svg, {Path} from 'react-native-svg';
 import AppShell from '../../components/appshell';
 import { FASES } from '@/data/frase';
+import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
 import React from 'react';
 
 export default function AprenderScreen() {
+
+     const { cores, fonte } = useConfiguracao();
+   const styles = criarEstilos(cores, fonte);
+
   return (
     <AppShell titulo="Aprender" paginaAtiva="aprender">
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -84,6 +89,7 @@ export default function AprenderScreen() {
               key={fase.id}
               fase={fase}
               index={index}
+              styles={styles}
             />
           ))}
 
@@ -95,7 +101,15 @@ export default function AprenderScreen() {
   );
 }
 
-function FaseNode({fase, index}: {fase: typeof FASES[0]; index: number}) {
+function FaseNode({
+  fase,
+  index,
+  styles,
+}: {
+  fase: typeof FASES[0];
+  index: number;
+  styles: ReturnType<typeof criarEstilos>;
+}) {
 
   const posicoes = [
     {top: 40, left: '50%'},
@@ -186,236 +200,137 @@ function FaseNode({fase, index}: {fase: typeof FASES[0]; index: number}) {
 
 }
 
-const styles = StyleSheet.create({
+const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.fundo },
+    content: { padding: 25, paddingBottom: 40 },
 
-  container: {
-    flex: 1,
-    backgroundColor: '#F8FAFC',
-  },
-
-  content: {
-    padding: 25,
-    paddingBottom: 50,
-  },
-
-  /* UNIDADE */
-
-  unidadeCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 20,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    marginBottom: 25,
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
+    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
+    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
+    statsRow: { flexDirection: 'row', gap: 12 },
+    statBox: {
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      flex: 1,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
+    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
+    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
 
-    elevation: 3,
-  },
-
-  unidadeIcone: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-
-    backgroundColor: '#EDE7F6',
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    marginRight: 16,
-  },
-
-  unidadeInfo: {
-    flex: 1,
-  },
-
-  unidadeTitulo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1E293B',
-  },
-
-  unidadeDescricao: {
-    marginTop: 4,
-    fontSize: 14,
-    color: '#64748B',
-  },
-
-  progressoContainer: {
-    marginTop: 12,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  progressoFundo: {
-    height: 8,
-    flex: 1,
-
-    backgroundColor: '#E2E8F0',
-    borderRadius: 10,
-
-    overflow: 'hidden',
-  },
-
-  progresso: {
-    width: '40%',
-    height: '100%',
-
-    backgroundColor: '#673AB7',
-    borderRadius: 10,
-  },
-
-  progressoTexto: {
-    marginLeft: 10,
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '600',
-  },
-
-  /* TÍTULO */
-
-  tituloContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    marginBottom: 10,
-  },
-
-  titulo: {
-    marginLeft: 8,
-
-    fontSize: 22,
-    fontWeight: 'bold',
-
-    color: '#1E293B',
-  },
-
-  /* MAPA */
-
-  mapa: {
-    height: 900,
-
-    position: 'relative',
-
-    backgroundColor: '#FFFFFF',
-
-    borderRadius: 20,
-
-    overflow: 'hidden',
-
-    paddingVertical: 10,
-  },
-
-  caminho: {
-    position: 'absolute',
-
-    top: 0,
-    left: 0,
-  },
-
-  /* FASE */
-
-  faseContainer: {
-    position: 'absolute',
-
-    transform: [
-      {
-        translateX: -45,
-      },
-    ],
-
-    width: 180,
-
-    alignItems: 'center',
-  },
-
-  faseNode: {
-    width: 70,
-    height: 70,
-
-    borderRadius: 35,
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    borderWidth: 5,
-    borderColor: '#FFFFFF',
-
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
+    trilhaSection: {
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 20,
+      marginBottom: 20,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 5,
+    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
 
-    elevation: 4,
-  },
+    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
+    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+    trilhaNumero: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
+    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
+    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
+    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
+    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: c.primaria },
 
-  faseConcluida: {
-    backgroundColor: '#2FA84F',
-  },
+    unidadeCard: {
+      flexDirection: 'row',
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 18,
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+    unidadeIcone: {
+      width: 52,
+      height: 52,
+      borderRadius: 16,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
+    },
+    unidadeInfo: { flex: 1 },
+    unidadeTitulo: { fontSize: f(21), fontWeight: 'bold', color: c.texto, marginBottom: 4 },
+    unidadeDescricao: { fontSize: f(14), color: c.textoSuave, marginBottom: 8 },
+    progressoContainer: { flexDirection: 'row', alignItems: 'center' },
+    progressoFundo: {
+      flex: 1,
+      height: 8,
+      backgroundColor: c.primariaClara,
+      borderRadius: 999,
+      overflow: 'hidden',
+      marginRight: 10,
+    },
+    progresso: { height: '100%', width: '40%', backgroundColor: c.primaria, borderRadius: 999 },
+    progressoTexto: { fontSize: f(12), color: c.textoSuave, fontWeight: '600' },
 
-  faseAtual: {
-    backgroundColor: '#673AB7',
+    tituloContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
+    titulo: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
 
-    transform: [
-      {
-        scale: 1.1,
-      },
-    ],
-  },
+    mapa: {
+      position: 'relative',
+      height: 840,
+      marginTop: 8,
+    },
+    caminho: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
 
-  faseBloqueada: {
-    backgroundColor: '#94A3B8',
-  },
-
-  faseInfo: {
-    marginTop: 8,
-
-    backgroundColor: '#FFFFFF',
-
-    borderRadius: 10,
-
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-
-    alignItems: 'center',
-
-    maxWidth: 170,
-  },
-
-  faseTitulo: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#1E293B',
-  },
-
-  faseDescricao: {
-    marginTop: 2,
-
-    fontSize: 11,
-    color: '#64748B',
-
-    textAlign: 'center',
-  },
-
-  estrelas: {
-    flexDirection: 'row',
-
-    marginTop: 4,
-
-    gap: 2,
-  },
-
-});
+    faseContainer: {
+      position: 'absolute',
+      width: 190,
+      flexDirection: 'row',
+      alignItems: 'center',
+      zIndex: 2,
+    },
+    faseNode: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+    faseConcluida: { backgroundColor: '#10B981' },
+    faseAtual: { backgroundColor: c.primaria },
+    faseBloqueada: { backgroundColor: '#B9B9C5' },
+    faseInfo: {
+      flex: 1,
+      marginLeft: 12,
+      backgroundColor: c.superficie,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 12,
+    },
+    faseTitulo: { fontSize: f(15), fontWeight: 'bold', color: c.texto, marginBottom: 2 },
+    faseDescricao: { fontSize: f(12), color: c.textoSuave, lineHeight: 16 },
+    estrelas: { flexDirection: 'row', marginTop: 8, gap: 2 },
+  });

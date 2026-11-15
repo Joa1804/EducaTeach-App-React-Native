@@ -1,6 +1,7 @@
 import {View,Text,StyleSheet,ScrollView,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppShell from '../../components/appshell';
+import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
 import React from 'react';
 
 const PURPLE = '#673AB7';
@@ -47,6 +48,9 @@ const jogadores: Jogador[] = [
 ];
 
 export default function RankingScreen() {
+       const { cores, fonte } = useConfiguracao();
+        const styles = criarEstilos(cores, fonte);
+
     return (
         <AppShell titulo="Ranking" paginaAtiva="ranking">
 
@@ -270,223 +274,159 @@ export default function RankingScreen() {
 }
 
 
-const styles = StyleSheet.create({
+const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.fundo },
+    content: { padding: 25, paddingBottom: 40 },
 
-    container: {
-        flex: 1,
-        backgroundColor: '#F8FAFC',
+    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
+    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
+    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
+    statsRow: { flexDirection: 'row', gap: 12 },
+    statBox: {
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      flex: 1,
     },
+    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
+    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
 
-    content: {
-        padding: 20,
-        paddingBottom: 40,
+    trilhaSection: {
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 20,
+      marginBottom: 20,
     },
+    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
+
+    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
+    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+    trilhaNumero: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 12,
+    },
+    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
+    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
+    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
+    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
+    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
+    progressBarFill: { height: '100%', backgroundColor: c.primaria },
 
     headerRanking: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 18,
+      marginBottom: 20,
     },
-
     trofeuHeader: {
-        width: 50,
-        height: 50,
-        borderRadius: 15,
-        backgroundColor: PURPLE,
-        alignItems: 'center',
-        justifyContent: 'center',
+      width: 52,
+      height: 52,
+      borderRadius: 16,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
     },
-
-    headerInfo: {
-        marginLeft: 12,
-    },
-
-    tituloRanking: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#1E293B',
-    },
-
-    subtituloRanking: {
-        marginTop: 3,
-        fontSize: 13,
-        color: '#64748B',
-    },
+    headerInfo: { flex: 1 },
+    tituloRanking: { fontSize: f(22), fontWeight: 'bold', color: c.texto },
+    subtituloRanking: { fontSize: f(14), color: c.textoSuave, marginTop: 4 },
 
     ligaCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        padding: 18,
-        marginBottom: 24,
-
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
+      backgroundColor: c.superficie,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 18,
+      marginBottom: 20,
     },
-
-    ligaTopo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-
+    ligaTopo: { flexDirection: 'row', alignItems: 'center' },
     ligaIcone: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        backgroundColor: '#FEF3C7',
-        alignItems: 'center',
-        justifyContent: 'center',
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: c.primariaClara,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-
-    ligaInfo: {
-        flex: 1,
-        marginLeft: 12,
-    },
-
-    ligaTitulo: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#1E293B',
-    },
-
-    ligaTexto: {
-        marginTop: 3,
-        fontSize: 12,
-        color: '#64748B',
-    },
-
-    ligaPosicao: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: PURPLE,
-    },
-
+    ligaInfo: { flex: 1, marginLeft: 12 },
+    ligaTitulo: { fontWeight: 'bold', fontSize: f(16), color: c.texto },
+    ligaTexto: { fontSize: f(13), color: c.textoSuave, marginTop: 2 },
+    ligaPosicao: { fontWeight: 'bold', color: c.primaria, fontSize: f(16) },
     progressoFundo: {
-        height: 9,
-        marginTop: 16,
-        backgroundColor: '#EDE9FE',
-        borderRadius: 10,
-        overflow: 'hidden',
+      height: 10,
+      backgroundColor: c.primariaClara,
+      borderRadius: 999,
+      overflow: 'hidden',
+      marginTop: 18,
     },
+    progresso: { width: '60%', height: '100%', backgroundColor: c.primaria, borderRadius: 999 },
 
-    progresso: {
-        width: '58%',
-        height: '100%',
-        backgroundColor: PURPLE,
-        borderRadius: 10,
-    },
-
-    listaTitulo: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#1E293B',
-        marginBottom: 10,
-    },
-
-    lista: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        paddingHorizontal: 6,
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
-    },
-
+    listaTitulo: { fontSize: f(18), fontWeight: 'bold', color: c.texto, marginBottom: 12 },
+    lista: { gap: 12 },
     jogador: {
-        minHeight: 72,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F1F5F9',
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 14,
     },
-
     jogadorVoce: {
-        backgroundColor: '#F3E8FF',
-        borderRadius: 12,
-        borderBottomWidth: 0,
-        marginVertical: 3,
+      backgroundColor: c.caixaSobrePrimaria,
+      borderColor: c.primariaClara,
     },
-
-    posicaoContainer: {
-        width: 34,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-
+    posicaoContainer: { width: 30, alignItems: 'center', justifyContent: 'center' },
     posicao: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#64748B',
+      fontSize: f(14),
+      fontWeight: 'bold',
+      color: c.texto,
     },
-
     avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        marginLeft: 8,
-        backgroundColor: '#E2E8F0',
-        alignItems: 'center',
-        justifyContent: 'center',
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginHorizontal: 12,
     },
-
-    avatarVoce: {
-        backgroundColor: '#EDE7F6',
-    },
-
-    infoJogador: {
-        flex: 1,
-        marginLeft: 12,
-    },
-
-    nomeLinha: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-
-    nome: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        color: '#1E293B',
-    },
-
-    nomeVoce: {
-        color: PURPLE,
-    },
-
-    pontos: {
-        marginTop: 3,
-        fontSize: 12,
-        color: '#64748B',
-    },
-
+    avatarVoce: { backgroundColor: c.primariaClara },
+    infoJogador: { flex: 1 },
+    nomeLinha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    nome: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
+    nomeVoce: { color: c.primaria },
     voceBadge: {
-        marginLeft: 8,
-        paddingHorizontal: 7,
-        paddingVertical: 3,
-        backgroundColor: PURPLE,
-        borderRadius: 8,
+      backgroundColor: c.primariaClara,
+      borderRadius: 10,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
     },
-
-    voceTexto: {
-        color: '#FFFFFF',
-        fontSize: 10,
-        fontWeight: 'bold',
-    },
+    voceTexto: { fontSize: f(11), fontWeight: 'bold', color: c.primaria },
+    pontos: { fontSize: f(13), color: c.textoSuave, marginTop: 3 },
 
     mensagem: {
-        marginTop: 18,
-        padding: 16,
-        borderRadius: 14,
-        backgroundColor: '#FFFBEB',
-        flexDirection: 'row',
-        alignItems: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 12,
+      padding: 14,
+      marginTop: 20,
     },
-
-    mensagemTexto: {
-        flex: 1,
-        marginLeft: 10,
-        fontSize: 13,
-        lineHeight: 19,
-        color: '#92400E',
-    },
-
-});
+    mensagemTexto: { fontSize: f(14), color: c.texto, flexShrink: 1 },
+  });
