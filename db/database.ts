@@ -57,7 +57,11 @@ let inicializacao: Promise<void> | null = null;
 
 function obterConexao(): Promise<SQLiteDatabase> {
     if (!dbPromise) {
-        dbPromise = SQLite.openDatabaseAsync(NOME_BANCO);
+        // Se a abertura falhar, descarta a promise rejeitada para permitir nova tentativa.
+        dbPromise = SQLite.openDatabaseAsync(NOME_BANCO).catch((error: unknown) => {
+            dbPromise = null;
+            throw error;
+        });
     }
 
     return dbPromise;

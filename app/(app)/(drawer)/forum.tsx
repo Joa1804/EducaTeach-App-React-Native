@@ -167,7 +167,6 @@ function PostCard({ post, styles }: { post: Post; styles: ReturnType<typeof cria
     );
 }
 
-const PURPLE = '#673AB7';
 
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({

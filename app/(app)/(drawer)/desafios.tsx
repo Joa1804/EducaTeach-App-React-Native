@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
-const BLUE = '#2563EB';
 
 export default function DesafiosScreen() {
 
