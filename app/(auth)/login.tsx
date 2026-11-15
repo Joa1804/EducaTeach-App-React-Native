@@ -3,8 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
-import { useLogin } from '../../hooks/use-login';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { useLogin } from '@/hooks/use-login';
 
 const PURPLE = '#6c63ff';
 
@@ -15,7 +15,7 @@ export default function LoginScreen() {
     const { cores, fonte } = useConfiguracao();
     const styles = criarEstilos(cores, fonte);
 
-    // Ao autenticar, o guard de rotas em app/(tabs)/_layout.tsx leva o usuário ao início.
+    // Ao autenticar, o guard de rotas em app/_layout.tsx leva o usuário ao início.
     const { email, senha, setEmail, setSenha, carregando, erro, enviar } = useLogin();
 
     return (
@@ -117,7 +117,7 @@ export default function LoginScreen() {
                                 Ainda não tem uma conta?{' '}
                             </Text>
 
-                            <TouchableOpacity onPress={() => router.push('/(tabs)/Cadastro')} disabled={carregando}>
+                            <TouchableOpacity onPress={() => router.push('/cadastro')} disabled={carregando}>
                                 <Text style={styles.linkCadastro}>Cadastre-se</Text>
                             </TouchableOpacity>
                         </View>

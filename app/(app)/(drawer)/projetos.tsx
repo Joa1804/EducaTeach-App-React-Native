@@ -1,7 +1,6 @@
 import {View,Text,StyleSheet,ScrollView,TouchableOpacity,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
 const PURPLE = '#673AB7';
@@ -52,7 +51,6 @@ export default function ProjetosScreen() {
     const styles = criarEstilos(cores, fonte);
 
     return (
-        <AppShell titulo="Meus Projetos" paginaAtiva="projetos">
             <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
                 {/* CABEÇALHO */}
@@ -123,7 +121,6 @@ export default function ProjetosScreen() {
                     ))}
                 </View>
             </ScrollView>
-        </AppShell>
     );
 }
 

@@ -3,8 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient} from 'expo-linear-gradient';
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
-import { useCadastro } from '../../hooks/use-cadastro';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { useCadastro } from '@/hooks/use-cadastro';
 
 
 const PURPLE = '#6c63ff';
@@ -37,7 +37,7 @@ export default function CadastroScreen() {
         setSenha('');
         setConfirmarSenha('');
         // Navega antes do alerta: no web o Alert do React Native não exibe nada nem chama callbacks.
-        router.replace('/(tabs)/login');
+        router.replace('/login');
         Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Entre com seu e-mail e senha.');
     }
 
