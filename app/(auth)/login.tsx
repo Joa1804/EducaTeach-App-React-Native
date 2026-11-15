@@ -1,19 +1,22 @@
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView} from "react-native";
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient} from 'expo-linear-gradient';
-import React, { useState } from "react";
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useRef, useState } from "react";
 import { useRouter } from "expo-router";
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { useLogin } from '@/hooks/use-login';
 
 const PURPLE = '#6c63ff';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const senhaRef = useRef<React.ComponentRef<typeof TextInput>>(null);
     const { cores, fonte } = useConfiguracao();
-   const styles = criarEstilos(cores, fonte);
+    const styles = criarEstilos(cores, fonte);
+
+    // Ao autenticar, o guard de rotas em app/_layout.tsx leva o usuário ao início.
+    const { email, senha, setEmail, setSenha, carregando, erro, enviar } = useLogin();
 
     return (
           <LinearGradient colors={['#6c63ff', '#8b7cf6', '#c4b5fd']} style={styles.container}>
@@ -33,11 +36,26 @@ export default function LoginScreen() {
                         <Text style={styles.subtitulo}>Aprenda a ensinar com tecnologia</Text>
 
                         {/* EMAIL */}
-                        <Text style={styles.label}> Email ou usuario</Text>
+                        <Text style={styles.label}> E-mail</Text>
 
                         <View style={styles.InputContainer}>
                             <Ionicons name="person-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
-                            <TextInput style={styles.input} placeholder="seu@email.com" placeholderTextColor="#94A3B8" autoCapitalize="none" keyboardType="email-address"/>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="seu@email.com"
+                                placeholderTextColor="#94A3B8"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                autoComplete="email"
+                                textContentType="emailAddress"
+                                keyboardType="email-address"
+                                returnKeyType="next"
+                                value={email}
+                                onChangeText={setEmail}
+                                onSubmitEditing={() => senhaRef.current?.focus()}
+                                editable={!carregando}
+                                accessibilityLabel="E-mail"
+                            />
                         </View>
 
                         {/* SENHA */}
@@ -45,15 +63,52 @@ export default function LoginScreen() {
 
                         <View style={styles.InputContainer}>
                             <Ionicons name="lock-closed-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
-                            <TextInput style={styles.input} placeholder="********" placeholderTextColor="#94A3B8" secureTextEntry={!mostrarSenha}/>
-                            <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
+                            <TextInput
+                                ref={senhaRef}
+                                style={styles.input}
+                                placeholder="********"
+                                placeholderTextColor="#94A3B8"
+                                secureTextEntry={!mostrarSenha}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                autoComplete="current-password"
+                                textContentType="password"
+                                returnKeyType="go"
+                                value={senha}
+                                onChangeText={setSenha}
+                                onSubmitEditing={enviar}
+                                editable={!carregando}
+                                accessibilityLabel="Senha"
+                            />
+                            <TouchableOpacity
+                                onPress={() => setMostrarSenha((atual) => !atual)}
+                                accessibilityRole="button"
+                                accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                            >
                                 <Ionicons  name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#94a3b8"/>
                             </TouchableOpacity>
                         </View>
 
+                        {/* ERRO */}
+                        {erro && (
+                            <Text style={styles.erro} accessibilityRole="alert" accessibilityLiveRegion="polite">
+                                {erro}
+                            </Text>
+                        )}
+
                         {/* ENTRAR */}
-                        <TouchableOpacity style={styles.botaoEntrar} onPress={() => router.push('/(tabs)/aprede')}>
-                            <Text style={styles.botaoTexto}>Entrar</Text>
+                        <TouchableOpacity
+                            style={[styles.botaoEntrar, carregando && styles.botaoDesabilitado]}
+                            onPress={enviar}
+                            disabled={carregando}
+                            accessibilityRole="button"
+                            accessibilityState={{ disabled: carregando, busy: carregando }}
+                        >
+                            {carregando ? (
+                                <ActivityIndicator color={cores.textoPrimaria} />
+                            ) : (
+                                <Text style={styles.botaoTexto}>Entrar</Text>
+                            )}
                         </TouchableOpacity>
 
                         {/* CADASTRO */}
@@ -62,7 +117,7 @@ export default function LoginScreen() {
                                 Ainda não tem uma conta?{' '}
                             </Text>
 
-                            <TouchableOpacity onPress={() => router.push('/(tabs)/Cadastro')}>
+                            <TouchableOpacity onPress={() => router.push('/cadastro')} disabled={carregando}>
                                 <Text style={styles.linkCadastro}>Cadastre-se</Text>
                             </TouchableOpacity>
                         </View>
@@ -75,123 +130,7 @@ export default function LoginScreen() {
 
 }
 
-
-const styles = StyleSheet.create({
-    container : {
-        flex: 1,
-        backgroundColor: '#F8FAFC',
-    },
-    card : {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        padding: 28,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 0.20,
-        shadowRadius: 10,
-        elevation: 8,
-    },
-    iconeContainer : {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: '#ede9fe', 
-        alignSelf: 'center',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    titulo : {
-         marginTop: 16,
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#1a1a2e',
-        textAlign: 'center',
-    },
-    subtitulo : {
-        fontSize: 14,
-        color: '#888888',
-        textAlign: 'center',
-        marginTop: 2,
-        marginBottom: 24,
-    },
-    label : {
-        fontSize: 13,
-        fontWeight: '500',
-        marginBottom: 5,
-        color: '#555555',
-    },
-    InputContainer : {
-        height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginTop: 8,
-    },
-    inputIcon : {},
-    input : {flex: 1, 
-        marginLeft: 10, 
-        fontSize: 15, 
-        color: '#1E293B',
-    },
-    botaoEntrar : {
-        height: 56, 
-        marginTop: 8, 
-        marginBottom: 16, 
-        backgroundColor: PURPLE, 
-        borderRadius: 10, 
-        alignItems: 'center',
-         justifyContent: 'center',
-        },
-    botaoTexto : {
-        color: '#FFFFFF', 
-        fontSize: 16, 
-        fontWeight: 'bold',
-    },
-    keyboard : {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scroll : {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: 20,    
-    },
-    cadastroContainer : {
-        flexDirection: 'row', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-    },
-    cadastroTexto : {
-        fontSize: 14, 
-        color: '#888888',
-    },
-    linkCadastro : {
-        marginLeft: 4, 
-        fontSize: 14, 
-        color: PURPLE, 
-        fontWeight: 'bold',
-    },
-})
-
-function criarEstilos(
-    cores: {
-        caixaSobrePrimaria: string;
-        fundo: string;
-        superficie: string;
-        texto: string;
-        textoSuave: string;
-        borda: string;
-        primaria: string;
-        primariaClara: string;
-        textoPrimaria: string;
-        iconeFundo: string;
-        perigo: string;
-    },
-    fonte: (tamanho: number) => number
-) {
+function criarEstilos(cores: Cores, fonte: (tamanho: number) => number) {
     return StyleSheet.create({
         container: {
             flex: 1,
@@ -254,12 +193,21 @@ function criarEstilos(
         },
         botaoEntrar: {
             height: 56,
-            marginTop: 8,
+            marginTop: 16,
             marginBottom: 16,
             backgroundColor: cores.primaria,
             borderRadius: 10,
             alignItems: 'center',
             justifyContent: 'center',
+        },
+        botaoDesabilitado: {
+            opacity: 0.7,
+        },
+        erro: {
+            marginTop: 12,
+            fontSize: fonte(13),
+            color: cores.perigo,
+            textAlign: 'center',
         },
         botaoTexto: {
             color: cores.textoPrimaria,

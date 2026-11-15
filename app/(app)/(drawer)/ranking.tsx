@@ -1,7 +1,6 @@
 import {View,Text,StyleSheet,ScrollView,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
 const PURPLE = '#673AB7';
@@ -52,7 +51,6 @@ export default function RankingScreen() {
         const styles = criarEstilos(cores, fonte);
 
     return (
-        <AppShell titulo="Ranking" paginaAtiva="ranking">
 
             <ScrollView
                 style={styles.container}
@@ -269,7 +267,6 @@ export default function RankingScreen() {
 
             </ScrollView>
 
-        </AppShell>
     );
 }
 

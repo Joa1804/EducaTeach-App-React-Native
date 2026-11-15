@@ -1,9 +1,8 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import  Svg, {Path} from 'react-native-svg';
-import AppShell from '../../components/appshell';
 import { FASES } from '@/data/frase';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
 export default function AprenderScreen() {
@@ -12,7 +11,6 @@ export default function AprenderScreen() {
    const styles = criarEstilos(cores, fonte);
 
   return (
-    <AppShell titulo="Aprender" paginaAtiva="aprender">
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* CABEÇALHO DA UNIDADE */}
@@ -97,7 +95,6 @@ export default function AprenderScreen() {
 
       </ScrollView>
 
-    </AppShell>
   );
 }
 

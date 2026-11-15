@@ -2,9 +2,9 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Keyboar
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient} from 'expo-linear-gradient';
 import React, { useState } from "react";
-import { router, useRouter } from "expo-router";
-import { cadastrarUsuario } from '../../db/database'
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useRouter } from "expo-router";
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { useCadastro } from '@/hooks/use-cadastro';
 
 
 const PURPLE = '#6c63ff';
@@ -16,52 +16,29 @@ export default function CadastroScreen() {
     const [senha, setSenha] = useState('');
     const [confirmarSenha, setConfirmarSenha] = useState('');
     const [mostrarSenha, setMostrarSenha] = useState(false);
-    const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
-    const [carregando, setCarregando] = useState(false);
     const { cores, fonte } = useConfiguracao();
-   const styles = criarEstilos(cores, fonte);
+    const styles = criarEstilos(cores, fonte);
+
+    // Validação (Zod), hash da senha e tratamento de e-mail duplicado ficam no hook/serviço.
+    const { carregando, erro, limparErro, enviar } = useCadastro();
+
+    function alterar(setter: (valor: string) => void) {
+        return (valor: string) => {
+            setter(valor);
+            limparErro();
+        };
+    }
 
     async function handleCadastro() {
+        const criado = await enviar({ nome, email, senha, confirmarSenha });
 
-        if (!nome.trim() || !email.trim() || !senha.trim() || !confirmarSenha.trim()) {
-            Alert.alert('Por favor, preencha todos os campos.');
-            return;
-        }
+        if (!criado) return;
 
-        if (!email.includes('@')) {
-            Alert.alert('Erro', 'Por favor, insira um email válido.');
-            return;
-        }
-
-        if (senha.length < 6) {
-            Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
-            return;
-        }
-
-        if (senha !== confirmarSenha) {
-            Alert.alert('Erro', 'As senhas não coincidem.');
-            return;
-        }
-
-        try {
-            setCarregando(true);
-
-            await cadastrarUsuario(nome.trim(), email.trim(), senha.trim());
-            Alert.alert('Sucesso', 'Cadastro realizado com sucesso!', [
-                { text: 'OK', onPress: () => router.replace('/(tabs)/login') },
-            ]);
-        } catch (error) {
-            console.error('Erro ao cadastrar usuário:', error);
-
-            const mensagemErro = error instanceof Error ? error.message : String(error);
-
-            if (mensagemErro.includes('UNIQUE constraint failed')) {
-                Alert.alert('Erro', 'Este email já está cadastrado.');
-            }
-        } finally {
-            setCarregando(false);
-        }
-
+        setSenha('');
+        setConfirmarSenha('');
+        // Navega antes do alerta: no web o Alert do React Native não exibe nada nem chama callbacks.
+        router.replace('/login');
+        Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Entre com seu e-mail e senha.');
     }
 
     return (
@@ -91,7 +68,7 @@ export default function CadastroScreen() {
 
                         <View style={styles.InputContainer}>
                             <Ionicons name="person-outline" size={20} color="#94a3b8"/>
-                            <TextInput style={styles.input} placeholder="Seu nome" placeholderTextColor="#94A3B8" value={nome} onChangeText={setNome} autoCapitalize="words"/>
+                            <TextInput style={styles.input} placeholder="Seu nome" placeholderTextColor="#94A3B8" value={nome} onChangeText={alterar(setNome)} editable={!carregando} autoComplete="name" autoCapitalize="words"/>
                         </View>
 
                         {/* EMAIL */}
@@ -101,7 +78,7 @@ export default function CadastroScreen() {
 
                         <View style={styles.InputContainer}>
                             <Ionicons name="mail-outline" size={20} color="#94a3b8"/>
-                            <TextInput style={styles.input} placeholder="seu@email.com" placeholderTextColor="#94A3B8" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" value={email} onChangeText={setEmail}/>
+                            <TextInput style={styles.input} placeholder="seu@email.com" placeholderTextColor="#94A3B8" autoCapitalize="none" autoCorrect={false} keyboardType="email-address" value={email} onChangeText={alterar(setEmail)} editable={!carregando} autoComplete="email"/>
                         </View>
 
                         {/* SENHA */}
@@ -111,7 +88,7 @@ export default function CadastroScreen() {
 
                         <View style={styles.InputContainer}>
                             <Ionicons name="lock-closed-outline" size={20} color="#94a3b8"/>
-                            <TextInput style={styles.input} placeholder="********" placeholderTextColor="#94A3B8" secureTextEntry={!mostrarSenha} value={senha} onChangeText={setSenha}/>
+                            <TextInput style={styles.input} placeholder="********" placeholderTextColor="#94A3B8" secureTextEntry={!mostrarSenha} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" textContentType="newPassword" value={senha} onChangeText={alterar(setSenha)} editable={!carregando}/>
 
                             <TouchableOpacity onPress={() => setMostrarSenha(!mostrarSenha)}>
                                 <Ionicons name={ mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#94a3b8"/>
@@ -126,8 +103,15 @@ export default function CadastroScreen() {
                         <View style={styles.InputContainer}>
                             <Ionicons name="lock-closed-outline" size={20} color="#94a3b8"/>
 
-                            <TextInput style={styles.input} placeholder="Digite a senha novamente" placeholderTextColor="#94A3B8"  secureTextEntry={!mostrarSenha} value={confirmarSenha} onChangeText={setConfirmarSenha}/>
+                            <TextInput style={styles.input} placeholder="Digite a senha novamente" placeholderTextColor="#94A3B8"  secureTextEntry={!mostrarSenha} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" textContentType="newPassword" value={confirmarSenha} onChangeText={alterar(setConfirmarSenha)} editable={!carregando}/>
                         </View>
+
+                        {/* ERRO */}
+                        {erro && (
+                            <Text style={styles.erro} accessibilityRole="alert" accessibilityLiveRegion="polite">
+                                {erro}
+                            </Text>
+                        )}
 
                         {/* CADASTRAR */}
                         <TouchableOpacity style={[ styles.botaoEntrar, carregando && { opacity: 0.7 },]} onPress={handleCadastro} disabled={carregando}>
@@ -242,6 +226,12 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 20,
+    },
+    erro: {
+      marginTop: 12,
+      color: c.perigo,
+      fontSize: f(13),
+      textAlign: 'center',
     },
     botaoTexto: {
       color: '#FFFFFF',

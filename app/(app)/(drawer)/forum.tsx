@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import AppShell from '../../components/appshell';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 
 
 type Categoria = 'Geral' | 'Duvidas' | 'Projetos' | 'Desafios' | 'Eventos';
@@ -99,7 +98,6 @@ export default function ForumScreen() {
         const styles = criarEstilos(cores, fonte);
 
     return (
-        <AppShell titulo="Fórum" paginaAtiva="forum">
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 <View style={styles.forumHeader}>
                     <Text style={styles.forumTitle}>Fórum da Comunidade</Text>
@@ -129,7 +127,6 @@ export default function ForumScreen() {
                     )}
 
             </ScrollView>
-        </AppShell>
     );
 }
 
@@ -170,7 +167,6 @@ function PostCard({ post, styles }: { post: Post; styles: ReturnType<typeof cria
     );
 }
 
-const PURPLE = '#673AB7';
 
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({

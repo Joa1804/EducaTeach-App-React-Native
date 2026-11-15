@@ -1,10 +1,8 @@
 import { View,Text,StyleSheet,ScrollView,TextInput,TouchableOpacity,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AppShell from '../../components/appshell';
-import { useConfiguracao, type Cores } from '../../context/ConfiguracaoContext';
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import React from 'react';
 
-const BLUE = '#2563EB';
 
 export default function DesafiosScreen() {
 
@@ -12,7 +10,6 @@ export default function DesafiosScreen() {
    const styles = criarEstilos(cores, fonte);
 
   return (
-    <AppShell titulo="Desafios" paginaAtiva="desafios">
       <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         {/* CABEÇALHO DO DESAFIO */} 
@@ -60,7 +57,6 @@ export default function DesafiosScreen() {
 
       </ScrollView>
 
-    </AppShell>
   );
 }
 
