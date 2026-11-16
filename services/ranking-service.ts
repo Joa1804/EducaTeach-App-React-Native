@@ -17,6 +17,30 @@ export type RankingCarregado = {
 type UsuarioRanking = Pick<Usuario, 'id' | 'nome' | 'firebase_uid'>;
 
 /**
+ * Explica por que o ranking global não carregou. Só falta de rede vira "sem
+ * conexão"; erros de configuração do Firebase recebem uma mensagem própria,
+ * para não esconder um problema que precisa de ação no console.
+ */
+export function avisoDeFalhaGlobal(error: unknown): string {
+  const codigo =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code: unknown }).code)
+      : '';
+
+  switch (codigo) {
+    case 'permission-denied':
+      return 'Ranking global bloqueado pelas regras do Firestore (publique o firestore.rules). Mostrando o ranking deste aparelho.';
+    case 'failed-precondition':
+      return 'Ranking global aguardando a criação dos índices no Firebase. Mostrando o ranking deste aparelho.';
+    case 'unavailable':
+    case 'deadline-exceeded':
+      return 'Sem conexão: mostrando o ranking deste aparelho.';
+    default:
+      return 'Ranking global indisponível agora: mostrando o ranking deste aparelho.';
+  }
+}
+
+/**
  * Carrega o ranking global (Firestore) para contas Firebase, enviando antes o
  * progresso pendente para que os pontos mais recentes já apareçam. Sem
  * Firebase, ou sem internet, usa o ranking dos usuários deste aparelho.
@@ -43,7 +67,7 @@ export async function carregarRanking(
         resumo,
         fonte: 'local',
         chaveUsuario: String(usuario.id),
-        aviso: 'Sem conexão: mostrando o ranking deste aparelho.',
+        aviso: avisoDeFalhaGlobal(error),
       };
     }
   }
