@@ -2,12 +2,12 @@ import type { LinhaRanking, ResumoRanking } from '../../../db/database';
 import { atribuirPosicoes, formatarPontos, montarRanking } from '../ranking';
 
 function linha(id: number, nome: string, pontos: number): LinhaRanking {
-  return { id, nome, pontos, avatar: 'padrao' };
+  return { id: String(id), nome, pontos, avatar: 'padrao' };
 }
 
 describe('atribuirPosicoes', () => {
   it('numera em ordem e marca o usuário atual', () => {
-    const itens = atribuirPosicoes([linha(1, 'Ana', 300), linha(2, 'Bia', 200)], 2);
+    const itens = atribuirPosicoes([linha(1, 'Ana', 300), linha(2, 'Bia', 200)], '2');
     expect(itens.map((item) => [item.nome, item.posicao, item.voce])).toEqual([
       ['Ana', 1, false],
       ['Bia', 2, true],
@@ -23,7 +23,7 @@ describe('atribuirPosicoes', () => {
   });
 
   it('lista vazia continua vazia', () => {
-    expect(atribuirPosicoes([], 1)).toEqual([]);
+    expect(atribuirPosicoes([], '1')).toEqual([]);
   });
 });
 
@@ -37,7 +37,7 @@ describe('montarRanking', () => {
       usuario: { linha: lideres[2], posicao: 3, acima: lideres[1] },
     };
 
-    const { itens, usuario } = montarRanking(resumo, 3);
+    const { itens, usuario } = montarRanking(resumo, '3');
 
     expect(itens).toHaveLength(3);
     expect(itens[2]).toMatchObject({ voce: true, foraDosLideres: false });
@@ -59,10 +59,10 @@ describe('montarRanking', () => {
       usuario: { linha: eu, posicao: 20, acima: linha(8, 'Yara', 50) },
     };
 
-    const { itens, usuario } = montarRanking(resumo, 9);
+    const { itens, usuario } = montarRanking(resumo, '9');
 
     expect(itens.at(-1)).toMatchObject({
-      id: 9,
+      id: '9',
       posicao: 20,
       voce: true,
       foraDosLideres: true,
@@ -78,7 +78,7 @@ describe('montarRanking', () => {
       usuario: { linha: lideres[0], posicao: 1, acima: null },
     };
 
-    expect(montarRanking(resumo, 1).usuario).toMatchObject({
+    expect(montarRanking(resumo, '1').usuario).toMatchObject({
       alvo: null,
       pontosParaSubir: 0,
       progresso: 1,
@@ -97,7 +97,7 @@ describe('montarRanking', () => {
       total: 0,
       usuario: { linha: linha(1, 'Ana', 0), posicao: 1, acima: null },
     };
-    expect(montarRanking(resumo, 1).usuario).toMatchObject({ posicao: 1, total: 1 });
+    expect(montarRanking(resumo, '1').usuario).toMatchObject({ posicao: 1, total: 1 });
   });
 });
 

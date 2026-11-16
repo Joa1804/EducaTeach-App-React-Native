@@ -48,3 +48,8 @@ app-example
 .env.*
 !.env.example
 coverage/
+
+# Emulador do Firebase
+firestore-debug.log
+firebase-debug.log
+.firebase/

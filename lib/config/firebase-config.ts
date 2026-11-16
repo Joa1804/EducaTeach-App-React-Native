@@ -80,3 +80,13 @@ export function lerFirebaseEnv(): FirebaseEnv {
     EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
   };
 }
+
+/** Config pronta para `initializeApp`, ou `null` quando o `.env` não foi preenchido. */
+export function obterFirebaseOptions(env: FirebaseEnv = lerFirebaseEnv()): FirebaseOptions | null {
+  try {
+    return criarFirebaseConfig(env);
+  } catch (error: unknown) {
+    if (error instanceof FirebaseConfigError) return null;
+    throw error;
+  }
+}

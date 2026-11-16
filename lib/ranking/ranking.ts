@@ -1,4 +1,4 @@
-import type { LinhaRanking, ResumoRanking } from '../../db/database';
+import type { LinhaRanking, ResumoRanking } from './tipos';
 
 export type ItemRanking = LinhaRanking & {
   /** Posição com empates compartilhados (1, 2, 2, 4...). */
@@ -34,7 +34,7 @@ export type Ranking = {
  */
 export function atribuirPosicoes(
   linhas: readonly LinhaRanking[],
-  usuarioId: number | null,
+  usuarioId: string | null,
 ): ItemRanking[] {
   let posicaoAtual = 0;
   let pontosAnteriores: number | null = null;
@@ -55,7 +55,7 @@ export function atribuirPosicoes(
 }
 
 /** Transforma o resumo do banco no que a tela de ranking exibe. */
-export function montarRanking(resumo: ResumoRanking, usuarioId: number | null): Ranking {
+export function montarRanking(resumo: ResumoRanking, usuarioId: string | null): Ranking {
   const itens = atribuirPosicoes(resumo.lideres, usuarioId);
   const situacao = resumo.usuario;
 

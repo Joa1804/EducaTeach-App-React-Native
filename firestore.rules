@@ -1,0 +1,137 @@
+rules_version = '2';
+
+// Regras do EducaTeach. Modelo de dados em services/firebase/modelos.ts.
+// Testadas no emulador: npm run test:rules (firestore-tests/).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function dono(uid) {
+      return autenticado() && request.auth.uid == uid;
+    }
+
+    // Pontuação máxima de cada lição (lib/licoes/dificuldade.ts + data/licoes.ts).
+    // Fácil 50, média 100, difícil 150. Ao criar uma lição, adicione-a aqui.
+    function pontosMaximos() {
+      return {
+        'comandos-basicos': 50,
+        'variaveis': 50,
+        'condicionais': 100,
+        'repeticoes-loops': 100,
+        'funcoes': 150
+      };
+    }
+
+    function licaoValida(licao) {
+      return licao is string && licao in pontosMaximos();
+    }
+
+    function inteiroEntre(valor, minimo, maximo) {
+      return valor is int && valor >= minimo && valor <= maximo;
+    }
+
+    function nomeValido(nome) {
+      return nome is string && nome.size() >= 1 && nome.size() <= 80;
+    }
+
+    function caminhoRanking(uid) {
+      return /databases/$(database)/documents/ranking/$(uid);
+    }
+
+    function caminhoProgresso(uid, licao) {
+      return /databases/$(database)/documents/usuarios/$(uid)/progresso/$(licao);
+    }
+
+    function pontosAntesDaEscrita(uid, licao) {
+      return exists(caminhoProgresso(uid, licao))
+        ? get(caminhoProgresso(uid, licao)).data.pontos
+        : 0;
+    }
+
+    // ---------------------------------------------------------------------
+    // ranking/{uid}: { nome, pontos, ultimaLicao, atualizadoEm }
+    // Público para alunos logados (sem e-mail). Os pontos só mudam junto com o
+    // progresso de uma lição, na mesma escrita atômica, e pela diferença exata.
+    // ---------------------------------------------------------------------
+    match /ranking/{uid} {
+      allow read: if autenticado();
+
+      allow create: if dono(uid)
+        && request.resource.data.keys().hasOnly(['nome', 'pontos', 'ultimaLicao', 'atualizadoEm'])
+        && request.resource.data.keys().hasAll(['nome', 'pontos', 'ultimaLicao', 'atualizadoEm'])
+        && nomeValido(request.resource.data.nome)
+        && request.resource.data.pontos == 0
+        && request.resource.data.ultimaLicao == null
+        && request.resource.data.atualizadoEm == request.time;
+
+      allow update: if dono(uid)
+        && request.resource.data.keys().hasOnly(['nome', 'pontos', 'ultimaLicao', 'atualizadoEm'])
+        && nomeValido(request.resource.data.nome)
+        && request.resource.data.atualizadoEm == request.time
+        && (
+          // Só troca de nome.
+          (request.resource.data.pontos == resource.data.pontos
+            && request.resource.data.ultimaLicao == resource.data.ultimaLicao)
+          ||
+          // Ganho de pontos acompanhado do progresso da lição informada.
+          ganhoConsistente(uid, request.resource.data.ultimaLicao)
+        );
+
+      allow delete: if false;
+    }
+
+    function ganhoConsistente(uid, licao) {
+      return licaoValida(licao)
+        && existsAfter(caminhoProgresso(uid, licao))
+        && request.resource.data.pontos > resource.data.pontos
+        && request.resource.data.pontos - resource.data.pontos
+          == getAfter(caminhoProgresso(uid, licao)).data.pontos - pontosAntesDaEscrita(uid, licao);
+    }
+
+    // ---------------------------------------------------------------------
+    // usuarios/{uid}/progresso/{licao}: { pontos, estrelas, atualizadoEm }
+    // Só o dono lê e escreve. Pontos e estrelas nunca diminuem, nunca passam do
+    // máximo da lição, e qualquer ganho precisa aparecer no ranking junto.
+    // ---------------------------------------------------------------------
+    match /usuarios/{uid}/progresso/{licao} {
+      allow read: if dono(uid);
+
+      allow create: if dono(uid)
+        && progressoValido(licao, 0, 0)
+        && rankingAcompanha(uid, licao, 0);
+
+      allow update: if dono(uid)
+        && progressoValido(licao, resource.data.pontos, resource.data.estrelas)
+        && rankingAcompanha(uid, licao, resource.data.pontos);
+
+      allow delete: if false;
+    }
+
+    function progressoValido(licao, pontosMinimos, estrelasMinimas) {
+      return licaoValida(licao)
+        && request.resource.data.keys().hasOnly(['pontos', 'estrelas', 'atualizadoEm'])
+        && request.resource.data.keys().hasAll(['pontos', 'estrelas', 'atualizadoEm'])
+        && inteiroEntre(request.resource.data.pontos, pontosMinimos, pontosMaximos()[licao])
+        && inteiroEntre(request.resource.data.estrelas, estrelasMinimas, 3)
+        && request.resource.data.atualizadoEm == request.time;
+    }
+
+    function rankingAcompanha(uid, licao, pontosAntes) {
+      return request.resource.data.pontos == pontosAntes
+        || (
+          exists(caminhoRanking(uid))
+          && getAfter(caminhoRanking(uid)).data.ultimaLicao == licao
+          && getAfter(caminhoRanking(uid)).data.pontos - get(caminhoRanking(uid)).data.pontos
+            == request.resource.data.pontos - pontosAntes
+        );
+    }
+
+    // Qualquer outro caminho é negado.
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}

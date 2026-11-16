@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useUsuario } from '../context/UsuarioContext';
 import { registrarConclusao, type ResultadoRegistro } from '../db/database';
 import type { Atividade } from '../data/atividade';
+import { sincronizarEmSegundoPlano } from '../services/sync';
 
 export type ResultadoConclusao = ResultadoRegistro;
 
@@ -28,6 +29,8 @@ export function useConcluirAtividade(): UseConcluirAtividade {
     const salvandoRef = useRef(false);
 
     const usuarioId = usuario?.id ?? null;
+    const nome = usuario?.nome ?? '';
+    const firebaseUid = usuario?.firebase_uid ?? null;
 
     const concluir = useCallback(
         async (atividade: Atividade, pontosObtidos?: number, estrelas = 0) => {
@@ -52,6 +55,8 @@ export function useConcluirAtividade(): UseConcluirAtividade {
                     estrelas
                 );
                 await recarregarUsuario();
+                // Envia para o ranking global sem segurar a tela; se falhar, fica pendente.
+                sincronizarEmSegundoPlano({ id: usuarioId, nome, firebase_uid: firebaseUid });
                 return resultado;
             } catch (error: unknown) {
                 console.error('Erro ao registrar conclusão:', error);
@@ -62,7 +67,7 @@ export function useConcluirAtividade(): UseConcluirAtividade {
                 setSalvando(false);
             }
         },
-        [usuarioId, recarregarUsuario]
+        [usuarioId, nome, firebaseUid, recarregarUsuario]
     );
 
     return { salvando, erro, concluir };
