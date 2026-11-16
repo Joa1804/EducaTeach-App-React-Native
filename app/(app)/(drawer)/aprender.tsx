@@ -19,8 +19,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { SeloDificuldade } from '@/components/atividades/SeloDificuldade';
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import { useTrilha } from '@/hooks/use-trilha';
+import { ROTULO_DIFICULDADE } from '@/lib/licoes/dificuldade';
 import type { EtapaTrilha } from '@/lib/licoes/trilha';
 
 /** Deslocamento horizontal de cada etapa, desenhando o caminho em zigue-zague. */
@@ -178,8 +180,10 @@ const EtapaNode = memo(function EtapaNode({ etapa, atual, styles, cores, onAbrir
         onPress={() => onAbrir(licao.id)}
         disabled={bloqueada}
         accessibilityRole="button"
-        accessibilityLabel={`Lição ${indice + 1}: ${licao.titulo}, ${ROTULO_STATUS[status]}${
-          concluida ? `, ${estrelas} de 3 estrelas` : ''
+        accessibilityLabel={`Lição ${indice + 1}: ${licao.titulo}, ${
+          ROTULO_DIFICULDADE[licao.dificuldade]
+        }, vale ${licao.pontos} pontos, ${ROTULO_STATUS[status]}${
+          concluida ? `, ${estrelas} de 3 estrelas, melhor resultado ${etapa.pontos} pontos` : ''
         }`}
         accessibilityState={{ disabled: bloqueada }}
         hitSlop={6}
@@ -217,6 +221,7 @@ const EtapaNode = memo(function EtapaNode({ etapa, atual, styles, cores, onAbrir
       <Text style={styles.etapaDescricao} numberOfLines={2}>
         {licao.descricao} · {licao.exercicios.length} exercícios
       </Text>
+      <SeloDificuldade dificuldade={licao.dificuldade} />
     </View>
   );
 });

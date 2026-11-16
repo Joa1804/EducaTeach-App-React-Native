@@ -18,7 +18,6 @@ const ENTRADA: LicaoEntrada[] = [
     descricao: 'Sequência, entrada e saída',
     icone: 'arrow-forward',
     dificuldade: 'facil',
-    pontos: 10,
     moedas: 1,
     exercicios: [
       {
@@ -93,9 +92,8 @@ const ENTRADA: LicaoEntrada[] = [
     titulo: 'Variáveis',
     descricao: 'Guardar e atualizar informações',
     icone: 'cube',
-    dificuldade: 'medio',
-    pontos: 20,
-    moedas: 2,
+    dificuldade: 'facil',
+    moedas: 1,
     exercicios: [
       {
         id: 'va-valor-final',
@@ -183,7 +181,6 @@ const ENTRADA: LicaoEntrada[] = [
     descricao: 'Tomar decisões com se/senao',
     icone: 'git-branch',
     dificuldade: 'medio',
-    pontos: 20,
     moedas: 2,
     exercicios: [
       {
@@ -288,7 +285,6 @@ const ENTRADA: LicaoEntrada[] = [
     descricao: 'Repetir comandos com para e enquanto',
     icone: 'repeat',
     dificuldade: 'medio',
-    pontos: 20,
     moedas: 2,
     exercicios: [
       {
@@ -381,7 +377,6 @@ const ENTRADA: LicaoEntrada[] = [
     descricao: 'Criar e reutilizar blocos de código',
     icone: 'construct',
     dificuldade: 'dificil',
-    pontos: 30,
     moedas: 3,
     exercicios: [
       {

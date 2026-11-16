@@ -37,7 +37,6 @@ const LICAO: Licao = licaoSchema.parse({
   descricao: 'Lição de teste',
   icone: 'cube',
   dificuldade: 'facil',
-  pontos: 10,
   moedas: 1,
   exercicios: ['e1', 'e2'].map((id) => ({
     id,
@@ -63,7 +62,7 @@ describe('useLicao', () => {
       sair: jest.fn(),
       recarregarUsuario: jest.fn(async () => {}),
     });
-    registrarConclusaoMock.mockResolvedValue({ primeiraVez: true, pontosGanhos: 5 });
+    registrarConclusaoMock.mockResolvedValue({ primeiraVez: true, pontosGanhos: 25 });
   });
 
   afterEach(() => {
@@ -92,14 +91,14 @@ describe('useLicao', () => {
     await responder(result, CERTA);
 
     expect(result.current.fase).toBe('concluida');
-    expect(result.current.desempenho).toMatchObject({ estrelas: 1, pontos: 5, precisao: 50 });
+    expect(result.current.desempenho).toMatchObject({ estrelas: 1, pontos: 25, precisao: 50 });
     await waitFor(() =>
-      expect(result.current.conclusao).toEqual({ primeiraVez: true, pontosGanhos: 5 }),
+      expect(result.current.conclusao).toEqual({ primeiraVez: true, pontosGanhos: 25 }),
     );
 
     await rerender({});
     expect(registrarConclusaoMock).toHaveBeenCalledTimes(1);
-    expect(registrarConclusaoMock).toHaveBeenCalledWith(3, 'teste', 5, 1, 1);
+    expect(registrarConclusaoMock).toHaveBeenCalledWith(3, 'teste', 25, 1, 1);
   });
 
   it('ao refazer a lição salva de novo a nova tentativa', async () => {
@@ -107,7 +106,7 @@ describe('useLicao', () => {
     await responder(result, CERTA);
     await responder(result, CERTA);
     await waitFor(() => expect(registrarConclusaoMock).toHaveBeenCalledTimes(1));
-    expect(registrarConclusaoMock).toHaveBeenLastCalledWith(3, 'teste', 10, 1, 3);
+    expect(registrarConclusaoMock).toHaveBeenLastCalledWith(3, 'teste', 50, 1, 3);
 
     await act(async () => {
       result.current.reiniciar();
