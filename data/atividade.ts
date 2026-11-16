@@ -1,8 +1,9 @@
 import type { Ionicons } from '@expo/vector-icons';
 
+import type { Dificuldade } from '../lib/licoes/dificuldade';
 import { LICOES } from './licoes';
 
-export type Dificuldade = 'facil' | 'medio' | 'dificil';
+export type { Dificuldade };
 
 /** Dados de pontuação de uma atividade (subconjunto de uma lição). */
 export type Atividade = {
