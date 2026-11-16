@@ -7,6 +7,8 @@ type UseProgresso = {
     progresso: Progresso[];
     carregando: boolean;
     erro: string | null;
+    /** Busca o progresso de novo (ex.: botão "Tentar novamente"). */
+    recarregar: () => void;
 };
 
 /** Progresso do usuário da sessão, recarregado sempre que a tela ganha foco. */
@@ -17,6 +19,10 @@ export function useProgresso(): UseProgresso {
     const [progresso, setProgresso] = useState<Progresso[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
+    // Mudar a versão recria o callback do foco e dispara uma nova busca.
+    const [versao, setVersao] = useState(0);
+
+    const recarregar = useCallback(() => setVersao((atual) => atual + 1), []);
 
     useFocusEffect(
         useCallback(() => {
@@ -46,8 +52,10 @@ export function useProgresso(): UseProgresso {
             return () => {
                 ativo = false;
             };
-        }, [usuarioId])
+            // `versao` entra nas dependências só para permitir recarregar manualmente.
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [usuarioId, versao])
     );
 
-    return { progresso, carregando, erro };
+    return { progresso, carregando, erro, recarregar };
 }

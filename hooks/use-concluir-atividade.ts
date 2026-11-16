@@ -1,22 +1,24 @@
 import { useCallback, useRef, useState } from 'react';
 import { useUsuario } from '../context/UsuarioContext';
-import { registrarConclusao } from '../db/database';
+import { registrarConclusao, type ResultadoRegistro } from '../db/database';
 import type { Atividade } from '../data/atividade';
 
-export type ResultadoConclusao = {
-    primeiraVez: boolean;
-    pontosGanhos: number;
-};
+export type ResultadoConclusao = ResultadoRegistro;
 
 type UseConcluirAtividade = {
     salvando: boolean;
     erro: string | null;
     /**
      * Registra a conclusão para o usuário da sessão e atualiza pontos/moedas no contexto.
-     * `pontosObtidos` é a pontuação da tentativa (padrão: pontuação máxima da atividade).
+     * `pontosObtidos` é a pontuação da tentativa (padrão: pontuação máxima da atividade)
+     * e `estrelas` a avaliação de 0 a 3 (padrão: 0, sem avaliação).
      * Retorna `null` se não houver sessão, se já houver um envio em andamento ou em caso de erro.
      */
-    concluir: (atividade: Atividade, pontosObtidos?: number) => Promise<ResultadoConclusao | null>;
+    concluir: (
+        atividade: Atividade,
+        pontosObtidos?: number,
+        estrelas?: number
+    ) => Promise<ResultadoConclusao | null>;
 };
 
 export function useConcluirAtividade(): UseConcluirAtividade {
@@ -28,7 +30,7 @@ export function useConcluirAtividade(): UseConcluirAtividade {
     const usuarioId = usuario?.id ?? null;
 
     const concluir = useCallback(
-        async (atividade: Atividade, pontosObtidos?: number) => {
+        async (atividade: Atividade, pontosObtidos?: number, estrelas = 0) => {
             if (usuarioId === null || salvandoRef.current) return null;
 
             // Nunca aceita pontuação negativa ou acima do máximo da atividade.
@@ -46,7 +48,8 @@ export function useConcluirAtividade(): UseConcluirAtividade {
                     usuarioId,
                     atividade.id,
                     pontos,
-                    atividade.moedas
+                    atividade.moedas,
+                    estrelas
                 );
                 await recarregarUsuario();
                 return resultado;

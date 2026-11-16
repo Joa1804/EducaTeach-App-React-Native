@@ -50,11 +50,46 @@ describe('db/database', () => {
       );
       const colunasUsuario = await db.getAllAsync<{ name: string }>('PRAGMA table_info(usuarios)');
 
-      expect(versao?.user_version).toBe(3);
+      expect(versao?.user_version).toBe(4);
       expect(tabelas.map((t) => t.name)).toEqual(['progresso', 'sessoes', 'usuarios']);
       expect(colunasUsuario.map((c) => c.name)).toEqual(
         expect.arrayContaining(['avatar', 'pontos', 'moedas']),
       );
+    });
+
+    it('migra um banco na versão 3 preservando o progresso existente', async () => {
+      const antigo = new sqlite.SQLiteDatabase('educateach.db');
+      await antigo.execAsync(`
+        CREATE TABLE usuarios (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
+          senha TEXT NOT NULL, tipo TEXT NOT NULL DEFAULT 'aluno',
+          avatar TEXT NOT NULL DEFAULT 'padrao', pontos INTEGER NOT NULL DEFAULT 0,
+          moedas INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE progresso (
+          usuario_id INTEGER NOT NULL, atividade_id TEXT NOT NULL,
+          pontos INTEGER NOT NULL DEFAULT 0, tentativas INTEGER NOT NULL DEFAULT 1,
+          concluida_em TEXT NOT NULL, sincronizado INTEGER NOT NULL DEFAULT 0,
+          PRIMARY KEY (usuario_id, atividade_id)
+        );
+        CREATE TABLE sessoes (
+          token_hash TEXT PRIMARY KEY NOT NULL, usuario_id INTEGER NOT NULL,
+          criada_em TEXT NOT NULL, expira_em TEXT NOT NULL
+        );
+        INSERT INTO usuarios (nome, email, senha) VALUES ('Ana', 'ana@exemplo.com', 'x');
+        INSERT INTO progresso (usuario_id, atividade_id, pontos, concluida_em)
+        VALUES (1, 'comandos-basicos', 10, '2026-01-01');
+        PRAGMA user_version = 3;
+      `);
+      sqlite.openDatabaseAsync.mockResolvedValueOnce(antigo);
+
+      const progresso = await database.buscarProgresso(1);
+
+      expect(progresso).toEqual([
+        expect.objectContaining({ atividade_id: 'comandos-basicos', pontos: 10, estrelas: 0 }),
+      ]);
+      const versao = await antigo.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+      expect(versao?.user_version).toBe(4);
     });
 
     it('abre uma única conexão mesmo com chamadas concorrentes', async () => {
@@ -265,7 +300,42 @@ describe('db/database', () => {
         pontos: 15,
         tentativas: 1,
         sincronizado: 0,
+        estrelas: 0,
       });
+    });
+
+    it('guarda as estrelas e mantém sempre a melhor', async () => {
+      await database.registrarConclusao(usuarioId, 'condicionais', 12, 2, 2);
+      await database.registrarConclusao(usuarioId, 'condicionais', 4, 2, 1);
+
+      let [linha] = await database.buscarProgresso(usuarioId);
+      expect(linha).toMatchObject({ estrelas: 2, pontos: 12, tentativas: 2 });
+
+      await database.registrarConclusao(usuarioId, 'condicionais', 20, 2, 3);
+      [linha] = await database.buscarProgresso(usuarioId);
+      expect(linha).toMatchObject({ estrelas: 3, pontos: 20, tentativas: 3 });
+    });
+
+    it('limita estrelas fora do intervalo de 0 a 3', async () => {
+      await database.registrarConclusao(usuarioId, 'condicionais', 10, 1, 9);
+
+      const [linha] = await database.buscarProgresso(usuarioId);
+      expect(linha.estrelas).toBe(3);
+    });
+
+    it('ignora linhas de progresso corrompidas ao ler', async () => {
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
+      await database.registrarConclusao(usuarioId, 'condicionais', 10, 1, 2);
+      await bancoAtual(sqlite).runAsync(
+        `INSERT INTO progresso (usuario_id, atividade_id, pontos, tentativas, concluida_em, estrelas)
+         VALUES (?, ?, ?, 1, ?, ?)`,
+        [usuarioId, 'funcoes', -5, '2026-01-01', 1],
+      );
+
+      const progresso = await database.buscarProgresso(usuarioId);
+
+      expect(progresso.map((linha) => linha.atividade_id)).toEqual(['condicionais']);
+      jest.restoreAllMocks();
     });
 
     it('ao repetir com pontuação maior credita só a diferença e não dá moedas de novo', async () => {

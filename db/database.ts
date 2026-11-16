@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { z } from 'zod';
 import {
     gerarHashSenha,
     gerarTokenSessao,
@@ -18,13 +19,23 @@ export type Usuario = {
     moedas: number;
 };
 
-export type Progresso = {
-    usuario_id: number;
-    atividade_id: string;
-    pontos: number;
-    tentativas: number;
-    concluida_em: string;
-    sincronizado: number;
+/** Linha da tabela `progresso`, validada ao ler do banco. */
+const progressoSchema = z.object({
+    usuario_id: z.number().int(),
+    atividade_id: z.string().min(1),
+    pontos: z.number().int().min(0),
+    tentativas: z.number().int().min(1),
+    concluida_em: z.string().min(1),
+    sincronizado: z.number().int(),
+    /** Melhor número de estrelas (0 a 3) obtido na atividade. */
+    estrelas: z.number().int().min(0).max(3),
+});
+
+export type Progresso = z.infer<typeof progressoSchema>;
+
+export type ResultadoRegistro = {
+    primeiraVez: boolean;
+    pontosGanhos: number;
 };
 
 export type SessaoCriada = {
@@ -42,7 +53,7 @@ export class EmailJaCadastradoError extends Error {
 
 const NOME_BANCO = 'educateach.db';
 
-const VERSAO_DO_BANCO = 3;
+const VERSAO_DO_BANCO = 4;
 
 /** Tempo de vida de uma sessão local: 30 dias. */
 const DURACAO_SESSAO_MS = 30 * 24 * 60 * 60 * 1000;
@@ -144,6 +155,19 @@ async function migrar(db: SQLiteDatabase): Promise<void> {
 
                 CREATE INDEX IF NOT EXISTS idx_sessoes_usuario
                 ON sessoes (usuario_id);
+            `);
+
+        });
+    }
+
+    if (versao < 4) {
+
+        await db.withTransactionAsync(async () => {
+
+            // Estrelas das lições da trilha (0 = registro antigo, sem avaliação).
+            await db.execAsync(`
+                ALTER TABLE progresso
+                ADD COLUMN estrelas INTEGER NOT NULL DEFAULT 0;
             `);
 
         });
@@ -345,22 +369,41 @@ export async function buscarProgresso(
 
     const db = await abrirBancoDeDados();
 
-    return db.getAllAsync<Progresso>(
-        'SELECT * FROM progresso WHERE usuario_id = ?',
+    const linhas = await db.getAllAsync<unknown>(
+        `SELECT usuario_id, atividade_id, pontos, tentativas, concluida_em, sincronizado, estrelas
+         FROM progresso
+         WHERE usuario_id = ?`,
         [usuarioId]
     );
+
+    // Descarta linhas corrompidas em vez de quebrar a trilha inteira.
+    return linhas.flatMap((linha) => {
+        const resultado = progressoSchema.safeParse(linha);
+        if (!resultado.success) {
+            console.warn('Linha de progresso inválida ignorada:', resultado.error.issues);
+            return [];
+        }
+        return [resultado.data];
+    });
 }
 
+/**
+ * Registra a conclusão de uma atividade numa transação. Guarda sempre a melhor
+ * pontuação e o melhor número de estrelas; moedas só são creditadas na primeira vez.
+ */
 export async function registrarConclusao(
     usuarioId: number,
     atividadeId: string,
     pontos: number,
-    moedas: number
-): Promise<{ primeiraVez: boolean; pontosGanhos: number }> {
+    moedas: number,
+    estrelas = 0
+): Promise<ResultadoRegistro> {
 
     const db = await abrirBancoDeDados();
 
-    let resultado = {
+    const estrelasValidas = Math.min(3, Math.max(0, Math.round(estrelas)));
+
+    let resultado: ResultadoRegistro = {
         primeiraVez: false,
         pontosGanhos: 0,
     };
@@ -384,10 +427,11 @@ export async function registrarConclusao(
                     pontos,
                     tentativas,
                     concluida_em,
-                    sincronizado
+                    sincronizado,
+                    estrelas
                 )
-                VALUES (?, ?, ?, 1, ?, 0)`,
-                [usuarioId, atividadeId, pontos, agora]
+                VALUES (?, ?, ?, 1, ?, 0, ?)`,
+                [usuarioId, atividadeId, pontos, agora, estrelasValidas]
             );
 
             await db.runAsync(
@@ -413,10 +457,11 @@ export async function registrarConclusao(
                 `UPDATE progresso
                  SET tentativas = tentativas + 1,
                      pontos = pontos + ?,
+                     estrelas = MAX(estrelas, ?),
                      concluida_em = ?,
                      sincronizado = 0
                  WHERE usuario_id = ? AND atividade_id = ?`,
-                [melhora, agora, usuarioId, atividadeId]
+                [melhora, estrelasValidas, agora, usuarioId, atividadeId]
             );
 
             if (melhora > 0) {

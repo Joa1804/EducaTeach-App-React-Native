@@ -71,7 +71,7 @@ describe('useConcluirAtividade', () => {
     });
 
     expect(resultado).toEqual({ primeiraVez: true, pontosGanhos: 20 });
-    expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', 20, 2);
+    expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', 20, 2, 0);
     expect(recarregarUsuario).toHaveBeenCalledTimes(1);
     expect(result.current.salvando).toBe(false);
     expect(result.current.erro).toBeNull();
@@ -95,9 +95,21 @@ describe('useConcluirAtividade', () => {
         await result.current.concluir(ATIVIDADE, obtidos);
       });
 
-      expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', esperado, 2);
+      expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', esperado, 2, 0);
     },
   );
+
+  it('repassa as estrelas da lição para o banco', async () => {
+    mockarSessao(USUARIO);
+    registrarConclusaoMock.mockResolvedValue({ primeiraVez: true, pontosGanhos: 12 });
+    const { result } = await renderHook(() => useConcluirAtividade());
+
+    await act(async () => {
+      await result.current.concluir(ATIVIDADE, 12, 2);
+    });
+
+    expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', 12, 2, 2);
+  });
 
   it('não faz nada sem usuário na sessão', async () => {
     mockarSessao(null);
