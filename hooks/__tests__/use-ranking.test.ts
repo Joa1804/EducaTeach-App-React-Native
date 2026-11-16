@@ -1,6 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+
 import { useUsuario } from '../../context/UsuarioContext';
-import { buscarRanking, type ResumoRanking, type Usuario } from '../../db/database';
+import type { Usuario } from '../../db/database';
+import { carregarRanking, type RankingCarregado } from '../../services/ranking-service';
 import { LIMITE_RANKING, useRanking } from '../use-ranking';
 
 // Sem navegação nos testes: o "foco" acontece na montagem.
@@ -13,15 +15,15 @@ jest.mock('expo-router', () => {
   };
 });
 
-jest.mock('../../db/database', () => ({
-  buscarRanking: jest.fn(),
+jest.mock('../../services/ranking-service', () => ({
+  carregarRanking: jest.fn(),
 }));
 
 jest.mock('../../context/UsuarioContext', () => ({
   useUsuario: jest.fn(),
 }));
 
-const buscarRankingMock = jest.mocked(buscarRanking);
+const carregarRankingMock = jest.mocked(carregarRanking);
 const useUsuarioMock = jest.mocked(useUsuario);
 
 const USUARIO: Usuario = {
@@ -32,18 +34,24 @@ const USUARIO: Usuario = {
   avatar: 'padrao',
   pontos: 100,
   moedas: 0,
+  firebase_uid: 'uid-bia',
 };
 
-const RESUMO: ResumoRanking = {
-  lideres: [
-    { id: 1, nome: 'Ana', avatar: 'padrao', pontos: 150 },
-    { id: 2, nome: 'Bia', avatar: 'padrao', pontos: 100 },
-  ],
-  total: 2,
-  usuario: {
-    linha: { id: 2, nome: 'Bia', avatar: 'padrao', pontos: 100 },
-    posicao: 2,
-    acima: { id: 1, nome: 'Ana', avatar: 'padrao', pontos: 150 },
+const GLOBAL: RankingCarregado = {
+  fonte: 'global',
+  chaveUsuario: 'uid-bia',
+  aviso: null,
+  resumo: {
+    lideres: [
+      { id: 'uid-ana', nome: 'Ana', avatar: 'padrao', pontos: 150 },
+      { id: 'uid-bia', nome: 'Bia', avatar: 'padrao', pontos: 100 },
+    ],
+    total: 2,
+    usuario: {
+      linha: { id: 'uid-bia', nome: 'Bia', avatar: 'padrao', pontos: 100 },
+      posicao: 2,
+      acima: { id: 'uid-ana', nome: 'Ana', avatar: 'padrao', pontos: 150 },
+    },
   },
 };
 
@@ -69,12 +77,16 @@ describe('useRanking', () => {
 
   it('carrega o ranking do usuário da sessão e destaca a linha dele', async () => {
     mockarSessao(USUARIO);
-    buscarRankingMock.mockResolvedValue(RESUMO);
+    carregarRankingMock.mockResolvedValue(GLOBAL);
 
     const { result } = await renderHook(() => useRanking());
 
     await waitFor(() => expect(result.current.carregando).toBe(false));
-    expect(buscarRankingMock).toHaveBeenCalledWith(2, LIMITE_RANKING);
+    expect(carregarRankingMock).toHaveBeenCalledWith(
+      { id: 2, nome: 'Bia', firebase_uid: 'uid-bia' },
+      LIMITE_RANKING,
+    );
+    expect(result.current.fonte).toBe('global');
     expect(result.current.itens.map((item) => [item.nome, item.posicao, item.voce])).toEqual([
       ['Ana', 1, false],
       ['Bia', 2, true],
@@ -83,9 +95,26 @@ describe('useRanking', () => {
     expect(result.current.erro).toBeNull();
   });
 
+  it('repassa o aviso quando caiu para o ranking do aparelho', async () => {
+    mockarSessao(USUARIO);
+    carregarRankingMock.mockResolvedValue({
+      ...GLOBAL,
+      fonte: 'local',
+      chaveUsuario: '2',
+      aviso: 'Sem conexão: mostrando o ranking deste aparelho.',
+      resumo: { ...GLOBAL.resumo, usuario: null, lideres: [] },
+    });
+
+    const { result } = await renderHook(() => useRanking());
+
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+    expect(result.current.fonte).toBe('local');
+    expect(result.current.aviso).toMatch(/Sem conexão/);
+  });
+
   it('mostra erro e permite tentar de novo', async () => {
     mockarSessao(USUARIO);
-    buscarRankingMock.mockRejectedValueOnce(new Error('falhou')).mockResolvedValueOnce(RESUMO);
+    carregarRankingMock.mockRejectedValueOnce(new Error('falhou')).mockResolvedValueOnce(GLOBAL);
 
     const { result } = await renderHook(() => useRanking());
 
@@ -98,23 +127,27 @@ describe('useRanking', () => {
 
     await waitFor(() => expect(result.current.erro).toBeNull());
     expect(result.current.itens).toHaveLength(2);
-    expect(buscarRankingMock).toHaveBeenCalledTimes(2);
+    expect(carregarRankingMock).toHaveBeenCalledTimes(2);
   });
 
   it('sem sessão busca só os líderes', async () => {
     mockarSessao(null);
-    buscarRankingMock.mockResolvedValue({ ...RESUMO, usuario: null });
+    carregarRankingMock.mockResolvedValue({
+      ...GLOBAL,
+      chaveUsuario: null,
+      resumo: { ...GLOBAL.resumo, usuario: null },
+    });
 
     const { result } = await renderHook(() => useRanking());
 
     await waitFor(() => expect(result.current.carregando).toBe(false));
-    expect(buscarRankingMock).toHaveBeenCalledWith(null, LIMITE_RANKING);
+    expect(carregarRankingMock).toHaveBeenCalledWith(null, LIMITE_RANKING);
     expect(result.current.usuario).toBeNull();
   });
 
   it('busca de novo quando os pontos do usuário mudam', async () => {
     mockarSessao(USUARIO);
-    buscarRankingMock.mockResolvedValue(RESUMO);
+    carregarRankingMock.mockResolvedValue(GLOBAL);
 
     const { result, rerender } = await renderHook(() => useRanking());
     await waitFor(() => expect(result.current.carregando).toBe(false));
@@ -122,6 +155,6 @@ describe('useRanking', () => {
     mockarSessao({ ...USUARIO, pontos: 250 });
     await rerender({});
 
-    await waitFor(() => expect(buscarRankingMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(carregarRankingMock).toHaveBeenCalledTimes(2));
   });
 });

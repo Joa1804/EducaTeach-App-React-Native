@@ -24,6 +24,7 @@ const USUARIO: Usuario = {
   avatar: 'padrao',
   pontos: 0,
   moedas: 0,
+  firebase_uid: null,
 };
 
 const opcoes = [

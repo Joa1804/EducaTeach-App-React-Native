@@ -5,7 +5,7 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
-  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/', '/firestore-tests/'],
   collectCoverageFrom: [
     'db/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',

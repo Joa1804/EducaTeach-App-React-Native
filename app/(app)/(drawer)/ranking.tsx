@@ -27,7 +27,7 @@ type Estilos = ReturnType<typeof criarEstilos>;
 export default function RankingScreen() {
   const { cores, fonte } = useConfiguracao();
   const styles = useMemo(() => criarEstilos(cores, fonte), [cores, fonte]);
-  const { itens, usuario, carregando, erro, recarregar } = useRanking();
+  const { itens, usuario, fonte: fonteRanking, aviso, carregando, erro, recarregar } = useRanking();
 
   const renderItem = useCallback<ListRenderItem<ItemRanking>>(
     ({ item }) => <LinhaJogador item={item} styles={styles} cores={cores} />,
@@ -52,9 +52,20 @@ export default function RankingScreen() {
           <Text style={styles.tituloRanking} accessibilityRole="header">
             Ranking
           </Text>
-          <Text style={styles.subtituloRanking}>Usuários cadastrados neste aparelho</Text>
+          <Text style={styles.subtituloRanking}>
+            {fonteRanking === 'global'
+              ? 'Alunos de todo o EducaTeach'
+              : 'Usuários cadastrados neste aparelho'}
+          </Text>
         </View>
       </View>
+
+      {aviso && !erro && (
+        <View style={styles.avisoCaixa} accessibilityLiveRegion="polite">
+          <Ionicons name="cloud-offline-outline" size={18} color={cores.textoSuave} />
+          <Text style={styles.avisoTexto}>{aviso}</Text>
+        </View>
+      )}
 
       {erro ? (
         <View style={styles.erroCaixa} accessibilityLiveRegion="polite">
@@ -132,7 +143,7 @@ function CardSituacao({ usuario, styles, cores }: PropsCard) {
     ? `Faltam ${formatarPontos(pontosParaSubir)} pts para passar ${alvo.nome}.`
     : total > 1
       ? 'Você está na liderança!'
-      : 'Por enquanto, só você tem conta neste aparelho.';
+      : 'Por enquanto, você é o único no ranking.';
 
   return (
     <View style={styles.ligaCard}>
@@ -253,6 +264,16 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       gap: 6,
       marginBottom: 16,
     },
+    avisoCaixa: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: c.iconeFundo,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 16,
+    },
+    avisoTexto: { flex: 1, fontSize: f(13), color: c.texto },
     erroTexto: { color: c.perigo, fontSize: f(14), textAlign: 'center' },
     erroBotao: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
     erroBotaoTexto: { color: c.perigo, fontWeight: 'bold', fontSize: f(15) },

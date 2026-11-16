@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "ranking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "pontos", "order": "DESCENDING" },
+        { "fieldPath": "nome", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ranking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "pontos", "order": "ASCENDING" },
+        { "fieldPath": "nome", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

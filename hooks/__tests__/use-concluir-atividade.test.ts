@@ -3,10 +3,15 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import type { Atividade } from '../../data/atividade';
 import { registrarConclusao, type Usuario } from '../../db/database';
 import { useUsuario } from '../../context/UsuarioContext';
+import { sincronizarEmSegundoPlano } from '../../services/sync';
 import { useConcluirAtividade } from '../use-concluir-atividade';
 
 jest.mock('../../db/database', () => ({
   registrarConclusao: jest.fn(),
+}));
+
+jest.mock('../../services/sync', () => ({
+  sincronizarEmSegundoPlano: jest.fn(),
 }));
 
 jest.mock('../../context/UsuarioContext', () => ({
@@ -14,6 +19,7 @@ jest.mock('../../context/UsuarioContext', () => ({
 }));
 
 const registrarConclusaoMock = jest.mocked(registrarConclusao);
+const sincronizarMock = jest.mocked(sincronizarEmSegundoPlano);
 const useUsuarioMock = jest.mocked(useUsuario);
 
 const USUARIO: Usuario = {
@@ -24,6 +30,7 @@ const USUARIO: Usuario = {
   avatar: 'padrao',
   pontos: 0,
   moedas: 0,
+  firebase_uid: null,
 };
 
 const ATIVIDADE: Atividade = {
@@ -73,6 +80,7 @@ describe('useConcluirAtividade', () => {
     expect(resultado).toEqual({ primeiraVez: true, pontosGanhos: 20 });
     expect(registrarConclusaoMock).toHaveBeenCalledWith(7, 'condicionais', 20, 2, 0);
     expect(recarregarUsuario).toHaveBeenCalledTimes(1);
+    expect(sincronizarMock).toHaveBeenCalledWith({ id: 7, nome: 'Ana', firebase_uid: null });
     expect(result.current.salvando).toBe(false);
     expect(result.current.erro).toBeNull();
   });

@@ -4,3 +4,6 @@
 // para que as queries e os hashes sejam exercitados de verdade.
 jest.mock('expo-sqlite', () => jest.requireActual('./mocks/expo-sqlite'));
 jest.mock('expo-crypto', () => jest.requireActual('./mocks/expo-crypto'));
+jest.mock('@react-native-async-storage/async-storage', () =>
+  jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);

@@ -50,7 +50,7 @@ describe('db/database', () => {
       );
       const colunasUsuario = await db.getAllAsync<{ name: string }>('PRAGMA table_info(usuarios)');
 
-      expect(versao?.user_version).toBe(5);
+      expect(versao?.user_version).toBe(6);
       expect(tabelas.map((t) => t.name)).toEqual(['progresso', 'sessoes', 'usuarios']);
       expect(colunasUsuario.map((c) => c.name)).toEqual(
         expect.arrayContaining(['avatar', 'pontos', 'moedas']),
@@ -90,7 +90,7 @@ describe('db/database', () => {
       ]);
       await expect(database.buscarUsuario(1)).resolves.toMatchObject({ pontos: 50 });
       const versao = await antigo.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-      expect(versao?.user_version).toBe(5);
+      expect(versao?.user_version).toBe(6);
     });
 
     it('na versão 5 reescala os pontos proporcionalmente e ajusta o total do usuário', async () => {
@@ -212,6 +212,7 @@ describe('db/database', () => {
         avatar: 'padrao',
         pontos: 0,
         moedas: 0,
+        firebase_uid: null,
       });
     });
 
@@ -495,7 +496,7 @@ describe('db/database', () => {
 
       expect(resumo.lideres.map((linha) => linha.nome)).toEqual(['Ana', 'Bia']);
       expect(resumo.usuario).toEqual({
-        linha: expect.objectContaining({ id: eu, nome: 'Davi', pontos: 50 }),
+        linha: expect.objectContaining({ id: String(eu), nome: 'Davi', pontos: 50 }),
         posicao: 4,
         acima: expect.objectContaining({ nome: 'Caio', pontos: 100 }),
       });
