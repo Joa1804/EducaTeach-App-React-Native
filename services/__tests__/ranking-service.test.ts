@@ -1,7 +1,7 @@
 import { buscarRanking, type ResumoRanking } from '../../db/database';
 import { firebaseHabilitado } from '../../db/firebase';
 import { buscarRankingGlobal } from '../firebase/ranking-global';
-import { carregarRanking } from '../ranking-service';
+import { avisoDeFalhaGlobal, carregarRanking } from '../ranking-service';
 import { sincronizarUsuario } from '../sync';
 
 jest.mock('../../db/database', () => ({ buscarRanking: jest.fn() }));
@@ -53,7 +53,9 @@ describe('carregarRanking', () => {
 
   it('sem internet cai para o ranking do aparelho com aviso', async () => {
     firebaseHabilitadoMock.mockReturnValue(true);
-    buscarRankingGlobalMock.mockRejectedValue(new Error('unavailable'));
+    buscarRankingGlobalMock.mockRejectedValue(
+      Object.assign(new Error('x'), { code: 'unavailable' }),
+    );
 
     const carregado = await carregarRanking(CONTA, 50);
 
@@ -85,5 +87,23 @@ describe('carregarRanking', () => {
 
     await expect(carregarRanking(null, 50)).resolves.toMatchObject({ chaveUsuario: null });
     expect(buscarRankingMock).toHaveBeenCalledWith(null, 50);
+  });
+});
+
+describe('avisoDeFalhaGlobal', () => {
+  const erro = (code: string) => Object.assign(new Error(code), { code });
+
+  it.each([
+    ['permission-denied', /regras do Firestore/],
+    ['failed-precondition', /índices/],
+    ['unavailable', /Sem conexão/],
+    ['deadline-exceeded', /Sem conexão/],
+    ['internal', /indisponível agora/],
+  ])('%s', (codigo, esperado) => {
+    expect(avisoDeFalhaGlobal(erro(codigo))).toMatch(esperado);
+  });
+
+  it('erro sem código', () => {
+    expect(avisoDeFalhaGlobal(new Error('?'))).toMatch(/indisponível agora/);
   });
 });
