@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { DIFICULDADES, pontosDaDificuldade } from './dificuldade';
+
 /**
  * Modelo dos exercícios da trilha. O conteúdo fica em `data/licoes.ts` e é
  * validado por estes schemas nos testes (inclusive as regras que o TypeScript
@@ -190,8 +192,7 @@ export const licaoSchema = z
     titulo: textoSchema,
     descricao: textoSchema,
     icone: z.enum(icones),
-    dificuldade: z.enum(['facil', 'medio', 'dificil']),
-    pontos: z.number().int().positive(),
+    dificuldade: z.enum(DIFICULDADES),
     moedas: z.number().int().min(0),
     exercicios: z.array(exercicioSchema).min(1),
   })
@@ -204,7 +205,9 @@ export const licaoSchema = z
         path: ['exercicios'],
       });
     }
-  });
+  })
+  // A pontuação vem da dificuldade, para não haver duas fontes que possam divergir.
+  .transform((licao) => ({ ...licao, pontos: pontosDaDificuldade(licao.dificuldade) }));
 
 export const trilhaSchema = z.array(licaoSchema).min(1);
 

@@ -1,323 +1,227 @@
-import {View,Text,StyleSheet,ScrollView,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { memo, useCallback, useMemo } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ListRenderItem,
+} from 'react-native';
+
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
-import React from 'react';
+import { useRanking } from '@/hooks/use-ranking';
+import { DIFICULDADES, PONTOS_POR_DIFICULDADE, ROTULO_DIFICULDADE } from '@/lib/licoes/dificuldade';
+import { formatarPontos, type ItemRanking, type SituacaoUsuario } from '@/lib/ranking/ranking';
 
-const PURPLE = '#673AB7';
-
-type Jogador = {
-    posicao: number;
-    nome: string;
-    pontos: number;
-    voce?: boolean;
+/** Ouro, prata e bronze para os três primeiros. */
+const CORES_MEDALHA: Readonly<Record<number, string>> = {
+  1: '#F59E0B',
+  2: '#94A3B8',
+  3: '#CD7F32',
 };
 
-const jogadores: Jogador[] = [
-    {
-        posicao: 1,
-        nome: 'Pedro Santos',
-        pontos: 2100,
-    },
-    {
-        posicao: 2,
-        nome: 'João Oliveira',
-        pontos: 1850,
-    },
-    {
-        posicao: 3,
-        nome: 'Maria Silva',
-        pontos: 1250,
-        voce: true,
-    },
-    {
-        posicao: 4,
-        nome: 'Ana Costa',
-        pontos: 1100,
-    },
-    {
-        posicao: 5,
-        nome: 'Carlos Souza',
-        pontos: 980,
-    },
-    {
-        posicao: 6,
-        nome: 'Lucas Almeida',
-        pontos: 850,
-    },
-];
+type Estilos = ReturnType<typeof criarEstilos>;
 
 export default function RankingScreen() {
-       const { cores, fonte } = useConfiguracao();
-        const styles = criarEstilos(cores, fonte);
+  const { cores, fonte } = useConfiguracao();
+  const styles = useMemo(() => criarEstilos(cores, fonte), [cores, fonte]);
+  const { itens, usuario, carregando, erro, recarregar } = useRanking();
 
+  const renderItem = useCallback<ListRenderItem<ItemRanking>>(
+    ({ item }) => <LinhaJogador item={item} styles={styles} cores={cores} />,
+    [cores, styles],
+  );
+
+  if (carregando && itens.length === 0 && !erro) {
     return (
-
-            <ScrollView
-                style={styles.container}
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-            >
-
-                {/* CABEÇALHO */}
-
-                <View style={styles.headerRanking}>
-
-                    <View style={styles.trofeuHeader}>
-                        <Ionicons
-                            name="trophy"
-                            size={26}
-                            color="#FFFFFF"
-                        />
-                    </View>
-
-                    <View style={styles.headerInfo}>
-
-                        <Text style={styles.tituloRanking}>
-                            Ranking semanal
-                        </Text>
-
-                        <Text style={styles.subtituloRanking}>
-                            Veja como você está se saindo!
-                        </Text>
-
-                    </View>
-
-                </View>
-
-
-                {/* CARD DA LIGA */}
-
-                <View style={styles.ligaCard}>
-
-                    <View style={styles.ligaTopo}>
-
-                        <View style={styles.ligaIcone}>
-                            <Ionicons
-                                name="trophy"
-                                size={22}
-                                color="#F59E0B"
-                            />
-                        </View>
-
-                        <View style={styles.ligaInfo}>
-
-                            <Text style={styles.ligaTitulo}>
-                                Liga da Semana
-                            </Text>
-
-                            <Text style={styles.ligaTexto}>
-                                Continue ganhando XP!
-                            </Text>
-
-                        </View>
-
-                        <Text style={styles.ligaPosicao}>
-                            3º de 6
-                        </Text>
-
-                    </View>
-
-
-                    {/* PROGRESSO */}
-
-                    <View style={styles.progressoFundo}>
-                        <View style={styles.progresso} />
-                    </View>
-
-                </View>
-
-
-                {/* TÍTULO DA LISTA */}
-
-                <Text style={styles.listaTitulo}>
-                    Classificação
-                </Text>
-
-
-                {/* LISTA */}
-
-                <View style={styles.lista}>
-
-                    {jogadores.map((jogador) => (
-
-                        <View
-                            key={jogador.posicao}
-                            style={[
-                                styles.jogador,
-                                jogador.voce && styles.jogadorVoce,
-                            ]}
-                        >
-
-                            {/* POSIÇÃO */}
-
-                            <View style={styles.posicaoContainer}>
-
-                                {jogador.posicao === 1 ? (
-                                    <Ionicons
-                                        name="medal"
-                                        size={24}
-                                        color="#F59E0B"
-                                    />
-                                ) : jogador.posicao === 2 ? (
-                                    <Ionicons
-                                        name="medal"
-                                        size={24}
-                                        color="#94A3B8"
-                                    />
-                                ) : jogador.posicao === 3 ? (
-                                    <Ionicons
-                                        name="medal"
-                                        size={24}
-                                        color="#CD7F32"
-                                    />
-                                ) : (
-                                    <Text style={styles.posicao}>
-                                        {jogador.posicao}
-                                    </Text>
-                                )}
-
-                            </View>
-
-
-                            {/* AVATAR */}
-
-                            <View
-                                style={[
-                                    styles.avatar,
-                                    jogador.voce && styles.avatarVoce,
-                                ]}
-                            >
-
-                                <Ionicons
-                                    name="person"
-                                    size={23}
-                                    color={
-                                        jogador.voce
-                                            ? PURPLE
-                                            : '#64748B'
-                                    }
-                                />
-
-                            </View>
-
-
-                            {/* NOME */}
-
-                            <View style={styles.infoJogador}>
-
-                                <View style={styles.nomeLinha}>
-
-                                    <Text
-                                        style={[
-                                            styles.nome,
-                                            jogador.voce &&
-                                                styles.nomeVoce,
-                                        ]}
-                                    >
-                                        {jogador.nome}
-                                    </Text>
-
-                                    {jogador.voce && (
-                                        <View style={styles.voceBadge}>
-                                            <Text style={styles.voceTexto}>
-                                                Você
-                                            </Text>
-                                        </View>
-                                    )}
-
-                                </View>
-
-                                <Text style={styles.pontos}>
-                                    {jogador.pontos} XP
-                                </Text>
-
-                            </View>
-
-
-                            {/* SETA */}
-
-                            <Ionicons
-                                name="chevron-forward"
-                                size={18}
-                                color="#CBD5E1"
-                            />
-
-                        </View>
-
-                    ))}
-
-                </View>
-
-
-                {/* MENSAGEM FINAL */}
-
-                <View style={styles.mensagem}>
-
-                    <Ionicons
-                        name="sparkles"
-                        size={21}
-                        color="#F59E0B"
-                    />
-
-                    <Text style={styles.mensagemTexto}>
-                        Continue aprendendo para subir no ranking!
-                    </Text>
-
-                </View>
-
-            </ScrollView>
-
+      <View style={styles.carregando} accessibilityLabel="Carregando ranking">
+        <ActivityIndicator size="large" color={cores.primaria} />
+      </View>
     );
+  }
+
+  const cabecalho = (
+    <View>
+      <View style={styles.headerRanking}>
+        <View style={styles.trofeuHeader}>
+          <Ionicons name="trophy" size={26} color={cores.textoPrimaria} />
+        </View>
+        <View style={styles.headerInfo}>
+          <Text style={styles.tituloRanking} accessibilityRole="header">
+            Ranking
+          </Text>
+          <Text style={styles.subtituloRanking}>Usuários cadastrados neste aparelho</Text>
+        </View>
+      </View>
+
+      {erro ? (
+        <View style={styles.erroCaixa} accessibilityLiveRegion="polite">
+          <Text style={styles.erroTexto}>{erro}</Text>
+          <Pressable onPress={recarregar} accessibilityRole="button" style={styles.erroBotao}>
+            <Text style={styles.erroBotaoTexto}>Tentar novamente</Text>
+          </Pressable>
+        </View>
+      ) : (
+        usuario && <CardSituacao usuario={usuario} styles={styles} cores={cores} />
+      )}
+
+      <Text style={styles.listaTitulo}>Classificação</Text>
+    </View>
+  );
+
+  const rodape = (
+    <View style={styles.legenda}>
+      <View style={styles.legendaTopo}>
+        <Ionicons name="sparkles" size={20} color={cores.estrela} />
+        <Text style={styles.legendaTitulo}>Como ganhar pontos</Text>
+      </View>
+      <Text style={styles.legendaTexto}>
+        Cada lição vale pontos pela dificuldade. Acertar tudo de primeira garante o valor cheio;
+        refazer só soma a diferença do seu melhor resultado.
+      </Text>
+      <View style={styles.legendaChips}>
+        {DIFICULDADES.map((dificuldade) => (
+          <View key={dificuldade} style={styles.legendaChip}>
+            <Text style={styles.legendaChipTexto}>
+              {ROTULO_DIFICULDADE[dificuldade]} · {PONTOS_POR_DIFICULDADE[dificuldade]} pts
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  const vazio = erro ? null : (
+    <View style={styles.vazio}>
+      <Ionicons name="people-outline" size={32} color={cores.textoSuave} />
+      <Text style={styles.vazioTexto}>Ninguém pontuou ainda. Comece uma lição!</Text>
+    </View>
+  );
+
+  return (
+    <FlatList
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      data={erro ? [] : itens}
+      keyExtractor={(item) => String(item.id)}
+      renderItem={renderItem}
+      ItemSeparatorComponent={Separador}
+      ListHeaderComponent={cabecalho}
+      ListEmptyComponent={vazio ?? undefined}
+      ListFooterComponent={rodape}
+      refreshing={carregando && itens.length > 0}
+      onRefresh={recarregar}
+      showsVerticalScrollIndicator={false}
+    />
+  );
 }
 
+function Separador() {
+  return <View style={separadorEstilo.espaco} />;
+}
+
+const separadorEstilo = StyleSheet.create({ espaco: { height: 12 } });
+
+type PropsCard = { usuario: SituacaoUsuario; styles: Estilos; cores: Cores };
+
+function CardSituacao({ usuario, styles, cores }: PropsCard) {
+  const { posicao, total, alvo, pontosParaSubir, progresso } = usuario;
+  const mensagem = alvo
+    ? `Faltam ${formatarPontos(pontosParaSubir)} pts para passar ${alvo.nome}.`
+    : total > 1
+      ? 'Você está na liderança!'
+      : 'Por enquanto, só você tem conta neste aparelho.';
+
+  return (
+    <View style={styles.ligaCard}>
+      <View style={styles.ligaTopo}>
+        <View style={styles.ligaIcone}>
+          <Ionicons name="podium" size={22} color={cores.estrela} />
+        </View>
+        <View style={styles.ligaInfo}>
+          <Text style={styles.ligaTitulo}>Sua posição</Text>
+          <Text style={styles.ligaTexto}>{formatarPontos(usuario.pontos)} pontos</Text>
+        </View>
+        <Text style={styles.ligaPosicao} accessibilityLabel={`${posicao}º lugar de ${total}`}>
+          {posicao}º de {total}
+        </Text>
+      </View>
+
+      <View
+        style={styles.progressoFundo}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel="Progresso até a próxima posição"
+        accessibilityValue={{ min: 0, max: 100, now: Math.round(progresso * 100) }}
+      >
+        <View style={[styles.progresso, { width: `${Math.round(progresso * 100)}%` }]} />
+      </View>
+      <Text style={styles.ligaMensagem}>{mensagem}</Text>
+    </View>
+  );
+}
+
+type PropsLinha = { item: ItemRanking; styles: Estilos; cores: Cores };
+
+const LinhaJogador = memo(function LinhaJogador({ item, styles, cores }: PropsLinha) {
+  const corMedalha = CORES_MEDALHA[item.posicao];
+
+  return (
+    <View>
+      {item.foraDosLideres && (
+        <View style={styles.reticencias} accessibilityElementsHidden importantForAccessibility="no">
+          <Ionicons name="ellipsis-vertical" size={18} color={cores.textoSuave} />
+        </View>
+      )}
+      <View
+        style={[styles.jogador, item.voce && styles.jogadorVoce]}
+        accessible
+        accessibilityLabel={`${item.posicao}º lugar: ${item.nome}${
+          item.voce ? ' (você)' : ''
+        }, ${item.pontos} pontos`}
+      >
+        <View style={styles.posicaoContainer}>
+          {corMedalha ? (
+            <Ionicons name="medal" size={24} color={corMedalha} />
+          ) : (
+            <Text style={styles.posicao}>{item.posicao}</Text>
+          )}
+        </View>
+
+        <View style={[styles.avatar, item.voce && styles.avatarVoce]}>
+          <Ionicons name="person" size={22} color={item.voce ? cores.primaria : cores.textoSuave} />
+        </View>
+
+        <View style={styles.infoJogador}>
+          <View style={styles.nomeLinha}>
+            <Text style={[styles.nome, item.voce && styles.nomeVoce]} numberOfLines={1}>
+              {item.nome}
+            </Text>
+            {item.voce && (
+              <View style={styles.voceBadge}>
+                <Text style={styles.voceTexto}>Você</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.pontos}>{formatarPontos(item.pontos)} pts</Text>
+        </View>
+      </View>
+    </View>
+  );
+});
 
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: c.fundo },
-    content: { padding: 25, paddingBottom: 40 },
-
-    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
-    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
-    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
-    statsRow: { flexDirection: 'row', gap: 12 },
-    statBox: {
-      backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
+    content: { padding: 16, paddingBottom: 40 },
+    carregando: {
       flex: 1,
-    },
-    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
-    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
-
-    trilhaSection: {
-      backgroundColor: c.superficie,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: c.borda,
-      padding: 20,
-      marginBottom: 20,
-    },
-    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
-
-    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
-    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    trilhaNumero: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: c.primaria,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 12,
+      backgroundColor: c.fundo,
     },
-    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
-    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
-    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
-    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
-    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: c.primaria },
 
     headerRanking: {
       flexDirection: 'row',
@@ -326,8 +230,8 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 18,
-      marginBottom: 20,
+      padding: 16,
+      marginBottom: 16,
     },
     trofeuHeader: {
       width: 52,
@@ -342,12 +246,23 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     tituloRanking: { fontSize: f(22), fontWeight: 'bold', color: c.texto },
     subtituloRanking: { fontSize: f(14), color: c.textoSuave, marginTop: 4 },
 
+    erroCaixa: {
+      backgroundColor: c.perigoFundo,
+      borderRadius: 12,
+      padding: 12,
+      gap: 6,
+      marginBottom: 16,
+    },
+    erroTexto: { color: c.perigo, fontSize: f(14), textAlign: 'center' },
+    erroBotao: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+    erroBotaoTexto: { color: c.perigo, fontWeight: 'bold', fontSize: f(15) },
+
     ligaCard: {
       backgroundColor: c.superficie,
       borderRadius: 18,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 18,
+      padding: 16,
       marginBottom: 20,
     },
     ligaTopo: { flexDirection: 'row', alignItems: 'center' },
@@ -355,25 +270,25 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       width: 42,
       height: 42,
       borderRadius: 12,
-      backgroundColor: c.primariaClara,
+      backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
     },
     ligaInfo: { flex: 1, marginLeft: 12 },
     ligaTitulo: { fontWeight: 'bold', fontSize: f(16), color: c.texto },
     ligaTexto: { fontSize: f(13), color: c.textoSuave, marginTop: 2 },
-    ligaPosicao: { fontWeight: 'bold', color: c.primaria, fontSize: f(16) },
+    ligaPosicao: { fontWeight: 'bold', color: c.primaria, fontSize: f(16), marginLeft: 8 },
     progressoFundo: {
       height: 10,
       backgroundColor: c.primariaClara,
       borderRadius: 999,
       overflow: 'hidden',
-      marginTop: 18,
+      marginTop: 16,
     },
-    progresso: { width: '60%', height: '100%', backgroundColor: c.primaria, borderRadius: 999 },
+    progresso: { height: '100%', backgroundColor: c.primaria, borderRadius: 999 },
+    ligaMensagem: { fontSize: f(13), color: c.textoSuave, marginTop: 8 },
 
     listaTitulo: { fontSize: f(18), fontWeight: 'bold', color: c.texto, marginBottom: 12 },
-    lista: { gap: 12 },
     jogador: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -381,49 +296,56 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       borderRadius: 16,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 14,
+      padding: 12,
     },
-    jogadorVoce: {
-      backgroundColor: c.caixaSobrePrimaria,
-      borderColor: c.primariaClara,
-    },
+    jogadorVoce: { backgroundColor: c.iconeFundo, borderColor: c.primaria, borderWidth: 2 },
     posicaoContainer: { width: 30, alignItems: 'center', justifyContent: 'center' },
-    posicao: {
-      fontSize: f(14),
-      fontWeight: 'bold',
-      color: c.texto,
-    },
+    posicao: { fontSize: f(14), fontWeight: 'bold', color: c.texto },
     avatar: {
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
-      marginHorizontal: 12,
+      marginHorizontal: 10,
     },
     avatarVoce: { backgroundColor: c.primariaClara },
-    infoJogador: { flex: 1 },
+    infoJogador: { flex: 1, minWidth: 0 },
     nomeLinha: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    nome: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
+    nome: { fontSize: f(15), fontWeight: 'bold', color: c.texto, flexShrink: 1 },
     nomeVoce: { color: c.primaria },
     voceBadge: {
       backgroundColor: c.primariaClara,
       borderRadius: 10,
       paddingHorizontal: 8,
-      paddingVertical: 4,
+      paddingVertical: 3,
     },
     voceTexto: { fontSize: f(11), fontWeight: 'bold', color: c.primaria },
     pontos: { fontSize: f(13), color: c.textoSuave, marginTop: 3 },
+    reticencias: { alignItems: 'center', paddingBottom: 12 },
 
-    mensagem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
+    vazio: { alignItems: 'center', gap: 8, paddingVertical: 24 },
+    vazioTexto: { fontSize: f(14), color: c.textoSuave, textAlign: 'center' },
+
+    legenda: {
+      backgroundColor: c.superficie,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.borda,
       padding: 14,
       marginTop: 20,
+      gap: 8,
     },
-    mensagemTexto: { fontSize: f(14), color: c.texto, flexShrink: 1 },
+    legendaTopo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    legendaTitulo: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
+    legendaTexto: { fontSize: f(13), color: c.textoSuave },
+    legendaChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    legendaChip: {
+      backgroundColor: c.iconeFundo,
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    legendaChipTexto: { fontSize: f(12), fontWeight: '600', color: c.primaria },
   });

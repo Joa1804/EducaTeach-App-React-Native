@@ -51,6 +51,16 @@ describe('conteúdo da trilha', () => {
     expect(ATIVIDADE.map((atividade) => atividade.id)).toEqual(LICOES.map((licao) => licao.id));
   });
 
+  it('classifica as lições por dificuldade, com pontos de acordo', () => {
+    expect(LICOES.map((licao) => [licao.id, licao.dificuldade, licao.pontos])).toEqual([
+      ['comandos-basicos', 'facil', 50],
+      ['variaveis', 'facil', 50],
+      ['condicionais', 'medio', 100],
+      ['repeticoes-loops', 'medio', 100],
+      ['funcoes', 'dificil', 150],
+    ]);
+  });
+
   it('encontra lição por id e devolve null para id desconhecido', () => {
     expect(buscarLicao('funcoes')?.titulo).toBe('Funções');
     expect(buscarLicao('nao-existe')).toBeNull();

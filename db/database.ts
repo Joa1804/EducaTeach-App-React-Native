@@ -33,6 +33,49 @@ const progressoSchema = z.object({
 
 export type Progresso = z.infer<typeof progressoSchema>;
 
+/** Linha da classificação lida do banco (sem dados sensíveis como e-mail). */
+const linhaRankingSchema = z.object({
+    id: z.number().int(),
+    nome: z.string(),
+    avatar: z.string(),
+    pontos: z.number().int().min(0),
+});
+
+export type LinhaRanking = z.infer<typeof linhaRankingSchema>;
+
+export type PosicaoUsuarioRanking = {
+    linha: LinhaRanking;
+    /** Posição com empates compartilhados: 1 + quantos têm mais pontos. */
+    posicao: number;
+    /** Jogador logo acima (o de menor pontuação entre os que têm mais pontos), se houver. */
+    acima: LinhaRanking | null;
+};
+
+export type ResumoRanking = {
+    /** Os mais bem colocados, do maior para o menor número de pontos. */
+    lideres: LinhaRanking[];
+    /** Total de usuários no ranking. */
+    total: number;
+    /** Situação do usuário consultado, ou `null` se ele não existir. */
+    usuario: PosicaoUsuarioRanking | null;
+};
+
+/** Limite máximo de linhas por consulta do ranking. */
+export const LIMITE_MAXIMO_RANKING = 100;
+
+/**
+ * Pontuação máxima de cada lição antes (v4) e depois (v5) da troca para pontos
+ * por dificuldade. Fica congelada aqui porque descreve o passado: mudar o
+ * conteúdo da trilha no futuro não pode alterar o que esta migração fez.
+ */
+const REESCALA_PONTOS_V5: readonly { atividadeId: string; antes: number; depois: number }[] = [
+    { atividadeId: 'comandos-basicos', antes: 10, depois: 50 },
+    { atividadeId: 'variaveis', antes: 20, depois: 50 },
+    { atividadeId: 'condicionais', antes: 20, depois: 100 },
+    { atividadeId: 'repeticoes-loops', antes: 20, depois: 100 },
+    { atividadeId: 'funcoes', antes: 30, depois: 150 },
+];
+
 export type ResultadoRegistro = {
     primeiraVez: boolean;
     pontosGanhos: number;
@@ -53,7 +96,7 @@ export class EmailJaCadastradoError extends Error {
 
 const NOME_BANCO = 'educateach.db';
 
-const VERSAO_DO_BANCO = 4;
+const VERSAO_DO_BANCO = 5;
 
 /** Tempo de vida de uma sessão local: 30 dias. */
 const DURACAO_SESSAO_MS = 30 * 24 * 60 * 60 * 1000;
@@ -168,6 +211,46 @@ async function migrar(db: SQLiteDatabase): Promise<void> {
             await db.execAsync(`
                 ALTER TABLE progresso
                 ADD COLUMN estrelas INTEGER NOT NULL DEFAULT 0;
+            `);
+
+        });
+    }
+
+    if (versao < 5) {
+
+        await db.withTransactionAsync(async () => {
+
+            // Converte o melhor resultado de cada lição para a nova escala,
+            // mantendo a proporção (ex.: 15 de 20 vira 75 de 100).
+            for (const { atividadeId, antes, depois } of REESCALA_PONTOS_V5) {
+
+                const novoValor = `CASE
+                    WHEN p.pontos <= 0 THEN 0
+                    ELSE MIN(${depois}, MAX(1, CAST(ROUND(p.pontos * ${depois} * 1.0 / ${antes}) AS INTEGER)))
+                END`;
+
+                // Primeiro ajusta o total do usuário pela diferença; depois a linha do progresso.
+                await db.runAsync(
+                    `UPDATE usuarios
+                     SET pontos = MAX(0, pontos + COALESCE((
+                         SELECT ${novoValor} - p.pontos
+                         FROM progresso p
+                         WHERE p.usuario_id = usuarios.id AND p.atividade_id = ?
+                     ), 0))`,
+                    [atividadeId]
+                );
+
+                await db.runAsync(
+                    `UPDATE progresso AS p
+                     SET pontos = ${novoValor}, sincronizado = 0
+                     WHERE p.atividade_id = ?`,
+                    [atividadeId]
+                );
+            }
+
+            await db.execAsync(`
+                CREATE INDEX IF NOT EXISTS idx_usuarios_pontos
+                ON usuarios (pontos DESC);
             `);
 
         });
@@ -483,4 +566,91 @@ export async function registrarConclusao(
     });
 
     return resultado;
+}
+
+
+function lerLinhasRanking(linhas: unknown[]): LinhaRanking[] {
+    return linhas.flatMap((linha) => {
+        const resultado = linhaRankingSchema.safeParse(linha);
+        if (!resultado.success) {
+            console.warn('Linha de ranking inválida ignorada:', resultado.error.issues);
+            return [];
+        }
+        return [resultado.data];
+    });
+}
+
+/**
+ * Classificação geral pelos pontos acumulados. Desempata pelo nome e depois
+ * pelo id, para a ordem ser estável entre consultas. Também devolve a posição
+ * do usuário informado, mesmo quando ele não está entre os `limite` primeiros.
+ */
+export async function buscarRanking(
+    usuarioId: number | null,
+    limite: number
+): Promise<ResumoRanking> {
+
+    const db = await abrirBancoDeDados();
+
+    const limiteSeguro = Math.min(
+        LIMITE_MAXIMO_RANKING,
+        Math.max(1, Number.isFinite(limite) ? Math.floor(limite) : 1)
+    );
+
+    const lideres = lerLinhasRanking(
+        await db.getAllAsync<unknown>(
+            `SELECT id, nome, avatar, pontos
+             FROM usuarios
+             ORDER BY pontos DESC, nome COLLATE NOCASE ASC, id ASC
+             LIMIT ?`,
+            [limiteSeguro]
+        )
+    );
+
+    const contagem = await db.getFirstAsync<{ total: number }>(
+        'SELECT COUNT(*) AS total FROM usuarios'
+    );
+
+    const total = contagem?.total ?? 0;
+
+    if (usuarioId === null) {
+        return { lideres, total, usuario: null };
+    }
+
+    const [linha] = lerLinhasRanking(
+        await db.getAllAsync<unknown>(
+            `SELECT id, nome, avatar, pontos
+             FROM usuarios
+             WHERE id = ?`,
+            [usuarioId]
+        )
+    );
+
+    if (!linha) {
+        return { lideres, total, usuario: null };
+    }
+
+    const acimaLinhas = await db.getAllAsync<unknown>(
+        `SELECT id, nome, avatar, pontos
+         FROM usuarios
+         WHERE pontos > ?
+         ORDER BY pontos ASC, nome COLLATE NOCASE DESC, id DESC
+         LIMIT 1`,
+        [linha.pontos]
+    );
+
+    const melhores = await db.getFirstAsync<{ quantidade: number }>(
+        'SELECT COUNT(*) AS quantidade FROM usuarios WHERE pontos > ?',
+        [linha.pontos]
+    );
+
+    return {
+        lideres,
+        total,
+        usuario: {
+            linha,
+            posicao: (melhores?.quantidade ?? 0) + 1,
+            acima: lerLinhasRanking(acimaLinhas)[0] ?? null,
+        },
+    };
 }

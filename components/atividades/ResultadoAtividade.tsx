@@ -9,6 +9,7 @@ import type { Desempenho } from '@/lib/licoes/desempenho';
 import type { Licao } from '@/lib/licoes/schemas';
 
 import { ALVO_TOQUE } from './estilo';
+import { SeloDificuldade } from './SeloDificuldade';
 
 type Props = {
   licao: Licao;
@@ -66,6 +67,7 @@ export function ResultadoAtividade({
         {TITULOS[desempenho.estrelas]}
       </Text>
       <Text style={styles.subtitulo}>{licao.titulo}</Text>
+      <SeloDificuldade dificuldade={licao.dificuldade} />
 
       <View
         style={styles.estrelas}
@@ -107,7 +109,8 @@ export function ResultadoAtividade({
       </View>
 
       <Text style={styles.detalhe}>
-        {desempenho.acertosDePrimeira} de {desempenho.total} exercícios certos de primeira.
+        {desempenho.acertosDePrimeira} de {desempenho.total} exercícios certos de primeira:{' '}
+        {desempenho.pontos} de {licao.pontos} pontos possíveis.
       </Text>
 
       {salvando && (
