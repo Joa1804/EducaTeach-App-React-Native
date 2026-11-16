@@ -1,20 +1,18 @@
-import {Ionicons } from '@expo/vector-icons';
+import type { Ionicons } from '@expo/vector-icons';
+
+import { LICOES } from './licoes';
 
 export type Dificuldade = 'facil' | 'medio' | 'dificil';
 
+/** Dados de pontuação de uma atividade (subconjunto de uma lição). */
 export type Atividade = {
-    id: string; 
-    titulo: string;
-    icone: keyof typeof Ionicons.glyphMap;
-    dificuldade: Dificuldade;
-    pontos: number;
-    moedas: number;
+  id: string;
+  titulo: string;
+  icone: keyof typeof Ionicons.glyphMap;
+  dificuldade: Dificuldade;
+  pontos: number;
+  moedas: number;
 };
 
-export const ATIVIDADE: Atividade[] = [
-     { id: 'comandos-basicos', titulo: 'Comandos Básicos', icone: 'arrow-forward', dificuldade: 'facil', pontos: 10, moedas: 1 },
-    { id: 'repeticoes-loops', titulo: 'Repetições e Loops', icone: 'repeat', dificuldade: 'facil', pontos: 10, moedas: 1 },
-    { id: 'condicionais', titulo: 'Condicionais', icone: 'help', dificuldade: 'medio', pontos: 20, moedas: 2 },
-    { id: 'variaveis', titulo: 'Variáveis', icone: 'cube', dificuldade: 'medio', pontos: 20, moedas: 2 },
-    { id: 'funcoes', titulo: 'Funções', icone: 'construct', dificuldade: 'dificil', pontos: 30, moedas: 3 },
-];
+/** Atividades da trilha, derivadas das lições para existir uma única fonte de dados. */
+export const ATIVIDADE: readonly Atividade[] = LICOES;

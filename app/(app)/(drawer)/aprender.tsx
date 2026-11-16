@@ -1,249 +1,236 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import  Svg, {Path} from 'react-native-svg';
-import { FASES } from '@/data/frase';
+import { useRouter } from 'expo-router';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ListRenderItem,
+} from 'react-native';
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
-import React from 'react';
+import { useTrilha } from '@/hooks/use-trilha';
+import type { EtapaTrilha } from '@/lib/licoes/trilha';
+
+/** Deslocamento horizontal de cada etapa, desenhando o caminho em zigue-zague. */
+const DESLOCAMENTOS = [0, -56, -80, -56, 0, 56, 80, 56] as const;
+
+const ROTULO_STATUS: Readonly<Record<EtapaTrilha['status'], string>> = {
+  concluida: 'concluída',
+  disponivel: 'disponível',
+  bloqueada: 'bloqueada',
+};
+
+type Estilos = ReturnType<typeof criarEstilos>;
 
 export default function AprenderScreen() {
+  const { cores, fonte } = useConfiguracao();
+  const styles = useMemo(() => criarEstilos(cores, fonte), [cores, fonte]);
+  const router = useRouter();
+  const { etapas, concluidas, total, proxima, carregando, erro, recarregar } = useTrilha();
 
-     const { cores, fonte } = useConfiguracao();
-   const styles = criarEstilos(cores, fonte);
+  const abrir = useCallback(
+    (licaoId: string) => router.push({ pathname: '/atividades/[id]', params: { id: licaoId } }),
+    [router],
+  );
+
+  const renderItem = useCallback<ListRenderItem<EtapaTrilha>>(
+    ({ item }) => (
+      <EtapaNode
+        etapa={item}
+        atual={item.licao.id === proxima?.licao.id}
+        styles={styles}
+        cores={cores}
+        onAbrir={abrir}
+      />
+    ),
+    [abrir, cores, proxima?.licao.id, styles],
+  );
+
+  const percentual = total === 0 ? 0 : Math.round((concluidas / total) * 100);
+
+  const cabecalho = (
+    <View>
+      <View style={styles.unidadeCard}>
+        <View style={styles.unidadeIcone}>
+          <Ionicons name="code-slash" size={30} color={cores.primaria} />
+        </View>
+        <View style={styles.unidadeInfo}>
+          <Text style={styles.unidadeTitulo}>Fundamentos de Programação</Text>
+          <Text style={styles.unidadeDescricao}>Lógica com pseudocódigo, passo a passo.</Text>
+          <View style={styles.progressoContainer}>
+            <View
+              style={styles.progressoFundo}
+              accessible
+              accessibilityRole="progressbar"
+              accessibilityLabel="Progresso da unidade"
+              accessibilityValue={{ min: 0, max: total, now: concluidas }}
+            >
+              <View style={[styles.progresso, { width: `${percentual}%` }]} />
+            </View>
+            <Text style={styles.progressoTexto}>
+              {concluidas} de {total}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.tituloContainer}>
+        <Ionicons name="map" size={22} color={cores.primaria} />
+        <Text style={styles.titulo}>Sua Jornada</Text>
+      </View>
+
+      {erro && (
+        <View style={styles.erroCaixa} accessibilityLiveRegion="polite">
+          <Text style={styles.erroTexto}>{erro}</Text>
+          <Pressable onPress={recarregar} accessibilityRole="button" style={styles.erroBotao}>
+            <Text style={styles.erroBotaoTexto}>Tentar novamente</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
+
+  const rodape =
+    !carregando && !erro && concluidas === total ? (
+      <View style={styles.final}>
+        <Ionicons name="ribbon" size={28} color={cores.estrela} />
+        <Text style={styles.finalTexto}>
+          Você concluiu a trilha! Refaça as lições para ganhar 3 estrelas.
+        </Text>
+      </View>
+    ) : null;
+
+  // Enquanto não sabemos o progresso, não mostramos cadeados que podem estar errados.
+  if (carregando && concluidas === 0 && !erro) {
+    return (
+      <View style={styles.carregando} accessibilityLabel="Carregando trilha">
+        <ActivityIndicator size="large" color={cores.primaria} />
+      </View>
+    );
+  }
 
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <FlatList
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      data={erro ? [] : etapas}
+      keyExtractor={(etapa) => etapa.licao.id}
+      renderItem={renderItem}
+      ListHeaderComponent={cabecalho}
+      ListFooterComponent={rodape ?? undefined}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+}
 
-        {/* CABEÇALHO DA UNIDADE */}
-        <View style={styles.unidadeCard}>
+type PropsEtapa = {
+  etapa: EtapaTrilha;
+  atual: boolean;
+  styles: Estilos;
+  cores: Cores;
+  onAbrir: (licaoId: string) => void;
+};
 
-          <View style={styles.unidadeIcone}>
-            <Ionicons name="code-slash" size={30} color="#673AB7"/>
-          </View>
+const EtapaNode = memo(function EtapaNode({ etapa, atual, styles, cores, onAbrir }: PropsEtapa) {
+  const { licao, indice, status, estrelas } = etapa;
+  const bloqueada = status === 'bloqueada';
+  const concluida = status === 'concluida';
+  const deslocamento = DESLOCAMENTOS[indice % DESLOCAMENTOS.length];
 
-          <View style={styles.unidadeInfo}>
+  // Pulso suave na etapa atual, rodando na thread de UI.
+  const escala = useSharedValue(1);
+  useEffect(() => {
+    if (!atual) {
+      cancelAnimation(escala);
+      escala.value = 1;
+      return undefined;
+    }
+    escala.value = withRepeat(
+      withSequence(withTiming(1.07, { duration: 700 }), withTiming(1, { duration: 700 })),
+      -1,
+    );
+    return () => cancelAnimation(escala);
+  }, [atual, escala]);
+  const estiloPulso = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
 
-            <Text style={styles.unidadeTitulo}>
-              Fundamentos de Programação
-            </Text>
+  const icone = concluida ? 'checkmark' : bloqueada ? 'lock-closed' : licao.icone;
 
-            <Text style={styles.unidadeDescricao}>
-              Aprenda programação através de desafios!
-            </Text>
-
-            <View style={styles.progressoContainer}>
-
-              <View style={styles.progressoFundo}>
-                <View style={styles.progresso} />
-              </View>
-
-              <Text style={styles.progressoTexto}>
-                2 de 5 fases
-              </Text>
-
-            </View>
-
-          </View>
-
+  return (
+    <View style={[styles.etapa, { transform: [{ translateX: deslocamento }] }]}>
+      {atual && (
+        <View style={styles.balao}>
+          <Text style={styles.balaoTexto}>{concluida ? 'REFAZER' : 'COMEÇAR'}</Text>
         </View>
+      )}
+      <Pressable
+        onPress={() => onAbrir(licao.id)}
+        disabled={bloqueada}
+        accessibilityRole="button"
+        accessibilityLabel={`Lição ${indice + 1}: ${licao.titulo}, ${ROTULO_STATUS[status]}${
+          concluida ? `, ${estrelas} de 3 estrelas` : ''
+        }`}
+        accessibilityState={{ disabled: bloqueada }}
+        hitSlop={6}
+      >
+        {({ pressed }) => (
+          <Animated.View
+            style={[
+              styles.no,
+              concluida && styles.noConcluido,
+              bloqueada && styles.noBloqueado,
+              pressed && styles.noPressionado,
+              estiloPulso,
+            ]}
+          >
+            <Ionicons name={icone} size={30} color={bloqueada ? cores.textoSuave : '#FFFFFF'} />
+          </Animated.View>
+        )}
+      </Pressable>
 
-        {/* TÍTULO */}
-        <View style={styles.tituloContainer}>
-          <Ionicons name="map" size={24} color="#673AB7" />
-
-          <Text style={styles.titulo}>
-            Sua Jornada
-          </Text>
-        </View>
-
-        {/* MAPA */}
-        <View style={styles.mapa}>
-
-          {/* CAMINHO */}
-          <Svg width="100%" height="900" viewBox="0 0 400 900" style={styles.caminho}>
-            <Path
-              d="
-                M 200 0
-                C 200 0, 200 100, 200 100
-                S 200 200, 200 200
-                S 200 300, 200 300
-                S 200 400, 200 400
-                S 200 500, 200 500
-                S 200 600, 200 600
-                S 200 700, 200 700
-                S 200 800, 200 800
-                S 200 900, 200 900
-              "
-              fill="none"
-              stroke="#D8CCF2"
-              strokeWidth="8"
-              strokeLinecap="round"
-            />
-
-          </Svg>
-
-          {/* FASES */}
-          {FASES.map((fase, index) => (
-            <FaseNode
-              key={fase.id}
-              fase={fase}
-              index={index}
-              styles={styles}
+      {concluida && (
+        <View style={styles.estrelas} accessibilityElementsHidden importantForAccessibility="no">
+          {[1, 2, 3].map((numero) => (
+            <Ionicons
+              key={numero}
+              name={numero <= estrelas ? 'star' : 'star-outline'}
+              size={16}
+              color={cores.estrela}
             />
           ))}
-
         </View>
-
-      </ScrollView>
-
+      )}
+      <Text style={[styles.etapaTitulo, bloqueada && styles.textoBloqueado]} numberOfLines={1}>
+        {licao.titulo}
+      </Text>
+      <Text style={styles.etapaDescricao} numberOfLines={2}>
+        {licao.descricao} · {licao.exercicios.length} exercícios
+      </Text>
+    </View>
   );
-}
-
-function FaseNode({
-  fase,
-  index,
-  styles,
-}: {
-  fase: typeof FASES[0];
-  index: number;
-  styles: ReturnType<typeof criarEstilos>;
-}) {
-
-  const posicoes = [
-    {top: 40, left: '50%'},
-    {top: 205, left: '25%' },
-    {top: 375, left: '50%' },
-    { top: 545, left: '25%'},
-    { top: 715, left: '50%'},
-  ];
-
-  const posicao = posicoes[index];
-
-  const bloqueada = fase.status === 'bloqueado';
-  const atual = fase.status === 'em-andamento';
-  const concluida = fase.status === 'concluido';
-
-  return (
-    <TouchableOpacity
-      disabled={bloqueada}
-      style={[
-        styles.faseContainer,
-        {
-          top: posicao.top,
-          left: posicao.left,
-        },
-      ]}
-    >
-
-      {/* CÍRCULO */}
-      <View
-        style={[
-          styles.faseNode,
-
-          concluida && styles.faseConcluida,
-          atual && styles.faseAtual,
-          bloqueada && styles.faseBloqueada,
-        ]}
-      >
-
-        <Ionicons
-          name={
-            concluida
-              ? 'checkmark'
-              : bloqueada
-              ? 'lock-closed'
-              : 'play'
-          }
-          size={26}
-          color="#FFFFFF"
-        />
-
-      </View>
-
-      {/* INFORMAÇÕES */}
-      <View style={styles.faseInfo}>
-
-        <Text style={styles.faseTitulo}>
-          {fase.titulo}
-        </Text>
-
-        <Text style={styles.faseDescricao}>
-          {fase.descricao}
-        </Text>
-
-        {/* ESTRELAS */}
-        {fase.estrelas !== undefined && (
-          <View style={styles.estrelas}>
-
-            {[1, 2, 3].map((estrela) => (
-              <Ionicons
-                key={estrela}
-                name={
-                  estrela <= fase.estrelas!
-                    ? 'star'
-                    : 'star-outline'
-                }
-                size={15}
-                color="#F59E0B"
-              />
-            ))}
-
-          </View>
-        )}
-
-      </View>
-
-    </TouchableOpacity>
-  );
-
-}
+});
 
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: c.fundo },
-    content: { padding: 25, paddingBottom: 40 },
-
-    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
-    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
-    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
-    statsRow: { flexDirection: 'row', gap: 12 },
-    statBox: {
-      backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
+    content: { padding: 16, paddingBottom: 40 },
+    carregando: {
       flex: 1,
-    },
-    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
-    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
-
-    trilhaSection: {
-      backgroundColor: c.superficie,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: c.borda,
-      padding: 20,
-      marginBottom: 20,
-    },
-    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
-
-    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
-    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    trilhaNumero: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: c.primaria,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 12,
+      backgroundColor: c.fundo,
     },
-    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
-    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
-    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
-    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
-    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: c.primaria },
 
     unidadeCard: {
       flexDirection: 'row',
@@ -251,7 +238,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 18,
+      padding: 16,
       marginBottom: 20,
       alignItems: 'center',
     },
@@ -265,7 +252,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       marginRight: 14,
     },
     unidadeInfo: { flex: 1 },
-    unidadeTitulo: { fontSize: f(21), fontWeight: 'bold', color: c.texto, marginBottom: 4 },
+    unidadeTitulo: { fontSize: f(19), fontWeight: 'bold', color: c.texto, marginBottom: 4 },
     unidadeDescricao: { fontSize: f(14), color: c.textoSuave, marginBottom: 8 },
     progressoContainer: { flexDirection: 'row', alignItems: 'center' },
     progressoFundo: {
@@ -276,58 +263,56 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       overflow: 'hidden',
       marginRight: 10,
     },
-    progresso: { height: '100%', width: '40%', backgroundColor: c.primaria, borderRadius: 999 },
+    progresso: { height: '100%', backgroundColor: c.primaria, borderRadius: 999 },
     progressoTexto: { fontSize: f(12), color: c.textoSuave, fontWeight: '600' },
 
-    tituloContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 },
+    tituloContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 8 },
     titulo: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
 
-    mapa: {
-      position: 'relative',
-      height: 840,
-      marginTop: 8,
-    },
-    caminho: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    },
+    erroCaixa: { backgroundColor: c.perigoFundo, borderRadius: 12, padding: 12, gap: 6 },
+    erroTexto: { color: c.perigo, fontSize: f(14), textAlign: 'center' },
+    erroBotao: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+    erroBotaoTexto: { color: c.perigo, fontWeight: 'bold', fontSize: f(15) },
 
-    faseContainer: {
-      position: 'absolute',
-      width: 190,
-      flexDirection: 'row',
-      alignItems: 'center',
-      zIndex: 2,
+    etapa: { alignItems: 'center', alignSelf: 'center', width: 168, paddingVertical: 14 },
+    balao: {
+      backgroundColor: c.superficie,
+      borderWidth: 2,
+      borderColor: c.borda,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      marginBottom: 8,
     },
-    faseNode: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
+    balaoTexto: { color: c.primaria, fontWeight: 'bold', fontSize: f(12), letterSpacing: 0.5 },
+    no: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
       backgroundColor: c.primaria,
       alignItems: 'center',
       justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-      elevation: 3,
+      borderBottomWidth: 6,
+      borderBottomColor: 'rgba(0,0,0,0.2)',
     },
-    faseConcluida: { backgroundColor: '#10B981' },
-    faseAtual: { backgroundColor: c.primaria },
-    faseBloqueada: { backgroundColor: '#B9B9C5' },
-    faseInfo: {
-      flex: 1,
-      marginLeft: 12,
+    noConcluido: { backgroundColor: c.sucesso },
+    noBloqueado: { backgroundColor: c.bloqueado },
+    noPressionado: { borderBottomWidth: 2, marginTop: 4 },
+    estrelas: { flexDirection: 'row', gap: 2, marginTop: 6 },
+    etapaTitulo: { fontSize: f(15), fontWeight: 'bold', color: c.texto, marginTop: 6 },
+    textoBloqueado: { color: c.textoSuave },
+    etapaDescricao: { fontSize: f(12), color: c.textoSuave, textAlign: 'center', marginTop: 2 },
+
+    final: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
       backgroundColor: c.superficie,
       borderRadius: 14,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 12,
+      padding: 14,
+      marginTop: 12,
     },
-    faseTitulo: { fontSize: f(15), fontWeight: 'bold', color: c.texto, marginBottom: 2 },
-    faseDescricao: { fontSize: f(12), color: c.textoSuave, lineHeight: 16 },
-    estrelas: { flexDirection: 'row', marginTop: 8, gap: 2 },
+    finalTexto: { flex: 1, fontSize: f(14), color: c.texto },
   });

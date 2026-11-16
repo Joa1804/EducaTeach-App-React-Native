@@ -1,19 +1,26 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Cores, useConfiguracao} from '@/context/ConfiguracaoContext';
 import React from 'react';
 import { useUsuario } from '@/context/UsuarioContext';
-import { ATIVIDADE } from '@/data/atividade';
-import { useProgresso } from '@/hooks/use-progresso';
+import { useTrilha } from '@/hooks/use-trilha';
+import type { EtapaTrilha } from '@/lib/licoes/trilha';
+
+const ROTULO_STATUS: Readonly<Record<EtapaTrilha['status'], string>> = {
+  concluida: 'Concluída',
+  disponivel: 'Disponível',
+  bloqueada: 'Bloqueada',
+};
 
 export default function HomeScreen() {
   const {cores, fonte} = useConfiguracao();
   const styles = criarEstilos(cores, fonte);
   const { usuario } = useUsuario();
-  const { progresso, carregando } = useProgresso();
+  const router = useRouter();
+  const { etapas, concluidas, total, carregando } = useTrilha();
 
   const primeiroNome = usuario?.nome.trim().split(/\s+/)[0] ?? '';
-  const concluidas = progresso.length;
 
   return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -33,33 +40,60 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{carregando ? '…' : `${concluidas}/${ATIVIDADE.length}`}</Text>
-              <Text style={styles.statLabel}>Atividades</Text>
+              <Text style={styles.statValue}>{carregando ? '…' : `${concluidas}/${total}`}</Text>
+              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit>Lições</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.trilhaSection}>
           <View style={styles.trilhaHeader}>
-            <Ionicons name="book" size={20} color="#212121" />
+            <Ionicons name="book" size={20} color={cores.texto} />
             <Text style={styles.trilhaTitle}>Sua Trilha de Aprendizado</Text>
           </View>
-          <TrilhaCard styles={styles} numero={1} titulo="Comandos Básicos" info="8 módulos · Iniciante" progresso={100} />
-          <TrilhaCard styles={styles} numero={2} titulo="Repetições e Loops" info="6 módulos · Iniciante" progresso={60} />
+          {etapas.map((etapa) => (
+            <TrilhaCard
+              key={etapa.licao.id}
+              styles={styles}
+              etapa={etapa}
+              onPress={() =>
+                router.push({ pathname: '/atividades/[id]', params: { id: etapa.licao.id } })
+              }
+            />
+          ))}
         </View>
       </ScrollView>
   );
 }
 
-function TrilhaCard({ numero, titulo, info, progresso, styles }: { numero: number; titulo: string; info: string; progresso: number; styles: ReturnType<typeof criarEstilos> }) {
+type PropsTrilhaCard = {
+  etapa: EtapaTrilha;
+  onPress: () => void;
+  styles: ReturnType<typeof criarEstilos>;
+};
+
+function TrilhaCard({ etapa, onPress, styles }: PropsTrilhaCard) {
+  const { licao, indice, status, estrelas } = etapa;
+  const bloqueada = status === 'bloqueada';
+  // Progresso da lição em estrelas: 0, 33, 67 ou 100%.
+  const progresso = Math.round((estrelas / 3) * 100);
+  const info = `${licao.exercicios.length} exercícios · ${ROTULO_STATUS[status]}`;
+
   return (
-    <View style={styles.trilhaCard}>
+    <Pressable
+      onPress={onPress}
+      disabled={bloqueada}
+      accessibilityRole="button"
+      accessibilityLabel={`${licao.titulo}, ${info}`}
+      accessibilityState={{ disabled: bloqueada }}
+      style={[styles.trilhaCard, bloqueada && styles.trilhaCardBloqueado]}
+    >
       <View style={styles.trilhaCardTop}>
         <View style={styles.trilhaNumero}>
-          <Text style={styles.trilhaNumeroText}>{numero}</Text>
+          <Text style={styles.trilhaNumeroText}>{indice + 1}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.trilhaCardTitulo}>{titulo}</Text>
+          <Text style={styles.trilhaCardTitulo}>{licao.titulo}</Text>
           <Text style={styles.trilhaCardInfo}>{info}</Text>
         </View>
         <Text style={styles.trilhaCardProgresso}>{progresso}%</Text>
@@ -67,7 +101,7 @@ function TrilhaCard({ numero, titulo, info, progresso, styles }: { numero: numbe
       <View style={styles.progressBarBg}>
         <View style={[styles.progressBarFill, { width: `${progresso}%` }]} />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -103,6 +137,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
 
     trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
+    trilhaCardBloqueado: { opacity: 0.6 },
     trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
     trilhaNumero: {
       width: 32,

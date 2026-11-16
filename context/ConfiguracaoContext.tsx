@@ -29,6 +29,15 @@ const CORES_NORMAL = {
   textoPrimaria: '#FFFFFF',
   iconeFundo: '#EDE7F6',
   perigo: '#E53935',
+  perigoFundo: '#FDECEA',
+  sucesso: '#0E9F6E',
+  sucessoFundo: '#E6F6EF',
+  estrela: '#F59E0B',
+  bloqueado: '#B9B9C5',
+  codigoFundo: '#1E1B2E',
+  codigoTexto: '#ECE8F7',
+  /** Texto sobre fundos de sucesso/perigo. */
+  textoSobreCor: '#FFFFFF',
 };
 
 export type Cores = typeof CORES_NORMAL;
@@ -45,6 +54,14 @@ const CORES_ALTO_CONTRASTE: Cores = {
   textoPrimaria: '#000000',
   iconeFundo: '#2A2A2A',
   perigo: '#FF8A80',
+  perigoFundo: '#3B0A0A',
+  sucesso: '#69F0AE',
+  sucessoFundo: '#00331C',
+  estrela: '#FFD600',
+  bloqueado: '#5E5E5E',
+  codigoFundo: '#000000',
+  codigoTexto: '#FFFFFF',
+  textoSobreCor: '#000000',
 };
 
 type ConfiguracaoContextType = Preferencias & {
