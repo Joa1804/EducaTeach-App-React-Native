@@ -53,7 +53,6 @@ O projeto tem como principais objetivos:
 O projeto possui os seguintes recursos implementados ou previstos em sua estrutura atual:
 
 - **Atividades educacionais:** ambiente de atividades voltadas ao aprendizado de programação.
-- **Blockly:** utilização de programação visual baseada em blocos.
 - **Cadastro e autenticação:** gerenciamento de contas por meio do Firebase Authentication.
 - **Progresso do estudante:** armazenamento do progresso das atividades realizadas.
 - **Ranking global:** sistema de pontuação e classificação dos estudantes.
@@ -73,7 +72,6 @@ O EducaTeach foi desenvolvido utilizando as seguintes tecnologias:
 | React 19 | Construção da interface |
 | Expo Router | Navegação entre telas |
 | React Navigation | Recursos de navegação |
-| Blockly | Programação visual por blocos |
 | Firebase Authentication | Autenticação de usuários |
 | Cloud Firestore | Armazenamento e sincronização de dados |
 | SQLite | Banco de dados local |
