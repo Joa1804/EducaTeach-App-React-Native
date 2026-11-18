@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import { Cartao, Etiqueta } from '@/components/ui';
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 
 type Categoria = 'Geral' | 'Duvidas' | 'Projetos' | 'Desafios' | 'Eventos';
@@ -98,6 +99,7 @@ export default function ForumScreen() {
   const [filtroAtivo, setFiltroAtivo] = useState<Filtro>('todos');
 
   const { cores, fonte } = useConfiguracao();
+
   const styles = useMemo(
     () => criarEstilos(cores, fonte),
     [cores, fonte],
@@ -120,6 +122,7 @@ export default function ForumScreen() {
           <Text style={styles.titulo} accessibilityRole="header">
             Comunidade
           </Text>
+
           <Text style={styles.subtitulo}>
             Compartilhe ideias, tire dúvidas e participe!
           </Text>
@@ -131,7 +134,7 @@ export default function ForumScreen() {
           accessibilityLabel="Criar novo post"
           activeOpacity={0.8}
         >
-          <Ionicons name="add" size={23} color={cores.textoPrimaria} />
+          <Ionicons name="add" size={24} color={cores.textoPrimaria} />
         </TouchableOpacity>
       </View>
 
@@ -142,7 +145,10 @@ export default function ForumScreen() {
         </View>
 
         <View style={styles.bannerInfo}>
-          <Text style={styles.bannerTitulo}>Fórum da Comunidade</Text>
+          <Text style={styles.bannerTitulo}>
+            Fórum da Comunidade
+          </Text>
+
           <Text style={styles.bannerTexto}>
             Aprender fica melhor quando compartilhamos conhecimento.
           </Text>
@@ -156,20 +162,26 @@ export default function ForumScreen() {
         />
       </View>
 
-      {/* Filtros */}
+      {/* Cabeçalho das conversas */}
       <View style={styles.secaoHeader}>
-        <View>
-          <Text style={styles.secaoTitulo}>Conversas</Text>
+        <View style={styles.secaoTexto}>
+          <Text style={styles.secaoTitulo}>
+            Conversas
+          </Text>
+
           <Text style={styles.secaoSubtitulo}>
             Explore as publicações da comunidade
           </Text>
         </View>
 
         <View style={styles.contador}>
-          <Text style={styles.contadorTexto}>{postsFiltrados.length}</Text>
+          <Text style={styles.contadorTexto}>
+            {postsFiltrados.length}
+          </Text>
         </View>
       </View>
 
+      {/* Filtros */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -195,22 +207,28 @@ export default function ForumScreen() {
         })}
       </ScrollView>
 
-      {/* Lista de publicações */}
+      {/* Publicações */}
       <View style={styles.lista}>
         {postsFiltrados.length === 0 ? (
-          <View style={styles.vazio}>
-            <View style={styles.vazioIcone}>
-              <Ionicons
-                name="chatbubbles-outline"
-                size={32}
-                color={cores.textoSuave}
-              />
+          <Cartao>
+            <View style={styles.vazio}>
+              <View style={styles.vazioIcone}>
+                <Ionicons
+                  name="chatbubbles-outline"
+                  size={32}
+                  color={cores.textoSuave}
+                />
+              </View>
+
+              <Text style={styles.vazioTitulo}>
+                Nenhum post encontrado
+              </Text>
+
+              <Text style={styles.vazioTexto}>
+                Ainda não existem publicações nesta categoria.
+              </Text>
             </View>
-            <Text style={styles.vazioTitulo}>Nenhum post encontrado</Text>
-            <Text style={styles.vazioTexto}>
-              Ainda não existem publicações nesta categoria.
-            </Text>
-          </View>
+          </Cartao>
         ) : (
           postsFiltrados.map((post) => (
             <PostCard
@@ -221,6 +239,18 @@ export default function ForumScreen() {
             />
           ))
         )}
+      </View>
+
+      {/* Rodapé */}
+      <View style={styles.rodape}>
+        <Ionicons
+          name="people-outline"
+          size={17}
+          color={cores.textoSuave}
+        />
+        <Text style={styles.rodapeTexto}>
+          Compartilhe, aprenda e cresça junto com a comunidade!
+        </Text>
       </View>
     </ScrollView>
   );
@@ -238,88 +268,103 @@ function PostCard({
   const categoriaInfo = CATEGORIAS_INFO[post.categoria];
 
   return (
-    <View style={styles.card}>
-      {/* Autor e categoria */}
-      <View style={styles.cardTopo}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarLetra}>
-            {post.autor.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+    <Cartao>
+      <View style={styles.card}>
+        {/* Autor e categoria */}
+        <View style={styles.cardTopo}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarLetra}>
+              {post.autor.charAt(0).toUpperCase()}
+            </Text>
+          </View>
 
-        <View style={styles.autorInfo}>
-          <Text style={styles.autor} numberOfLines={1}>
-            {post.autor}
-          </Text>
-          <View style={styles.tempoLinha}>
+          <View style={styles.autorInfo}>
+            <Text style={styles.autor} numberOfLines={1}>
+              {post.autor}
+            </Text>
+
+            <View style={styles.tempoLinha}>
+              <Ionicons
+                name="time-outline"
+                size={13}
+                color={cores.textoSuave}
+              />
+              <Text style={styles.tempo}>
+                {post.tempo}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={[
+              styles.etiqueta,
+              { backgroundColor: cores.iconeFundo },
+            ]}
+          >
             <Ionicons
-              name="time-outline"
-              size={12}
-              color={cores.textoSuave}
+              name={categoriaInfo.icone}
+              size={13}
+              color={categoriaInfo.cor}
             />
-            <Text style={styles.tempo}>{post.tempo}</Text>
+
+            <Text
+              style={[
+                styles.etiquetaTexto,
+                { color: categoriaInfo.cor },
+              ]}
+            >
+              {categoriaInfo.label}
+            </Text>
           </View>
         </View>
 
-        <View
-          style={[
-            styles.etiqueta,
-            { backgroundColor: cores.iconeFundo },
-          ]}
-        >
+        {/* Conteúdo */}
+        <Text style={styles.postTitulo}>
+          {post.titulo}
+        </Text>
+
+        <Text style={styles.postTexto}>
+          {post.texto}
+        </Text>
+
+        {/* Interações */}
+        <View style={styles.divisor} />
+
+        <View style={styles.cardAcoes}>
+          <View style={styles.acaoItem}>
+            <Ionicons
+              name="heart-outline"
+              size={18}
+              color={cores.textoSuave}
+            />
+
+            <Text style={styles.acaoTexto}>
+              {post.curtidas}
+            </Text>
+          </View>
+
+          <View style={styles.acaoItem}>
+            <Ionicons
+              name="chatbubble-outline"
+              size={17}
+              color={cores.textoSuave}
+            />
+
+            <Text style={styles.acaoTexto}>
+              {post.respostas} respostas
+            </Text>
+          </View>
+
+          <View style={styles.acaoEspacador} />
+
           <Ionicons
-            name={categoriaInfo.icone}
-            size={13}
-            color={categoriaInfo.cor}
-          />
-          <Text
-            style={[
-              styles.etiquetaTexto,
-              { color: categoriaInfo.cor },
-            ]}
-          >
-            {categoriaInfo.label}
-          </Text>
-        </View>
-      </View>
-
-      {/* Conteúdo */}
-      <Text style={styles.postTitulo}>{post.titulo}</Text>
-      <Text style={styles.postTexto}>{post.texto}</Text>
-
-      {/* Interações */}
-      <View style={styles.divisor} />
-
-      <View style={styles.cardAcoes}>
-        <View style={styles.acaoItem}>
-          <Ionicons
-            name="heart-outline"
-            size={18}
+            name="chevron-forward"
+            size={19}
             color={cores.textoSuave}
           />
-          <Text style={styles.acaoTexto}>{post.curtidas}</Text>
         </View>
-
-        <View style={styles.acaoItem}>
-          <Ionicons
-            name="chatbubble-outline"
-            size={17}
-            color={cores.textoSuave}
-          />
-          <Text style={styles.acaoTexto}>
-            {post.respostas} respostas
-          </Text>
-        </View>
-
-        <View style={styles.acaoEspacador} />
-
-        <Ionicons
-          name="chevron-forward"
-          size={18}
-          color={cores.textoSuave}
-        />
       </View>
-    </View>
+    </Cartao>
   );
 }
 
@@ -331,28 +376,29 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     },
     content: {
       padding: 16,
-      paddingBottom: 40,
+      paddingBottom: 35,
     },
 
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 18,
+      marginBottom: 20,
     },
     headerTexto: {
       flex: 1,
       paddingRight: 12,
     },
     titulo: {
-      fontSize: f(24),
+      fontSize: f(25),
       fontWeight: 'bold',
       color: c.texto,
     },
     subtitulo: {
       fontSize: f(13),
       color: c.textoSuave,
-      marginTop: 4,
+      marginTop: 5,
+      lineHeight: f(19),
     },
     novoPostBotao: {
       width: 46,
@@ -369,13 +415,13 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       backgroundColor: c.primaria,
       borderRadius: 20,
       padding: 18,
-      marginBottom: 24,
+      marginBottom: 25,
       overflow: 'hidden',
     },
     bannerIcone: {
       width: 52,
       height: 52,
-      borderRadius: 16,
+      borderRadius: 17,
       backgroundColor: c.caixaSobrePrimaria,
       alignItems: 'center',
       justifyContent: 'center',
@@ -393,7 +439,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       fontSize: f(12),
       color: c.textoPrimaria,
       marginTop: 5,
-      lineHeight: f(17),
+      lineHeight: f(18),
     },
     bannerBrilho: {
       marginLeft: 6,
@@ -403,26 +449,30 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 12,
+      marginBottom: 13,
+    },
+    secaoTexto: {
+      flex: 1,
     },
     secaoTitulo: {
-      fontSize: f(19),
+      fontSize: f(20),
       fontWeight: 'bold',
       color: c.texto,
     },
     secaoSubtitulo: {
       fontSize: f(12),
       color: c.textoSuave,
-      marginTop: 3,
+      marginTop: 4,
     },
     contador: {
-      minWidth: 32,
-      height: 32,
-      borderRadius: 11,
+      minWidth: 34,
+      height: 34,
+      borderRadius: 12,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: 8,
+      paddingHorizontal: 9,
+      marginLeft: 10,
     },
     contadorTexto: {
       color: c.primaria,
@@ -436,7 +486,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     },
     chip: {
       paddingHorizontal: 16,
-      paddingVertical: 9,
+      paddingVertical: 10,
       borderRadius: 999,
       backgroundColor: c.superficie,
       borderWidth: 1,
@@ -459,20 +509,16 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       gap: 14,
     },
     card: {
-      backgroundColor: c.superficie,
-      borderRadius: 18,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: c.borda,
+      gap: 0,
     },
     cardTopo: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 15,
+      marginBottom: 16,
     },
     avatar: {
-      width: 42,
-      height: 42,
+      width: 44,
+      height: 44,
       borderRadius: 15,
       backgroundColor: c.primariaClara,
       alignItems: 'center',
@@ -482,7 +528,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     avatarLetra: {
       color: c.primaria,
       fontWeight: 'bold',
-      fontSize: f(17),
+      fontSize: f(18),
     },
     autorInfo: {
       flex: 1,
@@ -496,7 +542,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     tempoLinha: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: 5,
       marginTop: 4,
     },
     tempo: {
@@ -508,7 +554,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       alignItems: 'center',
       gap: 5,
       paddingHorizontal: 9,
-      paddingVertical: 6,
+      paddingVertical: 7,
       borderRadius: 999,
       marginLeft: 6,
     },
@@ -521,8 +567,8 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       fontSize: f(16),
       fontWeight: 'bold',
       color: c.texto,
-      lineHeight: f(22),
-      marginBottom: 7,
+      lineHeight: f(23),
+      marginBottom: 8,
     },
     postTexto: {
       fontSize: f(13),
@@ -532,8 +578,8 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     divisor: {
       height: 1,
       backgroundColor: c.borda,
-      marginTop: 15,
-      marginBottom: 12,
+      marginTop: 16,
+      marginBottom: 13,
     },
     cardAcoes: {
       flexDirection: 'row',
@@ -558,10 +604,6 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       alignItems: 'center',
       paddingVertical: 35,
       paddingHorizontal: 20,
-      backgroundColor: c.superficie,
-      borderRadius: 18,
-      borderWidth: 1,
-      borderColor: c.borda,
     },
     vazioIcone: {
       width: 62,
@@ -570,7 +612,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 12,
+      marginBottom: 13,
     },
     vazioTitulo: {
       fontSize: f(16),
@@ -583,5 +625,20 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       textAlign: 'center',
       marginTop: 6,
       lineHeight: f(19),
+    },
+
+    rodape: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 7,
+      marginTop: 25,
+      paddingHorizontal: 12,
+    },
+    rodapeTexto: {
+      flex: 1,
+      fontSize: f(11),
+      color: c.textoSuave,
+      textAlign: 'center',
     },
   });

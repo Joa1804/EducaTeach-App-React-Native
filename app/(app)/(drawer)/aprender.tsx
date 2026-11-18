@@ -11,6 +11,7 @@ import {
   View,
   type ListRenderItem,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import Animated, {
   cancelAnimation,
@@ -29,7 +30,6 @@ import { useTrilha } from '@/hooks/use-trilha';
 import { ROTULO_DIFICULDADE } from '@/lib/licoes/dificuldade';
 import type { EtapaTrilha } from '@/lib/licoes/trilha';
 
-/** Deslocamento horizontal de cada etapa, desenhando o caminho em zigue-zague. */
 const DESLOCAMENTOS = [0, -56, -80, -56, 0, 56, 80, 56] as const;
 
 const ROTULO_STATUS: Readonly<Record<EtapaTrilha['status'], string>> = {
@@ -87,13 +87,17 @@ export default function AprenderScreen() {
 
   const cabecalho = (
     <View>
-      {/* Cartão da unidade */}
-      <View style={styles.unidadeCard}>
+      <LinearGradient
+        colors={[cores.primaria, cores.primariaClara]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.unidadeCard}
+      >
         <View style={styles.unidadeTopo}>
           <View style={styles.unidadeIcone}>
             <Ionicons
               name="code-slash"
-              size={30}
+              size={29}
               color={cores.textoPrimaria}
             />
           </View>
@@ -116,13 +120,21 @@ export default function AprenderScreen() {
 
         <View style={styles.progressoCabecalho}>
           <View style={styles.progressoTextos}>
-            <Text style={styles.progressoRotulo}>
-              Seu progresso
-            </Text>
+            <View>
+              <Text style={styles.progressoRotulo}>
+                Seu progresso
+              </Text>
 
-            <Text style={styles.progressoPercentual}>
-              {percentual}%
-            </Text>
+              <Text style={styles.progressoSubtitulo}>
+                Continue avançando!
+              </Text>
+            </View>
+
+            <View style={styles.percentualContainer}>
+              <Text style={styles.progressoPercentual}>
+                {percentual}%
+              </Text>
+            </View>
           </View>
 
           <BarraProgresso
@@ -132,14 +144,21 @@ export default function AprenderScreen() {
             rotulo="Progresso da unidade"
           />
 
-          <Text style={styles.progressoTexto}>
-            {concluidas} de {total} lições concluídas
-          </Text>
-        </View>
-      </View>
+          <View style={styles.progressoRodape}>
+            <Ionicons
+              name="checkmark-circle"
+              size={16}
+              color={cores.textoPrimaria}
+            />
 
-      {/* Título da jornada */}
-      <View style={styles.tituloContainer}>
+            <Text style={styles.progressoTexto}>
+              {concluidas} de {total} lições concluídas
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.jornadaCabecalho}>
         <View style={styles.tituloIcone}>
           <Ionicons
             name="map"
@@ -157,6 +176,16 @@ export default function AprenderScreen() {
             Complete as etapas e avance!
           </Text>
         </View>
+
+        <View style={styles.contadorEtapas}>
+          <Text style={styles.contadorNumero}>
+            {concluidas}/{total}
+          </Text>
+
+          <Text style={styles.contadorLegenda}>
+            etapas
+          </Text>
+        </View>
       </View>
 
       {erro && (
@@ -164,11 +193,13 @@ export default function AprenderScreen() {
           style={styles.erroCaixa}
           accessibilityLiveRegion="polite"
         >
-          <Ionicons
-            name="cloud-offline-outline"
-            size={25}
-            color={cores.perigo}
-          />
+          <View style={styles.erroIcone}>
+            <Ionicons
+              name="cloud-offline-outline"
+              size={23}
+              color={cores.perigo}
+            />
+          </View>
 
           <View style={styles.erroConteudo}>
             <Text style={styles.erroTitulo}>
@@ -183,6 +214,7 @@ export default function AprenderScreen() {
           <Pressable
             onPress={recarregar}
             accessibilityRole="button"
+            accessibilityLabel="Tentar carregar novamente"
             style={styles.erroBotao}
           >
             <Ionicons
@@ -202,7 +234,7 @@ export default function AprenderScreen() {
         <View style={styles.finalIcone}>
           <Ionicons
             name="trophy"
-            size={30}
+            size={29}
             color={cores.estrela}
           />
         </View>
@@ -220,20 +252,25 @@ export default function AprenderScreen() {
       </View>
     ) : null;
 
-  // Enquanto não sabemos o progresso, não mostramos cadeados que podem estar errados.
   if (carregando && concluidas === 0 && !erro) {
     return (
       <View
         style={styles.carregando}
         accessibilityLabel="Carregando trilha"
       >
-        <ActivityIndicator
-          size="large"
-          color={cores.primaria}
-        />
+        <View style={styles.carregandoIcone}>
+          <ActivityIndicator
+            size="large"
+            color={cores.primaria}
+          />
+        </View>
+
+        <Text style={styles.carregandoTitulo}>
+          Preparando sua jornada
+        </Text>
 
         <Text style={styles.carregandoTexto}>
-          Preparando sua jornada...
+          Estamos organizando suas lições...
         </Text>
       </View>
     );
@@ -276,7 +313,6 @@ const EtapaNode = memo(function EtapaNode({
   const deslocamento =
     DESLOCAMENTOS[indice % DESLOCAMENTOS.length];
 
-  // Pulso suave na etapa atual, rodando na thread de UI.
   const escala = useSharedValue(1);
 
   useEffect(() => {
@@ -320,18 +356,16 @@ const EtapaNode = memo(function EtapaNode({
         { transform: [{ translateX: deslocamento }] },
       ]}
     >
-      {/* Indicador da próxima lição */}
       {atual && (
         <View style={styles.balao}>
           <View style={styles.balaoPonto} />
 
           <Text style={styles.balaoTexto}>
-            {concluida ? 'REFAZER' : 'SUA PRÓXIMA LIÇÃO'}
+            {concluida ? 'REFAZER LIÇÃO' : 'SUA PRÓXIMA LIÇÃO'}
           </Text>
         </View>
       )}
 
-      {/* Botão circular */}
       <Pressable
         onPress={() => onAbrir(licao.id)}
         disabled={bloqueada}
@@ -353,20 +387,19 @@ const EtapaNode = memo(function EtapaNode({
               { backgroundColor: corNo },
               concluida && styles.noConcluido,
               bloqueada && styles.noBloqueado,
-              pressed && !bloqueada && styles.noPressionado,
               estiloPulso,
+              pressed && !bloqueada && styles.noPressionado,
             ]}
           >
             <Ionicons
               name={icone}
-              size={31}
+              size={30}
               color={bloqueada ? cores.textoSuave : '#FFFFFF'}
             />
           </Animated.View>
         )}
       </Pressable>
 
-      {/* Estrelas conquistadas */}
       {concluida && (
         <View
           style={styles.estrelas}
@@ -376,11 +409,7 @@ const EtapaNode = memo(function EtapaNode({
           {[1, 2, 3].map((numero) => (
             <Ionicons
               key={numero}
-              name={
-                numero <= estrelas
-                  ? 'star'
-                  : 'star-outline'
-              }
+              name={numero <= estrelas ? 'star' : 'star-outline'}
               size={17}
               color={cores.estrela}
             />
@@ -388,7 +417,6 @@ const EtapaNode = memo(function EtapaNode({
         </View>
       )}
 
-      {/* Informações da lição */}
       <Text
         style={[
           styles.etapaTitulo,
@@ -407,9 +435,7 @@ const EtapaNode = memo(function EtapaNode({
       </Text>
 
       <View style={styles.etapaDificuldade}>
-        <SeloDificuldade
-          dificuldade={licao.dificuldade}
-        />
+        <SeloDificuldade dificuldade={licao.dificuldade} />
       </View>
     </View>
   );
@@ -426,42 +452,61 @@ const criarEstilos = (
     },
 
     content: {
-      padding: 20,
+      paddingHorizontal: 20,
+      paddingTop: 20,
       paddingBottom: 45,
     },
 
+    // Carregamento
     carregando: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: c.fundo,
-      gap: 12,
+      padding: 24,
+    },
+
+    carregandoIcone: {
+      width: 70,
+      height: 70,
+      borderRadius: 23,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 18,
+    },
+
+    carregandoTitulo: {
+      color: c.texto,
+      fontSize: f(17),
+      fontWeight: 'bold',
     },
 
     carregandoTexto: {
       color: c.textoSuave,
-      fontSize: f(14),
+      fontSize: f(13),
+      marginTop: 6,
     },
 
     // Cartão da unidade
     unidadeCard: {
-      backgroundColor: c.primaria,
-      borderRadius: 24,
+      borderRadius: 25,
       padding: 21,
-      marginBottom: 28,
+      marginBottom: 30,
+      overflow: 'hidden',
     },
 
     unidadeTopo: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 17,
+      marginBottom: 19,
     },
 
     unidadeIcone: {
-      width: 55,
-      height: 55,
-      borderRadius: 17,
+      width: 54,
+      height: 54,
+      borderRadius: 18,
       backgroundColor: c.caixaSobrePrimaria,
       alignItems: 'center',
       justifyContent: 'center',
@@ -469,30 +514,32 @@ const criarEstilos = (
 
     unidadeEtiqueta: {
       backgroundColor: c.caixaSobrePrimaria,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: 10,
+      paddingHorizontal: 11,
+      paddingVertical: 7,
+      borderRadius: 11,
     },
 
     unidadeTitulo: {
       fontSize: f(21),
       fontWeight: 'bold',
       color: c.textoPrimaria,
-      marginBottom: 5,
+      marginBottom: 6,
     },
 
     unidadeDescricao: {
-      fontSize: f(14),
+      fontSize: f(13),
       color: c.textoPrimaria,
       opacity: 0.9,
+      lineHeight: f(19),
       marginBottom: 20,
     },
 
+    // Progresso
     progressoCabecalho: {
       backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 16,
-      padding: 13,
-      gap: 9,
+      borderRadius: 17,
+      padding: 14,
+      gap: 12,
     },
 
     progressoTextos: {
@@ -507,24 +554,44 @@ const criarEstilos = (
       color: c.textoPrimaria,
     },
 
+    progressoSubtitulo: {
+      fontSize: f(11),
+      color: c.textoPrimaria,
+      opacity: 0.8,
+      marginTop: 3,
+    },
+
+    percentualContainer: {
+      paddingHorizontal: 11,
+      paddingVertical: 6,
+      borderRadius: 10,
+      backgroundColor: c.caixaSobrePrimaria,
+    },
+
     progressoPercentual: {
-      fontSize: f(16),
+      fontSize: f(17),
       fontWeight: 'bold',
       color: c.textoPrimaria,
     },
 
+    progressoRodape: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+
     progressoTexto: {
-      fontSize: f(12),
+      fontSize: f(11),
       color: c.textoPrimaria,
       opacity: 0.9,
     },
 
-    // Título da jornada
-    tituloContainer: {
+    // Cabeçalho da jornada
+    jornadaCabecalho: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      marginBottom: 24,
+      marginBottom: 22,
     },
 
     tituloIcone: {
@@ -541,15 +608,39 @@ const criarEstilos = (
     },
 
     titulo: {
-      fontSize: f(20),
+      fontSize: f(19),
       fontWeight: 'bold',
       color: c.texto,
     },
 
     tituloDescricao: {
-      fontSize: f(13),
+      fontSize: f(12),
       color: c.textoSuave,
       marginTop: 3,
+    },
+
+    contadorEtapas: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.superficie,
+      borderWidth: 1,
+      borderColor: c.borda,
+      borderRadius: 13,
+      minWidth: 55,
+      paddingHorizontal: 9,
+      paddingVertical: 7,
+    },
+
+    contadorNumero: {
+      fontSize: f(14),
+      fontWeight: 'bold',
+      color: c.primaria,
+    },
+
+    contadorLegenda: {
+      fontSize: f(10),
+      color: c.textoSuave,
+      marginTop: 1,
     },
 
     // Erro
@@ -563,50 +654,59 @@ const criarEstilos = (
       marginBottom: 18,
     },
 
+    erroIcone: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: c.superficie,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
     erroConteudo: {
       flex: 1,
     },
 
     erroTitulo: {
-      fontSize: f(13),
+      fontSize: f(12),
       fontWeight: 'bold',
       color: c.perigo,
     },
 
     erroTexto: {
-      fontSize: f(12),
+      fontSize: f(11),
       color: c.perigo,
       marginTop: 3,
     },
 
     erroBotao: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
+      width: 38,
+      height: 38,
+      borderRadius: 11,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: c.superficie,
     },
 
-    // Etapas
+    // Etapas da trilha
     etapa: {
       alignItems: 'center',
       alignSelf: 'center',
-      width: 168,
-      paddingVertical: 16,
+      width: 175,
+      paddingVertical: 15,
     },
 
     balao: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      gap: 7,
       backgroundColor: c.superficie,
       borderWidth: 1,
       borderColor: c.primaria,
       borderRadius: 12,
-      paddingHorizontal: 11,
+      paddingHorizontal: 12,
       paddingVertical: 7,
-      marginBottom: 12,
+      marginBottom: 13,
     },
 
     balaoPonto: {
@@ -619,8 +719,8 @@ const criarEstilos = (
     balaoTexto: {
       color: c.primaria,
       fontWeight: 'bold',
-      fontSize: f(11),
-      letterSpacing: 0.4,
+      fontSize: f(10),
+      letterSpacing: 0.3,
     },
 
     no: {
@@ -652,15 +752,15 @@ const criarEstilos = (
 
     estrelas: {
       flexDirection: 'row',
-      gap: 3,
+      gap: 4,
       marginTop: 8,
     },
 
     etapaTitulo: {
-      fontSize: f(15),
+      fontSize: f(14),
       fontWeight: 'bold',
       color: c.texto,
-      marginTop: 8,
+      marginTop: 9,
       textAlign: 'center',
     },
 
@@ -669,18 +769,18 @@ const criarEstilos = (
     },
 
     etapaDescricao: {
-      fontSize: f(12),
+      fontSize: f(11),
       color: c.textoSuave,
       textAlign: 'center',
       marginTop: 4,
-      lineHeight: f(17),
+      lineHeight: f(16),
     },
 
     etapaDificuldade: {
       marginTop: 8,
     },
 
-    // Conclusão
+    // Conclusão da trilha
     final: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -690,7 +790,7 @@ const criarEstilos = (
       borderWidth: 1,
       borderColor: c.borda,
       padding: 16,
-      marginTop: 20,
+      marginTop: 22,
     },
 
     finalIcone: {
@@ -714,9 +814,8 @@ const criarEstilos = (
     },
 
     finalTexto: {
-      flex: 1,
-      fontSize: f(13),
+      fontSize: f(12),
       color: c.textoSuave,
-      lineHeight: f(19),
+      lineHeight: f(18),
     },
   });

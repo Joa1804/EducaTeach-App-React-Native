@@ -9,6 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 
@@ -86,6 +87,7 @@ export default function AjudarScreen() {
           <Text style={styles.titulo} accessibilityRole="header">
             Central de Ajuda
           </Text>
+
           <Text style={styles.subtitulo}>
             Encontre respostas para suas dúvidas.
           </Text>
@@ -94,18 +96,23 @@ export default function AjudarScreen() {
         <View style={styles.headerIcone}>
           <Ionicons
             name="help"
-            size={28}
+            size={27}
             color={cores.textoPrimaria}
           />
         </View>
       </View>
 
       {/* BANNER */}
-      <View style={styles.banner}>
+      <LinearGradient
+        colors={[cores.primaria, cores.primariaClara]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.banner}
+      >
         <View style={styles.bannerIcone}>
           <Ionicons
             name="chatbubbles"
-            size={28}
+            size={27}
             color={cores.textoPrimaria}
           />
         </View>
@@ -114,6 +121,7 @@ export default function AjudarScreen() {
           <Text style={styles.bannerTitulo}>
             Como podemos ajudar?
           </Text>
+
           <Text style={styles.bannerTexto}>
             Estamos aqui para ajudar você a aproveitar melhor o EducaTeach.
           </Text>
@@ -124,7 +132,7 @@ export default function AjudarScreen() {
           size={22}
           color={cores.textoPrimaria}
         />
-      </View>
+      </LinearGradient>
 
       {/* PESQUISA */}
       <View style={styles.pesquisa}>
@@ -165,6 +173,7 @@ export default function AjudarScreen() {
           <Text style={styles.secaoTitulo}>
             Perguntas frequentes
           </Text>
+
           <Text style={styles.secaoSubtitulo}>
             Encontre ajuda por assunto
           </Text>
@@ -331,7 +340,6 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     banner: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: c.primaria,
       borderRadius: 20,
       padding: 17,
       marginBottom: 22,

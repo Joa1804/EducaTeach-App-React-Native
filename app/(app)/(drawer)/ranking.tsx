@@ -1,12 +1,31 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import React, { memo, useCallback, useMemo } from 'react';
-import {ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, type ListRenderItem,} from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type ListRenderItem,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import { useRanking } from '@/hooks/use-ranking';
-import { DIFICULDADES, PONTOS_POR_DIFICULDADE, ROTULO_DIFICULDADE,} from '@/lib/licoes/dificuldade';
-import { formatarPontos, type ItemRanking, type SituacaoUsuario,} from '@/lib/ranking/ranking';
+import {
+  DIFICULDADES,
+  PONTOS_POR_DIFICULDADE,
+  ROTULO_DIFICULDADE,
+} from '@/lib/licoes/dificuldade';
+import {
+  formatarPontos,
+  type ItemRanking,
+  type SituacaoUsuario,
+} from '@/lib/ranking/ranking';
+
+import { Etiqueta } from '@/components/ui';
 
 /** Ouro, prata e bronze para os três primeiros. */
 const CORES_MEDALHA: Readonly<Record<number, string>> = {
@@ -19,7 +38,10 @@ type Estilos = ReturnType<typeof criarEstilos>;
 
 export default function RankingScreen() {
   const { cores, fonte } = useConfiguracao();
-  const styles = useMemo(() => criarEstilos(cores, fonte), [cores, fonte]);
+  const styles = useMemo(
+    () => criarEstilos(cores, fonte),
+    [cores, fonte],
+  );
 
   const {
     itens,
@@ -33,7 +55,11 @@ export default function RankingScreen() {
 
   const renderItem = useCallback<ListRenderItem<ItemRanking>>(
     ({ item }) => (
-      <LinhaJogador item={item} styles={styles} cores={cores} />
+      <LinhaJogador
+        item={item}
+        styles={styles}
+        cores={cores}
+      />
     ),
     [cores, styles],
   );
@@ -44,7 +70,11 @@ export default function RankingScreen() {
         style={styles.carregando}
         accessibilityLabel="Carregando ranking"
       >
-        <ActivityIndicator size="large" color={cores.primaria} />
+        <ActivityIndicator
+          size="large"
+          color={cores.primaria}
+        />
+
         <Text style={styles.carregandoTexto}>
           Preparando a classificação...
         </Text>
@@ -54,14 +84,19 @@ export default function RankingScreen() {
 
   const cabecalho = (
     <View>
-      {/* Cabeçalho principal */}
-      <View style={styles.headerRanking}>
+      {/* Banner principal */}
+      <LinearGradient
+        colors={['#6c63ff', '#8b7cf6', '#c4b5fd']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerRanking}
+      >
         <View style={styles.headerTopo}>
           <View style={styles.trofeuHeader}>
             <Ionicons
               name="trophy"
               size={30}
-              color={cores.primaria}
+              color="#FFFFFF"
             />
           </View>
 
@@ -83,8 +118,9 @@ export default function RankingScreen() {
           <Ionicons
             name="globe-outline"
             size={15}
-            color={cores.caixaSobrePrimaria}
+            color="#FFFFFF"
           />
+
           <Text style={styles.headerFonte}>
             {fonteRanking === 'global'
               ? 'Ranking global do EducaTeach'
@@ -95,10 +131,10 @@ export default function RankingScreen() {
         <Ionicons
           name="trophy"
           size={100}
-          color={cores.caixaSobrePrimaria}
+          color="rgba(255,255,255,0.15)"
           style={styles.trofeuDecorativo}
         />
-      </View>
+      </LinearGradient>
 
       {/* Aviso de conexão */}
       {aviso && !erro && (
@@ -111,7 +147,10 @@ export default function RankingScreen() {
             size={20}
             color={cores.textoSuave}
           />
-          <Text style={styles.avisoTexto}>{aviso}</Text>
+
+          <Text style={styles.avisoTexto}>
+            {aviso}
+          </Text>
         </View>
       )}
 
@@ -129,7 +168,9 @@ export default function RankingScreen() {
             />
           </View>
 
-          <Text style={styles.erroTexto}>{erro}</Text>
+          <Text style={styles.erroTexto}>
+            {erro}
+          </Text>
 
           <Pressable
             onPress={recarregar}
@@ -139,8 +180,9 @@ export default function RankingScreen() {
             <Ionicons
               name="refresh"
               size={17}
-              color={cores.caixaSobrePrimaria}
+              color="#FFFFFF"
             />
+
             <Text style={styles.erroBotaoTexto}>
               Tentar novamente
             </Text>
@@ -156,9 +198,13 @@ export default function RankingScreen() {
         )
       )}
 
+      {/* Cabeçalho da classificação */}
       <View style={styles.tituloListaContainer}>
         <View>
-          <Text style={styles.listaTitulo}>Classificação</Text>
+          <Text style={styles.listaTitulo}>
+            Classificação
+          </Text>
+
           <Text style={styles.listaSubtitulo}>
             Os alunos com mais pontos
           </Text>
@@ -190,6 +236,7 @@ export default function RankingScreen() {
           <Text style={styles.legendaTitulo}>
             Como ganhar pontos?
           </Text>
+
           <Text style={styles.legendaSubtitulo}>
             Aprenda e avance no ranking!
           </Text>
@@ -261,7 +308,9 @@ function Separador() {
 }
 
 const separadorEstilo = StyleSheet.create({
-  espaco: { height: 10 },
+  espaco: {
+    height: 10,
+  },
 });
 
 type PropsCard = {
@@ -270,7 +319,11 @@ type PropsCard = {
   cores: Cores;
 };
 
-function CardSituacao({ usuario, styles, cores }: PropsCard) {
+function CardSituacao({
+  usuario,
+  styles,
+  cores,
+}: PropsCard) {
   const {
     posicao,
     total,
@@ -297,7 +350,10 @@ function CardSituacao({ usuario, styles, cores }: PropsCard) {
         </View>
 
         <View style={styles.ligaInfo}>
-          <Text style={styles.ligaTitulo}>Sua posição</Text>
+          <Text style={styles.ligaTitulo}>
+            Sua posição
+          </Text>
+
           <Text style={styles.ligaTexto}>
             {formatarPontos(usuario.pontos)} pontos acumulados
           </Text>
@@ -307,6 +363,7 @@ function CardSituacao({ usuario, styles, cores }: PropsCard) {
           <Text style={styles.ligaPosicao}>
             {posicao}º
           </Text>
+
           <Text style={styles.posicaoTotal}>
             de {total}
           </Text>
@@ -317,6 +374,7 @@ function CardSituacao({ usuario, styles, cores }: PropsCard) {
         <Text style={styles.progressoRotulo}>
           Próxima posição
         </Text>
+
         <Text style={styles.progressoPercentual}>
           {Math.round(progresso * 100)}%
         </Text>
@@ -347,7 +405,10 @@ function CardSituacao({ usuario, styles, cores }: PropsCard) {
           size={17}
           color={cores.primaria}
         />
-        <Text style={styles.ligaMensagem}>{mensagem}</Text>
+
+        <Text style={styles.ligaMensagem}>
+          {mensagem}
+        </Text>
       </View>
     </View>
   );
@@ -408,7 +469,9 @@ const LinhaJogador = memo(function LinhaJogador({
               />
             </View>
           ) : (
-            <Text style={styles.posicao}>{item.posicao}</Text>
+            <Text style={styles.posicao}>
+              {item.posicao}
+            </Text>
           )}
         </View>
 
@@ -439,7 +502,9 @@ const LinhaJogador = memo(function LinhaJogador({
 
             {item.voce && (
               <View style={styles.voceBadge}>
-                <Text style={styles.voceTexto}>Você</Text>
+                <Text style={styles.voceTexto}>
+                  Você
+                </Text>
               </View>
             )}
           </View>
@@ -474,7 +539,7 @@ const criarEstilos = (
     },
 
     content: {
-      padding: 16,
+      padding: 20,
       paddingBottom: 40,
     },
 
@@ -491,12 +556,11 @@ const criarEstilos = (
       color: c.textoSuave,
     },
 
-    // Cabeçalho
+    // Banner com degradê
     headerRanking: {
-      backgroundColor: c.primaria,
-      borderRadius: 22,
-      padding: 18,
-      marginBottom: 18,
+      borderRadius: 24,
+      padding: 22,
+      marginBottom: 20,
       overflow: 'hidden',
       minHeight: 155,
       justifyContent: 'space-between',
@@ -512,7 +576,7 @@ const criarEstilos = (
       width: 58,
       height: 58,
       borderRadius: 18,
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       alignItems: 'center',
       justifyContent: 'center',
       marginRight: 14,
@@ -525,14 +589,14 @@ const criarEstilos = (
     tituloRanking: {
       fontSize: f(25),
       fontWeight: 'bold',
-      color: c.caixaSobrePrimaria,
+      color: '#FFFFFF',
     },
 
     subtituloRanking: {
       fontSize: f(13),
-      color: c.caixaSobrePrimaria,
+      color: '#FFFFFF',
       marginTop: 4,
-      opacity: 0.9,
+      opacity: 0.95,
     },
 
     headerRodape: {
@@ -545,7 +609,7 @@ const criarEstilos = (
 
     headerFonte: {
       fontSize: f(12),
-      color: c.caixaSobrePrimaria,
+      color: '#FFFFFF',
       fontWeight: '600',
     },
 
@@ -553,10 +617,9 @@ const criarEstilos = (
       position: 'absolute',
       right: -16,
       bottom: -25,
-      opacity: 0.10,
     },
 
-    // Avisos e erros
+    // Avisos
     avisoCaixa: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -573,9 +636,10 @@ const criarEstilos = (
       color: c.texto,
     },
 
+    // Erros
     erroCaixa: {
       backgroundColor: c.perigoFundo,
-      borderRadius: 16,
+      borderRadius: 18,
       padding: 16,
       alignItems: 'center',
       gap: 10,
@@ -609,7 +673,7 @@ const criarEstilos = (
     },
 
     erroBotaoTexto: {
-      color: c.caixaSobrePrimaria,
+      color: '#FFFFFF',
       fontWeight: 'bold',
       fontSize: f(14),
     },
@@ -620,8 +684,8 @@ const criarEstilos = (
       borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 16,
-      marginBottom: 22,
+      padding: 17,
+      marginBottom: 24,
     },
 
     ligaTopo: {
@@ -717,16 +781,16 @@ const criarEstilos = (
       color: c.textoSuave,
     },
 
-    // Título da classificação
+    // Classificação
     tituloListaContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 13,
+      marginBottom: 14,
     },
 
     listaTitulo: {
-      fontSize: f(19),
+      fontSize: f(20),
       fontWeight: 'bold',
       color: c.texto,
     },
@@ -738,9 +802,9 @@ const criarEstilos = (
     },
 
     listaIcone: {
-      width: 42,
-      height: 42,
-      borderRadius: 13,
+      width: 44,
+      height: 44,
+      borderRadius: 14,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
@@ -894,10 +958,10 @@ const criarEstilos = (
     // Legenda de pontos
     legenda: {
       backgroundColor: c.superficie,
-      borderRadius: 18,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 15,
+      padding: 17,
       marginTop: 20,
       gap: 12,
     },
@@ -949,7 +1013,7 @@ const criarEstilos = (
       backgroundColor: c.iconeFundo,
       borderRadius: 999,
       paddingHorizontal: 11,
-      paddingVertical: 6,
+      paddingVertical: 7,
     },
 
     legendaChipTexto: {

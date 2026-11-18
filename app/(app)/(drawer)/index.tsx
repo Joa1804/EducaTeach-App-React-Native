@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { Cores, useConfiguracao } from '@/context/ConfiguracaoContext';
 import { useUsuario } from '@/context/UsuarioContext';
@@ -16,7 +17,6 @@ import { useTrilha } from '@/hooks/use-trilha';
 import type { EtapaTrilha } from '@/lib/licoes/trilha';
 
 import {
-  Cartao,
   Etiqueta,
   BarraProgresso,
 } from '@/components/ui';
@@ -44,8 +44,13 @@ export default function HomeScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Cabeçalho de boas-vindas */}
-      <View style={styles.greetingCard}>
+      {/* Cabeçalho de boas-vindas com degradê */}
+      <LinearGradient
+        colors={['#6c63ff', '#8b7cf6', '#c4b5fd']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.greetingCard}
+      >
         <View style={styles.greetingTop}>
           <View style={styles.greetingTextContainer}>
             <Text style={styles.greeting}>
@@ -61,45 +66,40 @@ export default function HomeScreen() {
             <Ionicons
               name="school"
               size={34}
-              color={cores.textoPrimaria}
+              color="#FFFFFF"
             />
           </View>
         </View>
 
+        {/* Estatísticas */}
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
-            <Ionicons
-              name="star"
-              size={20}
-              color="#FFD45C"
-            />
+            <Ionicons name="star" size={20} color="#FFD45C" />
+
             <Text style={styles.statValue}>
               {usuario?.pontos ?? 0}
             </Text>
+
             <Text style={styles.statLabel}>Pontos</Text>
           </View>
 
           <View style={styles.statBox}>
-            <Ionicons
-              name="wallet"
-              size={20}
-              color="#FFD45C"
-            />
+            <Ionicons name="wallet" size={20} color="#FFD45C" />
+
             <Text style={styles.statValue}>
               {usuario?.moedas ?? 0}
             </Text>
+
             <Text style={styles.statLabel}>Moedas</Text>
           </View>
 
           <View style={styles.statBox}>
-            <Ionicons
-              name="book"
-              size={20}
-              color="#FFD45C"
-            />
+            <Ionicons name="book" size={20} color="#FFD45C" />
+
             <Text style={styles.statValue}>
               {carregando ? '…' : `${concluidas}/${total}`}
             </Text>
+
             <Text
               style={styles.statLabel}
               numberOfLines={1}
@@ -109,7 +109,7 @@ export default function HomeScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       {/* Resumo da trilha */}
       <View style={styles.sectionHeading}>
@@ -126,6 +126,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>
               Sua jornada
             </Text>
+
             <Text style={styles.sectionSubtitle}>
               Continue de onde parou!
             </Text>
@@ -159,9 +160,11 @@ export default function HomeScreen() {
               size={42}
               color={cores.textoSuave}
             />
+
             <Text style={styles.emptyTitle}>
               Sua jornada está começando!
             </Text>
+
             <Text style={styles.emptySubtitle}>
               As lições aparecerão aqui quando estiverem disponíveis.
             </Text>
@@ -270,7 +273,11 @@ function TrilhaCard({
                 key={estrela}
                 name={estrela <= estrelas ? 'star' : 'star-outline'}
                 size={17}
-                color={estrela <= estrelas ? '#EBAF32' : cores.textoSuave}
+                color={
+                  estrela <= estrelas
+                    ? '#EBAF32'
+                    : cores.textoSuave
+                }
               />
             ))}
           </View>
@@ -301,9 +308,8 @@ const criarEstilos = (
       paddingBottom: 40,
     },
 
-    // Cabeçalho
+    // Cabeçalho com degradê
     greetingCard: {
-      backgroundColor: c.primaria,
       borderRadius: 24,
       padding: 22,
       marginBottom: 28,
@@ -324,21 +330,21 @@ const criarEstilos = (
     greeting: {
       fontSize: f(24),
       fontWeight: 'bold',
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
     },
 
     greetingSubtitle: {
       fontSize: f(14),
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       marginTop: 5,
-      opacity: 0.9,
+      opacity: 0.95,
     },
 
     greetingIcon: {
       width: 58,
       height: 58,
       borderRadius: 18,
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -351,7 +357,7 @@ const criarEstilos = (
 
     statBox: {
       flex: 1,
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       borderRadius: 16,
       paddingVertical: 13,
       paddingHorizontal: 8,
@@ -360,13 +366,13 @@ const criarEstilos = (
     },
 
     statValue: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: f(19),
       fontWeight: 'bold',
     },
 
     statLabel: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: f(12),
     },
 

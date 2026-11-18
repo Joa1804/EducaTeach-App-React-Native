@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import { useUsuario } from '@/context/UsuarioContext';
@@ -37,7 +38,7 @@ function OpcaoSwitch({
   return (
     <View style={styles.opcaoLinha}>
       <View style={styles.opcaoIcone}>
-        <Ionicons name={icon} size={19} color={cores.primaria} />
+        <Ionicons name={icon} size={20} color={cores.primaria} />
       </View>
 
       <View style={styles.opcaoInfo}>
@@ -79,7 +80,7 @@ function Secao({
     <View style={styles.secao}>
       <View style={styles.secaoHeader}>
         <View style={styles.secaoIcone}>
-          <Ionicons name={icon} size={17} color={cores.primaria} />
+          <Ionicons name={icon} size={18} color={cores.primaria} />
         </View>
 
         <Text style={styles.secaoTitulo}>{titulo}</Text>
@@ -117,24 +118,34 @@ export default function ConfiguracaoScreen() {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* CABEÇALHO */}
+      {/* Cabeçalho */}
       <View style={styles.header}>
         <View style={styles.headerTexto}>
           <Text style={styles.titulo} accessibilityRole="header">
             Configurações
           </Text>
+
           <Text style={styles.subtitulo}>
             Personalize sua experiência no EducaTeach.
           </Text>
         </View>
 
         <View style={styles.headerIcone}>
-          <Ionicons name="settings" size={25} color={cores.textoPrimaria} />
+          <Ionicons
+            name="settings"
+            size={25}
+            color={cores.textoPrimaria}
+          />
         </View>
       </View>
 
-      {/* PERFIL */}
-      <View style={styles.perfilCard}>
+      {/* Perfil */}
+      <LinearGradient
+        colors={['#6c63ff', '#8b7cf6', '#a99bf9']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.perfilCard}
+      >
         <View style={styles.perfilTopo}>
           <View style={styles.avatar}>
             <Text style={styles.avatarLetra}>{inicial}</Text>
@@ -153,8 +164,8 @@ export default function ConfiguracaoScreen() {
           <View style={styles.perfilSelo}>
             <Ionicons
               name="person-circle-outline"
-              size={19}
-              color={cores.primaria}
+              size={21}
+              color={cores.textoPrimaria}
             />
           </View>
         </View>
@@ -162,16 +173,24 @@ export default function ConfiguracaoScreen() {
         <View style={styles.perfilRodape}>
           <Ionicons
             name="shield-checkmark-outline"
-            size={15}
-            color={cores.sucesso}
+            size={16}
+            color="#B9F6CA"
           />
+
           <Text style={styles.perfilRodapeTexto}>
             Sua conta EducaTeach
           </Text>
         </View>
-      </View>
 
-      {/* ACESSIBILIDADE */}
+        <Ionicons
+          name="settings-outline"
+          size={105}
+          color="rgba(255,255,255,0.10)"
+          style={styles.perfilDecoracao}
+        />
+      </LinearGradient>
+
+      {/* Acessibilidade */}
       <Secao
         titulo="Acessibilidade"
         icon="accessibility-outline"
@@ -201,7 +220,7 @@ export default function ConfiguracaoScreen() {
         />
       </Secao>
 
-      {/* PREFERÊNCIAS */}
+      {/* Preferências */}
       <Secao
         titulo="Preferências"
         icon="options-outline"
@@ -231,7 +250,7 @@ export default function ConfiguracaoScreen() {
         />
       </Secao>
 
-      {/* CONTA */}
+      {/* Conta */}
       <Secao
         titulo="Conta"
         icon="person-outline"
@@ -247,13 +266,14 @@ export default function ConfiguracaoScreen() {
           <View style={styles.sairIcone}>
             <Ionicons
               name="log-out-outline"
-              size={20}
+              size={21}
               color={cores.perigo}
             />
           </View>
 
           <View style={styles.sairInfo}>
             <Text style={styles.sairTexto}>Sair da conta</Text>
+
             <Text style={styles.sairDescricao}>
               Encerrar sua sessão neste aparelho
             </Text>
@@ -261,18 +281,18 @@ export default function ConfiguracaoScreen() {
 
           <Ionicons
             name="chevron-forward"
-            size={19}
+            size={20}
             color={cores.textoSuave}
           />
         </TouchableOpacity>
       </Secao>
 
-      {/* VERSÃO */}
+      {/* Versão */}
       <View style={styles.versaoContainer}>
         <View style={styles.versaoIcone}>
           <Ionicons
             name="school-outline"
-            size={17}
+            size={19}
             color={cores.textoSuave}
           />
         </View>
@@ -280,6 +300,7 @@ export default function ConfiguracaoScreen() {
         <Text style={styles.versao}>
           EducaTeach · versão 1.0.0
         </Text>
+
         <Text style={styles.versaoDescricao}>
           Aprender, criar e evoluir!
         </Text>
@@ -311,19 +332,20 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       paddingRight: 12,
     },
     titulo: {
-      fontSize: f(24),
+      fontSize: f(25),
       fontWeight: 'bold',
       color: c.texto,
     },
     subtitulo: {
       fontSize: f(13),
       color: c.textoSuave,
-      marginTop: 4,
+      marginTop: 5,
+      lineHeight: f(19),
     },
     headerIcone: {
       width: 48,
       height: 48,
-      borderRadius: 15,
+      borderRadius: 16,
       backgroundColor: c.primaria,
       alignItems: 'center',
       justifyContent: 'center',
@@ -331,20 +353,23 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
 
     // Perfil
     perfilCard: {
-      backgroundColor: c.primaria,
-      borderRadius: 20,
+      borderRadius: 21,
       padding: 18,
-      marginBottom: 20,
+      marginBottom: 22,
+      overflow: 'hidden',
     },
     perfilTopo: {
       flexDirection: 'row',
       alignItems: 'center',
+      zIndex: 1,
     },
     avatar: {
-      width: 56,
-      height: 56,
-      borderRadius: 18,
-      backgroundColor: c.caixaSobrePrimaria,
+      width: 57,
+      height: 57,
+      borderRadius: 19,
+      backgroundColor: 'rgba(255,255,255,0.22)',
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.25)',
       alignItems: 'center',
       justifyContent: 'center',
       marginRight: 13,
@@ -352,7 +377,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     avatarLetra: {
       fontWeight: 'bold',
       fontSize: f(23),
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
     },
     perfilInfo: {
       flex: 1,
@@ -361,19 +386,19 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     perfilNome: {
       fontSize: f(17),
       fontWeight: 'bold',
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
     },
     perfilEmail: {
       fontSize: f(12),
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       marginTop: 4,
-      opacity: 0.85,
+      opacity: 0.9,
     },
     perfilSelo: {
-      width: 34,
-      height: 34,
-      borderRadius: 11,
-      backgroundColor: c.caixaSobrePrimaria,
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: 'rgba(255,255,255,0.18)',
       alignItems: 'center',
       justifyContent: 'center',
       marginLeft: 8,
@@ -383,20 +408,27 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       alignItems: 'center',
       gap: 7,
       borderTopWidth: 1,
-      borderTopColor: c.caixaSobrePrimaria,
+      borderTopColor: 'rgba(255,255,255,0.22)',
       marginTop: 16,
-      paddingTop: 12,
+      paddingTop: 13,
+      zIndex: 1,
     },
     perfilRodapeTexto: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: f(12),
       fontWeight: '600',
+    },
+    perfilDecoracao: {
+      position: 'absolute',
+      right: -15,
+      bottom: -28,
+      transform: [{ rotate: '-15deg' }],
     },
 
     // Seções
     secao: {
       backgroundColor: c.superficie,
-      borderRadius: 18,
+      borderRadius: 19,
       borderWidth: 1,
       borderColor: c.borda,
       padding: 16,
@@ -405,13 +437,13 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     secaoHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 9,
+      gap: 10,
       marginBottom: 12,
     },
     secaoIcone: {
-      width: 30,
-      height: 30,
-      borderRadius: 10,
+      width: 33,
+      height: 33,
+      borderRadius: 11,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
@@ -427,12 +459,12 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 11,
-      paddingVertical: 11,
+      paddingVertical: 12,
     },
     opcaoIcone: {
-      width: 38,
-      height: 38,
-      borderRadius: 12,
+      width: 39,
+      height: 39,
+      borderRadius: 13,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
@@ -449,7 +481,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     opcaoDescricao: {
       fontSize: f(12),
       color: c.textoSuave,
-      marginTop: 3,
+      marginTop: 4,
       lineHeight: f(17),
     },
     divisor: {
@@ -462,12 +494,12 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 11,
-      paddingVertical: 5,
+      paddingVertical: 6,
     },
     sairIcone: {
-      width: 40,
-      height: 40,
-      borderRadius: 12,
+      width: 41,
+      height: 41,
+      borderRadius: 13,
       backgroundColor: c.perigoFundo,
       alignItems: 'center',
       justifyContent: 'center',
@@ -483,19 +515,19 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     sairDescricao: {
       color: c.textoSuave,
       fontSize: f(12),
-      marginTop: 3,
+      marginTop: 4,
     },
 
     // Rodapé
     versaoContainer: {
       alignItems: 'center',
-      marginTop: 8,
+      marginTop: 9,
       gap: 5,
     },
     versaoIcone: {
-      width: 34,
-      height: 34,
-      borderRadius: 11,
+      width: 36,
+      height: 36,
+      borderRadius: 12,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',

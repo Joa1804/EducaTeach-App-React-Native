@@ -9,7 +9,10 @@ import {
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { Etiqueta } from '@/components/ui';
 
 type Projeto = {
   id: string;
@@ -81,20 +84,25 @@ export default function ProjetosScreen() {
         >
           <Ionicons
             name="add"
-            size={22}
+            size={24}
             color="#FFFFFF"
           />
         </TouchableOpacity>
       </View>
 
-      {/* Cartão de destaque */}
-      <View style={styles.resumoCard}>
+      {/* Banner de destaque com degradê */}
+      <LinearGradient
+        colors={['#6c63ff', '#8b7cf6', '#c4b5fd']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.resumoCard}
+      >
         <View style={styles.resumoTopo}>
           <View style={styles.resumoIcone}>
             <Ionicons
               name="folder-open"
               size={25}
-              color={cores.primaria}
+              color="#FFFFFF"
             />
           </View>
 
@@ -119,7 +127,7 @@ export default function ProjetosScreen() {
             <Ionicons
               name="layers"
               size={18}
-              color={cores.textoPrimaria}
+              color="#FFFFFF"
             />
 
             <Text style={styles.resumoNumero}>
@@ -134,10 +142,10 @@ export default function ProjetosScreen() {
           <Ionicons
             name="sparkles"
             size={27}
-            color={cores.textoPrimaria}
+            color="#FFFFFF"
           />
         </View>
-      </View>
+      </LinearGradient>
 
       {/* Cabeçalho da galeria */}
       <View style={styles.projetosHeader}>
@@ -394,11 +402,10 @@ function criarEstilos(
       borderBottomColor: 'rgba(0,0,0,0.18)',
     },
 
-    // Resumo
+    // Resumo com degradê
     resumoCard: {
-      backgroundColor: c.primaria,
-      borderRadius: 23,
-      padding: 20,
+      borderRadius: 24,
+      padding: 22,
       marginBottom: 28,
     },
 
@@ -413,20 +420,20 @@ function criarEstilos(
       width: 49,
       height: 49,
       borderRadius: 16,
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       alignItems: 'center',
       justifyContent: 'center',
     },
 
     resumoEtiqueta: {
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       paddingHorizontal: 11,
       paddingVertical: 6,
       borderRadius: 9,
     },
 
     resumoEtiquetaTexto: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: fonte(10),
       fontWeight: 'bold',
       letterSpacing: 1,
@@ -435,13 +442,13 @@ function criarEstilos(
     resumoTitulo: {
       fontSize: fonte(21),
       fontWeight: 'bold',
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
     },
 
     resumoTexto: {
       fontSize: fonte(13),
-      color: c.textoPrimaria,
-      opacity: 0.9,
+      color: '#FFFFFF',
+      opacity: 0.95,
       marginTop: 6,
       lineHeight: fonte(19),
     },
@@ -457,20 +464,20 @@ function criarEstilos(
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      backgroundColor: c.caixaSobrePrimaria,
+      backgroundColor: 'rgba(255,255,255,0.20)',
       paddingHorizontal: 12,
       paddingVertical: 9,
       borderRadius: 12,
     },
 
     resumoNumero: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: fonte(17),
       fontWeight: 'bold',
     },
 
     resumoNumeroTexto: {
-      color: c.textoPrimaria,
+      color: '#FFFFFF',
       fontSize: fonte(12),
     },
 
@@ -512,7 +519,7 @@ function criarEstilos(
       fontWeight: 'bold',
     },
 
-    // Grid responsivo
+    // Grid
     grid: {
       flexDirection: 'row',
       flexWrap: 'wrap',

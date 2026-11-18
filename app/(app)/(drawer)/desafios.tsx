@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 
 export default function DesafiosScreen() {
@@ -22,15 +24,30 @@ export default function DesafiosScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      {/* CABEÇALHO */}
-      <View style={styles.banner}>
+      {/* CABEÇALHO / BANNER */}
+      <LinearGradient
+        colors={[cores.primaria, cores.primariaClara]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.banner}
+      >
         <View style={styles.bannerIcone}>
-          <Ionicons name="trophy" size={30} color={cores.textoPrimaria} />
+          <Ionicons
+            name="trophy"
+            size={29}
+            color={cores.textoPrimaria}
+          />
         </View>
 
         <View style={styles.bannerInfo}>
-          <Text style={styles.bannerSubtitulo}>DESAFIO ATUAL</Text>
-          <Text style={styles.titulo}>Título da Atividade</Text>
+          <Text style={styles.bannerSubtitulo}>
+            DESAFIO ATUAL
+          </Text>
+
+          <Text style={styles.titulo}>
+            Título da Atividade
+          </Text>
+
           <Text style={styles.bannerDescricao}>
             Coloque seus conhecimentos em prática!
           </Text>
@@ -38,26 +55,38 @@ export default function DesafiosScreen() {
 
         <Ionicons
           name="sparkles"
-          size={24}
+          size={23}
           color={cores.textoPrimaria}
           style={styles.bannerBrilho}
         />
-      </View>
+      </LinearGradient>
 
       {/* STATUS */}
       <View style={styles.statusCard}>
         <View style={styles.statusIcone}>
-          <Ionicons name="time-outline" size={23} color="#D97706" />
+          <Ionicons
+            name="time-outline"
+            size={23}
+            color="#D97706"
+          />
         </View>
 
         <View style={styles.statusInfo}>
-          <Text style={styles.statusTitulo}>Status do desafio</Text>
-          <Text style={styles.statusTexto}>Em andamento</Text>
+          <Text style={styles.statusTitulo}>
+            Status do desafio
+          </Text>
+
+          <Text style={styles.statusTexto}>
+            Em andamento
+          </Text>
         </View>
 
         <View style={styles.statusEtiqueta}>
           <View style={styles.statusPonto} />
-          <Text style={styles.statusEtiquetaTexto}>Ativo</Text>
+
+          <Text style={styles.statusEtiquetaTexto}>
+            Ativo
+          </Text>
         </View>
       </View>
 
@@ -71,7 +100,10 @@ export default function DesafiosScreen() {
               color={cores.primaria}
             />
           </View>
-          <Text style={styles.secaoTitulo}>Enunciado</Text>
+
+          <Text style={styles.secaoTitulo}>
+            Enunciado
+          </Text>
         </View>
 
         <View style={styles.enunciadoCard}>
@@ -91,7 +123,10 @@ export default function DesafiosScreen() {
               color={cores.primaria}
             />
           </View>
-          <Text style={styles.secaoTitulo}>Sua resposta</Text>
+
+          <Text style={styles.secaoTitulo}>
+            Sua resposta
+          </Text>
         </View>
 
         <Text style={styles.inputDescricao}>
@@ -104,12 +139,20 @@ export default function DesafiosScreen() {
           placeholderTextColor={cores.textoSuave}
           multiline
           textAlignVertical="top"
+          accessibilityLabel="Campo para escrever sua resposta"
         />
 
-        <Text style={styles.dica}>
-          <Ionicons name="bulb-outline" size={14} color={cores.estrela} />
-          {'  '}Revise sua resposta antes de enviar.
-        </Text>
+        <View style={styles.dicaContainer}>
+          <Ionicons
+            name="bulb-outline"
+            size={16}
+            color={cores.estrela}
+          />
+
+          <Text style={styles.dica}>
+            Revise sua resposta antes de enviar.
+          </Text>
+        </View>
       </View>
 
       {/* AÇÕES */}
@@ -117,20 +160,37 @@ export default function DesafiosScreen() {
         <TouchableOpacity
           style={styles.botaoEnviar}
           activeOpacity={0.8}
+          accessibilityRole="button"
         >
-          <Ionicons name="send" size={18} color={cores.textoPrimaria} />
-          <Text style={styles.botaoEnviarTexto}>Enviar resposta</Text>
+          <Ionicons
+            name="send"
+            size={18}
+            color={cores.textoPrimaria}
+          />
+
+          <Text style={styles.botaoEnviarTexto}>
+            Enviar resposta
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.botaoVoltar}
           activeOpacity={0.8}
+          accessibilityRole="button"
         >
-          <Ionicons name="arrow-back" size={18} color={cores.primaria} />
-          <Text style={styles.botaoVoltarTexto}>Voltar</Text>
+          <Ionicons
+            name="arrow-back"
+            size={18}
+            color={cores.primaria}
+          />
+
+          <Text style={styles.botaoVoltarTexto}>
+            Voltar
+          </Text>
         </TouchableOpacity>
       </View>
 
+      {/* RODAPÉ */}
       <Text style={styles.rodape}>
         Boa sorte no desafio! Você consegue!
       </Text>
@@ -145,31 +205,31 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       backgroundColor: c.fundo,
     },
     content: {
-      padding: 20,
+      padding: 16,
       paddingBottom: 40,
     },
 
     // Banner
     banner: {
-      backgroundColor: c.primaria,
       borderRadius: 20,
-      padding: 20,
+      padding: 19,
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 18,
       overflow: 'hidden',
     },
     bannerIcone: {
-      width: 58,
-      height: 58,
+      width: 56,
+      height: 56,
       borderRadius: 17,
       backgroundColor: c.caixaSobrePrimaria,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 14,
+      marginRight: 13,
     },
     bannerInfo: {
       flex: 1,
+      minWidth: 0,
     },
     bannerSubtitulo: {
       color: c.textoPrimaria,
@@ -181,7 +241,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     },
     titulo: {
       color: c.textoPrimaria,
-      fontSize: f(21),
+      fontSize: f(20),
       fontWeight: 'bold',
     },
     bannerDescricao: {
@@ -189,15 +249,16 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       opacity: 0.85,
       fontSize: f(12),
       marginTop: 5,
+      lineHeight: f(17),
     },
     bannerBrilho: {
-      marginLeft: 6,
+      marginLeft: 5,
     },
 
     // Status
     statusCard: {
       backgroundColor: c.superficie,
-      borderRadius: 16,
+      borderRadius: 17,
       borderWidth: 1,
       borderColor: c.borda,
       padding: 15,
@@ -259,9 +320,9 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       gap: 9,
     },
     secaoIcone: {
-      width: 36,
-      height: 36,
-      borderRadius: 11,
+      width: 38,
+      height: 38,
+      borderRadius: 12,
       backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
@@ -275,7 +336,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     // Enunciado
     enunciadoCard: {
       backgroundColor: c.superficie,
-      borderRadius: 16,
+      borderRadius: 17,
       borderWidth: 1,
       borderColor: c.borda,
       padding: 18,
@@ -283,7 +344,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     enunciado: {
       color: c.texto,
       fontSize: f(15),
-      lineHeight: 24,
+      lineHeight: f(24),
     },
 
     // Resposta
@@ -294,20 +355,26 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
     },
     input: {
       backgroundColor: c.superficie,
-      borderRadius: 16,
+      borderRadius: 17,
       borderWidth: 1,
       borderColor: c.borda,
       minHeight: 170,
       padding: 16,
       color: c.texto,
       fontSize: f(15),
-      lineHeight: 23,
+      lineHeight: f(23),
       textAlignVertical: 'top',
+    },
+    dicaContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 11,
+      gap: 7,
     },
     dica: {
       color: c.textoSuave,
       fontSize: f(12),
-      marginTop: 10,
+      flex: 1,
     },
 
     // Botões
@@ -346,6 +413,7 @@ const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
       fontWeight: 'bold',
     },
 
+    // Rodapé
     rodape: {
       color: c.textoSuave,
       fontSize: f(12),
