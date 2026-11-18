@@ -1,8 +1,8 @@
-# EducaTeach 📚💻
+# EducaTech 📚💻
 
 **Uma plataforma educacional para tornar o aprendizado de programação mais acessível, interativo e divertido.**
 
-O EducaTeach é um aplicativo educacional desenvolvido com React Native e Expo, com o objetivo de oferecer um ambiente de aprendizagem por meio de atividades e recursos interativos de programação.
+O EducaTech é um aplicativo educacional desenvolvido com React Native e Expo, com o objetivo de oferecer um ambiente de aprendizagem por meio de atividades e recursos interativos de programação.
 
 O projeto utiliza tecnologias como Blockly, Firebase e SQLite para construir uma experiência de aprendizagem com atividades, armazenamento de progresso e recursos de acompanhamento.
 
@@ -29,7 +29,7 @@ O projeto utiliza tecnologias como Blockly, Firebase e SQLite para construir uma
 
 ## 🎯 Sobre o projeto
 
-O EducaTeach é um aplicativo mobile voltado à educação e ao aprendizado de programação.
+O EducaTech é um aplicativo mobile voltado à educação e ao aprendizado de programação.
 
 A proposta é proporcionar um ambiente no qual os estudantes possam desenvolver o raciocínio lógico e aprender conceitos de programação por meio de atividades interativas.
 
@@ -62,7 +62,7 @@ O projeto possui os seguintes recursos implementados ou previstos em sua estrutu
 
 ## 🛠️ Tecnologias utilizadas
 
-O EducaTeach foi desenvolvido utilizando as seguintes tecnologias:
+O EducaTech foi desenvolvido utilizando as seguintes tecnologias:
 
 | Tecnologia | Utilização |
 |---|---|
@@ -200,7 +200,7 @@ npm install
 
 ## 🔥 Configuração do Firebase
 
-O EducaTeach utiliza Firebase Authentication e Cloud Firestore para os recursos de autenticação, sincronização e ranking global.
+O EducaTech utiliza Firebase Authentication e Cloud Firestore para os recursos de autenticação, sincronização e ranking global.
 
 Para configurar:
 
@@ -349,11 +349,11 @@ O repositório também possui um workflow de integração contínua no GitHub Ac
 
 ## 👥 Equipe de desenvolvimento
 
-O EducaTeach foi desenvolvido por:
+O EducaTech foi desenvolvido por:
 
 - **João Emanoel**
 - **Murilo Sobral**
-- **Gustavo Molina**
+- **Gustavo L. Molina**
 
 ## 📄 Licença
 
@@ -363,4 +363,4 @@ Até que uma licença seja escolhida e adicionada ao repositório por meio de um
 
 ---
 
-**EducaTeach — Aprender programação pode ser uma experiência interativa!**
+**EducaTech — Aprender programação pode ser uma experiência interativa!**
