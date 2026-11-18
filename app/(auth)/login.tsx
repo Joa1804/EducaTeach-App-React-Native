@@ -1,243 +1,488 @@
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from "react-native";
+
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useRef, useState } from "react";
-import { useRouter } from "expo-router";
-import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import { useRouter } from 'expo-router';
+
+import {
+  useConfiguracao,
+  type Cores,
+} from '@/context/ConfiguracaoContext';
 import { useLogin } from '@/hooks/use-login';
 
-const PURPLE = '#6c63ff';
-
 export default function LoginScreen() {
-    const router = useRouter();
-    const [mostrarSenha, setMostrarSenha] = useState(false);
-    const senhaRef = useRef<React.ComponentRef<typeof TextInput>>(null);
-    const { cores, fonte } = useConfiguracao();
-    const styles = criarEstilos(cores, fonte);
+  const router = useRouter();
 
-    // Ao autenticar, o guard de rotas em app/_layout.tsx leva o usuário ao início.
-    const { email, senha, setEmail, setSenha, carregando, erro, enviar } = useLogin();
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
-    return (
-          <LinearGradient colors={['#6c63ff', '#8b7cf6', '#c4b5fd']} style={styles.container}>
-            <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+  const senhaRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
-                    {/* CARD */}
-                    <View style={styles.card}>
+  const { cores, fonte } = useConfiguracao();
 
-                        {/* ÍCONE */}
-                        <View style={styles.iconeContainer}>
-                            <Ionicons name="person" size={42} color={PURPLE}/>
-                        </View>
+  const styles = criarEstilos(cores, fonte);
 
-                        {/* TÍTULO */}
-                        <Text style={styles.titulo}>EducaTeach</Text>
-                        <Text style={styles.subtitulo}>Aprenda a ensinar com tecnologia</Text>
+  const {
+    email,
+    senha,
+    setEmail,
+    setSenha,
+    carregando,
+    erro,
+    enviar,
+  } = useLogin();
 
-                        {/* EMAIL */}
-                        <Text style={styles.label}> E-mail</Text>
+  return (
+    <LinearGradient
+      colors={['#6c63ff', '#8b7cf6', '#c4b5fd']}
+      style={styles.container}
+    >
+      <KeyboardAvoidingView
+        style={styles.keyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ELEMENTOS DECORATIVOS */}
+          <View style={styles.decoracaoSuperior}>
+            <Ionicons name="sparkles" size={34} color="#FFFFFF" />
+          </View>
 
-                        <View style={styles.InputContainer}>
-                            <Ionicons name="person-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="seu@email.com"
-                                placeholderTextColor="#94A3B8"
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                autoComplete="email"
-                                textContentType="emailAddress"
-                                keyboardType="email-address"
-                                returnKeyType="next"
-                                value={email}
-                                onChangeText={setEmail}
-                                onSubmitEditing={() => senhaRef.current?.focus()}
-                                editable={!carregando}
-                                accessibilityLabel="E-mail"
-                            />
-                        </View>
+          {/* CABEÇALHO */}
+          <View style={styles.cabecalho}>
+            <View style={styles.logoContainer}>
+              <Ionicons
+                name="school"
+                size={42}
+                color="#6c63ff"
+              />
+            </View>
 
-                        {/* SENHA */}
-                        <Text style={styles.label}> Senha</Text>
+            <Text style={styles.nomeApp}>EducaTeach</Text>
 
-                        <View style={styles.InputContainer}>
-                            <Ionicons name="lock-closed-outline" size={20} color='#94a3b8' style={styles.inputIcon}/>
-                            <TextInput
-                                ref={senhaRef}
-                                style={styles.input}
-                                placeholder="********"
-                                placeholderTextColor="#94A3B8"
-                                secureTextEntry={!mostrarSenha}
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                autoComplete="current-password"
-                                textContentType="password"
-                                returnKeyType="go"
-                                value={senha}
-                                onChangeText={setSenha}
-                                onSubmitEditing={enviar}
-                                editable={!carregando}
-                                accessibilityLabel="Senha"
-                            />
-                            <TouchableOpacity
-                                onPress={() => setMostrarSenha((atual) => !atual)}
-                                accessibilityRole="button"
-                                accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
-                            >
-                                <Ionicons  name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#94a3b8"/>
-                            </TouchableOpacity>
-                        </View>
+            <Text style={styles.descricaoApp}>
+              Aprenda, ensine e transforme o futuro!
+            </Text>
+          </View>
 
-                        {/* ERRO */}
-                        {erro && (
-                            <Text style={styles.erro} accessibilityRole="alert" accessibilityLiveRegion="polite">
-                                {erro}
-                            </Text>
-                        )}
+          {/* CARD DE LOGIN */}
+          <View style={styles.card}>
+            <View style={styles.cardCabecalho}>
+              <Text style={styles.titulo}>
+                Bem-vindo de volta!
+              </Text>
 
-                        {/* ENTRAR */}
-                        <TouchableOpacity
-                            style={[styles.botaoEntrar, carregando && styles.botaoDesabilitado]}
-                            onPress={enviar}
-                            disabled={carregando}
-                            accessibilityRole="button"
-                            accessibilityState={{ disabled: carregando, busy: carregando }}
-                        >
-                            {carregando ? (
-                                <ActivityIndicator color={cores.textoPrimaria} />
-                            ) : (
-                                <Text style={styles.botaoTexto}>Entrar</Text>
-                            )}
-                        </TouchableOpacity>
+              <Text style={styles.subtitulo}>
+                Entre na sua conta para continuar aprendendo.
+              </Text>
+            </View>
 
-                        {/* CADASTRO */}
-                        <View style={styles.cadastroContainer}>
-                            <Text style={styles.cadastroTexto}>
-                                Ainda não tem uma conta?{' '}
-                            </Text>
+            {/* EMAIL */}
+            <Text style={styles.label}>E-mail</Text>
 
-                            <TouchableOpacity onPress={() => router.push('/cadastro')} disabled={carregando}>
-                                <Text style={styles.linkCadastro}>Cadastre-se</Text>
-                            </TouchableOpacity>
-                        </View>
+            <View style={styles.inputContainer}>
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={cores.textoSuave}
+              />
 
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-          </LinearGradient>
-    );
+              <TextInput
+                style={styles.input}
+                placeholder="seu@email.com"
+                placeholderTextColor={cores.textoSuave}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
+                keyboardType="email-address"
+                returnKeyType="next"
+                value={email}
+                onChangeText={setEmail}
+                onSubmitEditing={() => senhaRef.current?.focus()}
+                editable={!carregando}
+                accessibilityLabel="E-mail"
+              />
+            </View>
 
+            {/* SENHA */}
+            <View style={styles.labelLinha}>
+              <Text style={styles.label}>Senha</Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={cores.textoSuave}
+              />
+
+              <TextInput
+                ref={senhaRef}
+                style={styles.input}
+                placeholder="Digite sua senha"
+                placeholderTextColor={cores.textoSuave}
+                secureTextEntry={!mostrarSenha}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="current-password"
+                textContentType="password"
+                returnKeyType="go"
+                value={senha}
+                onChangeText={setSenha}
+                onSubmitEditing={enviar}
+                editable={!carregando}
+                accessibilityLabel="Senha"
+              />
+
+              <TouchableOpacity
+                onPress={() => setMostrarSenha((atual) => !atual)}
+                disabled={carregando}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'
+                }
+              >
+                <Ionicons
+                  name={
+                    mostrarSenha
+                      ? 'eye-off-outline'
+                      : 'eye-outline'
+                  }
+                  size={21}
+                  color={cores.textoSuave}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* ERRO */}
+            {erro ? (
+              <View style={styles.erroContainer}>
+                <Ionicons
+                  name="alert-circle-outline"
+                  size={19}
+                  color={cores.perigo}
+                />
+
+                <Text
+                  style={styles.erro}
+                  accessibilityRole="alert"
+                  accessibilityLiveRegion="polite"
+                >
+                  {erro}
+                </Text>
+              </View>
+            ) : null}
+
+            {/* ENTRAR */}
+            <TouchableOpacity
+              style={[
+                styles.botaoEntrar,
+                carregando && styles.botaoDesabilitado,
+              ]}
+              onPress={enviar}
+              disabled={carregando}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityState={{
+                disabled: carregando,
+                busy: carregando,
+              }}
+            >
+              {carregando ? (
+                <ActivityIndicator color={cores.textoPrimaria} />
+              ) : (
+                <>
+                  <Text style={styles.botaoTexto}>Entrar</Text>
+                  <Ionicons
+                    name="arrow-forward"
+                    size={19}
+                    color={cores.textoPrimaria}
+                  />
+                </>
+              )}
+            </TouchableOpacity>
+
+            {/* CADASTRO */}
+            <View style={styles.divisorContainer}>
+              <View style={styles.divisor} />
+              <Text style={styles.divisorTexto}>OU</Text>
+              <View style={styles.divisor} />
+            </View>
+
+            <View style={styles.cadastroContainer}>
+              <Text style={styles.cadastroTexto}>
+                Ainda não tem uma conta?
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => router.push('/cadastro')}
+                disabled={carregando}
+                accessibilityRole="button"
+              >
+                <Text style={styles.linkCadastro}>
+                  Cadastre-se
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* RODAPÉ */}
+          <View style={styles.rodape}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={15}
+              color="#FFFFFF"
+            />
+
+            <Text style={styles.rodapeTexto}>
+              Seu aprendizado começa aqui.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
+  );
 }
 
-function criarEstilos(cores: Cores, fonte: (tamanho: number) => number) {
-    return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: cores.fundo,
-        },
-        card: {
-            backgroundColor: cores.superficie,
-            borderRadius: 20,
-            padding: 28,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 5 },
-            shadowOpacity: 0.2,
-            shadowRadius: 10,
-            elevation: 8,
-        },
-        iconeContainer: {
-            width: 72,
-            height: 72,
-            borderRadius: 36,
-            backgroundColor: cores.iconeFundo,
-            alignSelf: 'center',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        titulo: {
-            marginTop: 16,
-            fontSize: fonte(26),
-            fontWeight: 'bold',
-            color: cores.texto,
-            textAlign: 'center',
-        },
-        subtitulo: {
-            fontSize: fonte(14),
-            color: cores.textoSuave,
-            textAlign: 'center',
-            marginTop: 2,
-            marginBottom: 24,
-        },
-        label: {
-            fontSize: fonte(13),
-            fontWeight: '500',
-            marginBottom: 5,
-            color: cores.texto,
-        },
-        InputContainer: {
-            height: 52,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: cores.caixaSobrePrimaria,
-            borderRadius: 10,
-            paddingHorizontal: 10,
-            marginTop: 8,
-        },
-        inputIcon: {},
-        input: {
-            flex: 1,
-            marginLeft: 10,
-            fontSize: fonte(15),
-            color: cores.texto,
-        },
-        botaoEntrar: {
-            height: 56,
-            marginTop: 16,
-            marginBottom: 16,
-            backgroundColor: cores.primaria,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        botaoDesabilitado: {
-            opacity: 0.7,
-        },
-        erro: {
-            marginTop: 12,
-            fontSize: fonte(13),
-            color: cores.perigo,
-            textAlign: 'center',
-        },
-        botaoTexto: {
-            color: cores.textoPrimaria,
-            fontSize: fonte(16),
-            fontWeight: 'bold',
-        },
-        keyboard: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        scroll: {
-            flexGrow: 1,
-            justifyContent: 'center',
-            padding: 20,
-        },
-        cadastroContainer: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        cadastroTexto: {
-            fontSize: fonte(14),
-            color: cores.textoSuave,
-        },
-        linkCadastro: {
-            marginLeft: 4,
-            fontSize: fonte(14),
-            color: cores.primaria,
-            fontWeight: 'bold',
-        },
-    });
+function criarEstilos(
+  cores: Cores,
+  fonte: (tamanho: number) => number,
+) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+
+    keyboard: {
+      flex: 1,
+    },
+
+    scroll: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      paddingHorizontal: 22,
+      paddingVertical: 35,
+    },
+
+    // Cabeçalho
+    decoracaoSuperior: {
+      position: 'absolute',
+      top: 45,
+      right: 35,
+      opacity: 0.55,
+    },
+
+    cabecalho: {
+      alignItems: 'center',
+      marginBottom: 28,
+    },
+
+    logoContainer: {
+      width: 82,
+      height: 82,
+      borderRadius: 26,
+      backgroundColor: '#FFFFFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 13,
+      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+    },
+
+    nomeApp: {
+      fontSize: fonte(30),
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+      textAlign: 'center',
+    },
+
+    descricaoApp: {
+      fontSize: fonte(14),
+      color: '#FFFFFF',
+      opacity: 0.9,
+      textAlign: 'center',
+      marginTop: 5,
+    },
+
+    // Card
+    card: {
+      backgroundColor: cores.superficie,
+      borderRadius: 24,
+      padding: 25,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.16,
+      shadowRadius: 12,
+    },
+
+    cardCabecalho: {
+      marginBottom: 25,
+    },
+
+    titulo: {
+      color: cores.texto,
+      fontSize: fonte(23),
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+
+    subtitulo: {
+      color: cores.textoSuave,
+      fontSize: fonte(13),
+      textAlign: 'center',
+      marginTop: 7,
+      lineHeight: 20,
+    },
+
+    // Campos
+    label: {
+      color: cores.texto,
+      fontSize: fonte(14),
+      fontWeight: 'bold',
+      marginBottom: 9,
+    },
+
+    labelLinha: {
+      marginTop: 19,
+    },
+
+    inputContainer: {
+      minHeight: 55,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: cores.iconeFundo,
+      borderRadius: 13,
+      borderWidth: 1,
+      borderColor: cores.borda,
+      paddingHorizontal: 15,
+    },
+
+    input: {
+      flex: 1,
+      marginLeft: 11,
+      marginRight: 8,
+      fontSize: fonte(14),
+      color: cores.texto,
+      paddingVertical: 12,
+    },
+
+    // Erro
+    erroContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: cores.perigoFundo,
+      borderRadius: 12,
+      padding: 12,
+      marginTop: 16,
+      gap: 8,
+    },
+
+    erro: {
+      flex: 1,
+      color: cores.perigo,
+      fontSize: fonte(12),
+      lineHeight: 18,
+    },
+
+    // Botão
+    botaoEntrar: {
+      minHeight: 56,
+      backgroundColor: cores.primaria,
+      borderRadius: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      marginTop: 25,
+      elevation: 3,
+      shadowColor: cores.primaria,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 5,
+    },
+
+    botaoDesabilitado: {
+      opacity: 0.65,
+    },
+
+    botaoTexto: {
+      color: cores.textoPrimaria,
+      fontSize: fonte(16),
+      fontWeight: 'bold',
+    },
+
+    // Cadastro
+    divisorContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 23,
+      gap: 12,
+    },
+
+    divisor: {
+      flex: 1,
+      height: 1,
+      backgroundColor: cores.borda,
+    },
+
+    divisorTexto: {
+      color: cores.textoSuave,
+      fontSize: fonte(11),
+      fontWeight: 'bold',
+    },
+
+    cadastroContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 4,
+    },
+
+    cadastroTexto: {
+      color: cores.textoSuave,
+      fontSize: fonte(13),
+    },
+
+    linkCadastro: {
+      color: cores.primaria,
+      fontSize: fonte(13),
+      fontWeight: 'bold',
+    },
+
+    // Rodapé
+    rodape: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 7,
+      marginTop: 25,
+    },
+
+    rodapeTexto: {
+      color: '#FFFFFF',
+      fontSize: fonte(12),
+      opacity: 0.9,
+    },
+  });
 }

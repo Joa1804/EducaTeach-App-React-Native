@@ -1,8 +1,29 @@
-import { ScrollView, StyleSheet, View, Text, Switch, TouchableOpacity } from 'react-native';
+
+import React, { useMemo } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  Switch,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { useConfiguracao } from '@/context/ConfiguracaoContext';
+
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
 import { useUsuario } from '@/context/UsuarioContext';
+
+type Estilos = ReturnType<typeof criarEstilos>;
+
+type PropsOpcao = {
+  icon: keyof typeof Ionicons.glyphMap;
+  titulo: string;
+  descricao: string;
+  valor: boolean;
+  aoMudar: (value: boolean) => void;
+  cores: Cores;
+  styles: Estilos;
+};
 
 function OpcaoSwitch({
   icon,
@@ -10,167 +31,484 @@ function OpcaoSwitch({
   descricao,
   valor,
   aoMudar,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  titulo: string;
-  descricao: string;
-  valor: boolean;
-  aoMudar: (value: boolean) => void;
-}) {
-  const { cores, fonte } = useConfiguracao();
-
+  cores,
+  styles,
+}: PropsOpcao) {
   return (
     <View style={styles.opcaoLinha}>
-      <View style={[styles.opcaoIcone, { backgroundColor: cores.iconeFundo }]}>
-        <Ionicons name={icon} size={18} color={cores.primaria} />
+      <View style={styles.opcaoIcone}>
+        <Ionicons name={icon} size={19} color={cores.primaria} />
       </View>
 
-      <View style={{ flex: 1 }}>
-        <Text style={[styles.opcaoTitulo, { color: cores.texto, fontSize: fonte(14) }]}>{titulo}</Text>
-        <Text style={[styles.opcaoDescricao, { color: cores.textoSuave, fontSize: fonte(12) }]}>{descricao}</Text>
+      <View style={styles.opcaoInfo}>
+        <Text style={styles.opcaoTitulo}>{titulo}</Text>
+        <Text style={styles.opcaoDescricao}>{descricao}</Text>
       </View>
 
       <Switch
         value={valor}
         onValueChange={aoMudar}
-        trackColor={{ false: '#E0E0E0', true: cores.primariaClara }}
+        trackColor={{
+          false: cores.borda,
+          true: cores.primariaClara,
+        }}
         thumbColor={valor ? cores.primaria : '#F5F5F5'}
+        accessibilityLabel={titulo}
+        accessibilityHint={descricao}
       />
     </View>
   );
 }
 
+type PropsSecao = {
+  titulo: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  children: React.ReactNode;
+  cores: Cores;
+  styles: Estilos;
+};
+
+function Secao({
+  titulo,
+  icon,
+  children,
+  cores,
+  styles,
+}: PropsSecao) {
+  return (
+    <View style={styles.secao}>
+      <View style={styles.secaoHeader}>
+        <View style={styles.secaoIcone}>
+          <Ionicons name={icon} size={17} color={cores.primaria} />
+        </View>
+
+        <Text style={styles.secaoTitulo}>{titulo}</Text>
+      </View>
+
+      {children}
+    </View>
+  );
+}
+
 export default function ConfiguracaoScreen() {
-  const { altoContraste, fonteGrande, notificacoes, som, alterar, cores, fonte } = useConfiguracao();
+  const {
+    altoContraste,
+    fonteGrande,
+    notificacoes,
+    som,
+    alterar,
+    cores,
+    fonte,
+  } = useConfiguracao();
+
   const { usuario, sair } = useUsuario();
+
+  const styles = useMemo(
+    () => criarEstilos(cores, fonte),
+    [cores, fonte],
+  );
 
   const nome = usuario?.nome ?? '';
   const inicial = nome.trim().charAt(0).toUpperCase() || '?';
 
-  // Estilo comum dos cartões de seção, que muda junto com o tema
-  const secao = [styles.secao, { backgroundColor: cores.superficie, borderColor: cores.borda }];
-  const secaoTitulo = [styles.secaoTitulo, { color: cores.textoSuave, fontSize: fonte(14) }];
-
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* CABEÇALHO */}
+      <View style={styles.header}>
+        <View style={styles.headerTexto}>
+          <Text style={styles.titulo} accessibilityRole="header">
+            Configurações
+          </Text>
+          <Text style={styles.subtitulo}>
+            Personalize sua experiência no EducaTeach.
+          </Text>
+        </View>
 
-        {/* PERFIL */}
-        <View style={secao}>
-          <View style={styles.perfilLinha}>
-            <View style={[styles.avatar, { backgroundColor: cores.primaria }]}>
-              <Text style={[styles.avatarLetra, { color: cores.textoPrimaria, fontSize: fonte(22) }]}>{inicial}</Text>
-            </View>
+        <View style={styles.headerIcone}>
+          <Ionicons name="settings" size={25} color={cores.textoPrimaria} />
+        </View>
+      </View>
 
-            <View>
-              <Text style={[styles.perfilNome, { color: cores.texto, fontSize: fonte(16) }]}>{nome}</Text>
-              <Text style={[styles.perfilEmail, { color: cores.textoSuave, fontSize: fonte(13) }]}>{usuario?.email ?? ''}</Text>
-            </View>
+      {/* PERFIL */}
+      <View style={styles.perfilCard}>
+        <View style={styles.perfilTopo}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarLetra}>{inicial}</Text>
+          </View>
+
+          <View style={styles.perfilInfo}>
+            <Text style={styles.perfilNome} numberOfLines={1}>
+              {nome || 'Usuário'}
+            </Text>
+
+            <Text style={styles.perfilEmail} numberOfLines={1}>
+              {usuario?.email ?? ''}
+            </Text>
+          </View>
+
+          <View style={styles.perfilSelo}>
+            <Ionicons
+              name="person-circle-outline"
+              size={19}
+              color={cores.primaria}
+            />
           </View>
         </View>
 
-        {/* ACESSIBILIDADE */}
-        <View style={secao}>
-          <Text style={secaoTitulo}>Acessibilidade</Text>
-
-          <OpcaoSwitch
-            icon="contrast-outline"
-            titulo="Alto contraste"
-            descricao="Aumenta o contraste de cores da tela"
-            valor={altoContraste}
-            aoMudar={(valor) => alterar('altoContraste', valor)}
+        <View style={styles.perfilRodape}>
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={15}
+            color={cores.sucesso}
           />
+          <Text style={styles.perfilRodapeTexto}>
+            Sua conta EducaTeach
+          </Text>
+        </View>
+      </View>
 
-          <OpcaoSwitch
-            icon="text-outline"
-            titulo="Fonte grande"
-            descricao="Aumenta o tamanho da fonte da interface"
-            valor={fonteGrande}
-            aoMudar={(valor) => alterar('fonteGrande', valor)}
+      {/* ACESSIBILIDADE */}
+      <Secao
+        titulo="Acessibilidade"
+        icon="accessibility-outline"
+        cores={cores}
+        styles={styles}
+      >
+        <OpcaoSwitch
+          icon="contrast-outline"
+          titulo="Alto contraste"
+          descricao="Aumenta o contraste de cores da tela"
+          valor={altoContraste}
+          aoMudar={(valor) => alterar('altoContraste', valor)}
+          cores={cores}
+          styles={styles}
+        />
+
+        <View style={styles.divisor} />
+
+        <OpcaoSwitch
+          icon="text-outline"
+          titulo="Fonte grande"
+          descricao="Aumenta o tamanho da fonte da interface"
+          valor={fonteGrande}
+          aoMudar={(valor) => alterar('fonteGrande', valor)}
+          cores={cores}
+          styles={styles}
+        />
+      </Secao>
+
+      {/* PREFERÊNCIAS */}
+      <Secao
+        titulo="Preferências"
+        icon="options-outline"
+        cores={cores}
+        styles={styles}
+      >
+        <OpcaoSwitch
+          icon="notifications-outline"
+          titulo="Notificações"
+          descricao="Receba alertas e lembretes"
+          valor={notificacoes}
+          aoMudar={(valor) => alterar('notificacoes', valor)}
+          cores={cores}
+          styles={styles}
+        />
+
+        <View style={styles.divisor} />
+
+        <OpcaoSwitch
+          icon="volume-medium-outline"
+          titulo="Som"
+          descricao="Ativa os sons de notificações"
+          valor={som}
+          aoMudar={(valor) => alterar('som', valor)}
+          cores={cores}
+          styles={styles}
+        />
+      </Secao>
+
+      {/* CONTA */}
+      <Secao
+        titulo="Conta"
+        icon="person-outline"
+        cores={cores}
+        styles={styles}
+      >
+        <TouchableOpacity
+          style={styles.sairButton}
+          onPress={sair}
+          activeOpacity={0.75}
+          accessibilityRole="button"
+        >
+          <View style={styles.sairIcone}>
+            <Ionicons
+              name="log-out-outline"
+              size={20}
+              color={cores.perigo}
+            />
+          </View>
+
+          <View style={styles.sairInfo}>
+            <Text style={styles.sairTexto}>Sair da conta</Text>
+            <Text style={styles.sairDescricao}>
+              Encerrar sua sessão neste aparelho
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={19}
+            color={cores.textoSuave}
+          />
+        </TouchableOpacity>
+      </Secao>
+
+      {/* VERSÃO */}
+      <View style={styles.versaoContainer}>
+        <View style={styles.versaoIcone}>
+          <Ionicons
+            name="school-outline"
+            size={17}
+            color={cores.textoSuave}
           />
         </View>
 
-        {/* PREFERÊNCIAS */}
-        <View style={secao}>
-          <Text style={secaoTitulo}>Preferências</Text>
-
-          <OpcaoSwitch
-            icon="notifications-outline"
-            titulo="Notificações"
-            descricao="Receba alertas e lembretes"
-            valor={notificacoes}
-            aoMudar={(valor) => alterar('notificacoes', valor)}
-          />
-
-          <OpcaoSwitch
-            icon="volume-medium-outline"
-            titulo="Som"
-            descricao="Ativa os sons de notificações"
-            valor={som}
-            aoMudar={(valor) => alterar('som', valor)}
-          />
-        </View>
-
-        {/* CONTA */}
-        <View style={secao}>
-          <TouchableOpacity style={styles.sairButton} onPress={sair}>
-            <Ionicons name="log-out-outline" size={20} color={cores.perigo} />
-            <Text style={[styles.sairTexto, { color: cores.perigo, fontSize: fonte(14) }]}>Sair da conta</Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.versao, { color: cores.textoSuave, fontSize: fonte(12) }]}>
+        <Text style={styles.versao}>
           EducaTeach · versão 1.0.0
         </Text>
-      </ScrollView>
+        <Text style={styles.versaoDescricao}>
+          Aprender, criar e evoluir!
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 25, paddingBottom: 40 },
+const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.fundo,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 40,
+    },
 
-  secao: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 18,
-    marginBottom: 16,
-  },
-  secaoTitulo: {
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textTransform: 'uppercase',
-  },
+    // Cabeçalho
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+    },
+    headerTexto: {
+      flex: 1,
+      paddingRight: 12,
+    },
+    titulo: {
+      fontSize: f(24),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+    subtitulo: {
+      fontSize: f(13),
+      color: c.textoSuave,
+      marginTop: 4,
+    },
+    headerIcone: {
+      width: 48,
+      height: 48,
+      borderRadius: 15,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  perfilLinha: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarLetra: { fontWeight: 'bold' },
-  perfilNome: { fontWeight: 'bold' },
-  perfilEmail: { marginTop: 2 },
+    // Perfil
+    perfilCard: {
+      backgroundColor: c.primaria,
+      borderRadius: 20,
+      padding: 18,
+      marginBottom: 20,
+    },
+    perfilTopo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatar: {
+      width: 56,
+      height: 56,
+      borderRadius: 18,
+      backgroundColor: c.caixaSobrePrimaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 13,
+    },
+    avatarLetra: {
+      fontWeight: 'bold',
+      fontSize: f(23),
+      color: c.textoPrimaria,
+    },
+    perfilInfo: {
+      flex: 1,
+      minWidth: 0,
+    },
+    perfilNome: {
+      fontSize: f(17),
+      fontWeight: 'bold',
+      color: c.textoPrimaria,
+    },
+    perfilEmail: {
+      fontSize: f(12),
+      color: c.textoPrimaria,
+      marginTop: 4,
+      opacity: 0.85,
+    },
+    perfilSelo: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      backgroundColor: c.caixaSobrePrimaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 8,
+    },
+    perfilRodape: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      borderTopWidth: 1,
+      borderTopColor: c.caixaSobrePrimaria,
+      marginTop: 16,
+      paddingTop: 12,
+    },
+    perfilRodapeTexto: {
+      color: c.textoPrimaria,
+      fontSize: f(12),
+      fontWeight: '600',
+    },
 
-  opcaoLinha: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 10,
-  },
-  opcaoIcone: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  opcaoTitulo: { fontWeight: '600' },
-  opcaoDescricao: { marginTop: 2 },
+    // Seções
+    secao: {
+      backgroundColor: c.superficie,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 16,
+      marginBottom: 16,
+    },
+    secaoHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 9,
+      marginBottom: 12,
+    },
+    secaoIcone: {
+      width: 30,
+      height: 30,
+      borderRadius: 10,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secaoTitulo: {
+      fontWeight: 'bold',
+      fontSize: f(15),
+      color: c.texto,
+    },
 
-  sairButton: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  sairTexto: { fontWeight: 'bold' },
+    // Opções
+    opcaoLinha: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 11,
+      paddingVertical: 11,
+    },
+    opcaoIcone: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    opcaoInfo: {
+      flex: 1,
+      minWidth: 0,
+    },
+    opcaoTitulo: {
+      fontWeight: '600',
+      fontSize: f(14),
+      color: c.texto,
+    },
+    opcaoDescricao: {
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginTop: 3,
+      lineHeight: f(17),
+    },
+    divisor: {
+      height: 1,
+      backgroundColor: c.borda,
+    },
 
-  versao: { textAlign: 'center', marginTop: 8 },
-});
+    // Sair
+    sairButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 11,
+      paddingVertical: 5,
+    },
+    sairIcone: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: c.perigoFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sairInfo: {
+      flex: 1,
+    },
+    sairTexto: {
+      color: c.perigo,
+      fontSize: f(14),
+      fontWeight: 'bold',
+    },
+    sairDescricao: {
+      color: c.textoSuave,
+      fontSize: f(12),
+      marginTop: 3,
+    },
+
+    // Rodapé
+    versaoContainer: {
+      alignItems: 'center',
+      marginTop: 8,
+      gap: 5,
+    },
+    versaoIcone: {
+      width: 34,
+      height: 34,
+      borderRadius: 11,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 3,
+    },
+    versao: {
+      textAlign: 'center',
+      color: c.textoSuave,
+      fontSize: f(12),
+      fontWeight: '600',
+    },
+    versaoDescricao: {
+      color: c.textoSuave,
+      fontSize: f(11),
+    },
+  });

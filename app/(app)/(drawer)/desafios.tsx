@@ -1,184 +1,355 @@
-import { View,Text,StyleSheet,ScrollView,TextInput,TouchableOpacity,} from 'react-native';
+
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
-import React from 'react';
-
 
 export default function DesafiosScreen() {
-
-     const { cores, fonte } = useConfiguracao();
-   const styles = criarEstilos(cores, fonte);
+  const { cores, fonte } = useConfiguracao();
+  const styles = criarEstilos(cores, fonte);
 
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* CABEÇALHO */}
+      <View style={styles.banner}>
+        <View style={styles.bannerIcone}>
+          <Ionicons name="trophy" size={30} color={cores.textoPrimaria} />
+        </View>
 
-        {/* CABEÇALHO DO DESAFIO */} 
-        <View style={styles.cabecalho}> 
+        <View style={styles.bannerInfo}>
+          <Text style={styles.bannerSubtitulo}>DESAFIO ATUAL</Text>
+          <Text style={styles.titulo}>Título da Atividade</Text>
+          <Text style={styles.bannerDescricao}>
+            Coloque seus conhecimentos em prática!
+          </Text>
+        </View>
 
-          <View style={styles.iconeDesafio}> 
-            <Ionicons name="trophy" size={28} color="#FFFFFF" /> 
-          </View> 
+        <Ionicons
+          name="sparkles"
+          size={24}
+          color={cores.textoPrimaria}
+          style={styles.bannerBrilho}
+        />
+      </View>
 
-            <View style={styles.informacoes}> 
-              <Text style={styles.titulo}> Título da Atividade </Text>  
-              </View> 
-            </View> 
-            
-                {/* STATUS */} 
-                <View style={styles.statusCard}> 
-                  <Ionicons name="time" size={24} color="#F59E0B" /> 
-                  <View style={styles.statusInfo}> 
-                    <Text style={styles.statusTitulo}> Status </Text> 
-                    <Text style={styles.statusTexto}> Em Andamento </Text> 
-                  </View> 
-                  </View> 
+      {/* STATUS */}
+      <View style={styles.statusCard}>
+        <View style={styles.statusIcone}>
+          <Ionicons name="time-outline" size={23} color="#D97706" />
+        </View>
 
-                    {/* ENUNCIADO */}
-                    <Text style={styles.label}> Enunciado </Text> 
-                    <View style={styles.enunciadoCard}> 
-                      <Text style={styles.enunciado}> Descrição detalhada do desafio... </Text> 
-                    </View> 
+        <View style={styles.statusInfo}>
+          <Text style={styles.statusTitulo}>Status do desafio</Text>
+          <Text style={styles.statusTexto}>Em andamento</Text>
+        </View>
 
-                      {/* RESOLUÇÃO */} 
-                      <Text style={styles.label}> Sua Resposta </Text> 
-                      <TextInput style={styles.input} placeholder="Digite sua resposta aqui..." placeholderTextColor="#94A3B8" multiline textAlignVertical="top" /> 
+        <View style={styles.statusEtiqueta}>
+          <View style={styles.statusPonto} />
+          <Text style={styles.statusEtiquetaTexto}>Ativo</Text>
+        </View>
+      </View>
 
-                      {/* ENVIAR */} 
-                      <TouchableOpacity style={styles.botaoEnviar}> 
-                        <Ionicons name="send" size={18} color="#FFFFFF" /> 
-                        <Text style={styles.botaoTexto}> Enviar Resposta </Text> 
-                      </TouchableOpacity> 
+      {/* ENUNCIADO */}
+      <View style={styles.secao}>
+        <View style={styles.secaoCabecalho}>
+          <View style={styles.secaoIcone}>
+            <Ionicons
+              name="document-text-outline"
+              size={20}
+              color={cores.primaria}
+            />
+          </View>
+          <Text style={styles.secaoTitulo}>Enunciado</Text>
+        </View>
 
-                        {/* VOLTAR */} 
-                        <TouchableOpacity style={styles.botaoVoltar}> 
-                          <Ionicons name="arrow-back" size={18} color="#FFFFFF" /> 
-                          <Text style={styles.botaoTexto}> Voltar </Text> 
-                        </TouchableOpacity>
+        <View style={styles.enunciadoCard}>
+          <Text style={styles.enunciado}>
+            Descrição detalhada do desafio...
+          </Text>
+        </View>
+      </View>
 
-      </ScrollView>
+      {/* RESPOSTA */}
+      <View style={styles.secao}>
+        <View style={styles.secaoCabecalho}>
+          <View style={styles.secaoIcone}>
+            <Ionicons
+              name="create-outline"
+              size={20}
+              color={cores.primaria}
+            />
+          </View>
+          <Text style={styles.secaoTitulo}>Sua resposta</Text>
+        </View>
 
+        <Text style={styles.inputDescricao}>
+          Escreva sua solução no espaço abaixo.
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Digite sua resposta aqui..."
+          placeholderTextColor={cores.textoSuave}
+          multiline
+          textAlignVertical="top"
+        />
+
+        <Text style={styles.dica}>
+          <Ionicons name="bulb-outline" size={14} color={cores.estrela} />
+          {'  '}Revise sua resposta antes de enviar.
+        </Text>
+      </View>
+
+      {/* AÇÕES */}
+      <View style={styles.acoes}>
+        <TouchableOpacity
+          style={styles.botaoEnviar}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="send" size={18} color={cores.textoPrimaria} />
+          <Text style={styles.botaoEnviarTexto}>Enviar resposta</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.botaoVoltar}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="arrow-back" size={18} color={cores.primaria} />
+          <Text style={styles.botaoVoltarTexto}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.rodape}>
+        Boa sorte no desafio! Você consegue!
+      </Text>
+    </ScrollView>
   );
 }
 
-
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.fundo },
-    content: { padding: 25, paddingBottom: 40 },
-
-    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
-    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
-    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
-    statsRow: { flexDirection: 'row', gap: 12 },
-    statBox: {
-      backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
+    container: {
       flex: 1,
+      backgroundColor: c.fundo,
     },
-    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
-    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
-
-    trilhaSection: {
-      backgroundColor: c.superficie,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: c.borda,
+    content: {
       padding: 20,
-      marginBottom: 20,
+      paddingBottom: 40,
     },
-    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
 
-    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
-    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    trilhaNumero: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
+    // Banner
+    banner: {
       backgroundColor: c.primaria,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 12,
-    },
-    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
-    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
-    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
-    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
-    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: c.primaria },
-
-    cabecalho: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-    iconeDesafio: {
-      width: 56,
-      height: 56,
-      borderRadius: 16,
-      backgroundColor: c.primaria,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 12,
-    },
-    informacoes: { flex: 1 },
-    titulo: { fontSize: f(24), fontWeight: 'bold', color: c.texto },
-
-    statusCard: {
+      borderRadius: 20,
+      padding: 20,
       flexDirection: 'row',
       alignItems: 'center',
+      marginBottom: 18,
+      overflow: 'hidden',
+    },
+    bannerIcone: {
+      width: 58,
+      height: 58,
+      borderRadius: 17,
+      backgroundColor: c.caixaSobrePrimaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 14,
+    },
+    bannerInfo: {
+      flex: 1,
+    },
+    bannerSubtitulo: {
+      color: c.textoPrimaria,
+      opacity: 0.8,
+      fontSize: f(11),
+      fontWeight: 'bold',
+      letterSpacing: 1,
+      marginBottom: 4,
+    },
+    titulo: {
+      color: c.textoPrimaria,
+      fontSize: f(21),
+      fontWeight: 'bold',
+    },
+    bannerDescricao: {
+      color: c.textoPrimaria,
+      opacity: 0.85,
+      fontSize: f(12),
+      marginTop: 5,
+    },
+    bannerBrilho: {
+      marginLeft: 6,
+    },
+
+    // Status
+    statusCard: {
       backgroundColor: c.superficie,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 16,
-      marginBottom: 20,
+      padding: 15,
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 24,
     },
-    statusInfo: { marginLeft: 12, flex: 1 },
-    statusTitulo: { fontSize: f(13), color: c.textoSuave, marginBottom: 2 },
-    statusTexto: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
+    statusIcone: {
+      width: 46,
+      height: 46,
+      borderRadius: 14,
+      backgroundColor: '#FEF3C7',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    statusInfo: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    statusTitulo: {
+      color: c.textoSuave,
+      fontSize: f(12),
+      marginBottom: 3,
+    },
+    statusTexto: {
+      color: c.texto,
+      fontSize: f(15),
+      fontWeight: 'bold',
+    },
+    statusEtiqueta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.iconeFundo,
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      gap: 6,
+    },
+    statusPonto: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: c.sucesso,
+    },
+    statusEtiquetaTexto: {
+      color: c.texto,
+      fontSize: f(11),
+      fontWeight: 'bold',
+    },
 
-    label: { fontSize: f(14), fontWeight: '700', color: c.texto, marginBottom: 10 },
+    // Seções
+    secao: {
+      marginBottom: 24,
+    },
+    secaoCabecalho: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+      gap: 9,
+    },
+    secaoIcone: {
+      width: 36,
+      height: 36,
+      borderRadius: 11,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secaoTitulo: {
+      color: c.texto,
+      fontSize: f(17),
+      fontWeight: 'bold',
+    },
+
+    // Enunciado
     enunciadoCard: {
       backgroundColor: c.superficie,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 16,
-      marginBottom: 20,
+      padding: 18,
     },
-    enunciado: { fontSize: f(15), color: c.texto, lineHeight: 22 },
+    enunciado: {
+      color: c.texto,
+      fontSize: f(15),
+      lineHeight: 24,
+    },
 
+    // Resposta
+    inputDescricao: {
+      color: c.textoSuave,
+      fontSize: f(13),
+      marginBottom: 10,
+    },
     input: {
       backgroundColor: c.superficie,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: c.borda,
-      minHeight: 140,
+      minHeight: 170,
       padding: 16,
-      paddingTop: 16,
       color: c.texto,
       fontSize: f(15),
-      marginBottom: 20,
+      lineHeight: 23,
       textAlignVertical: 'top',
     },
+    dica: {
+      color: c.textoSuave,
+      fontSize: f(12),
+      marginTop: 10,
+    },
 
+    // Botões
+    acoes: {
+      gap: 12,
+      marginTop: 4,
+    },
     botaoEnviar: {
       backgroundColor: c.primaria,
       borderRadius: 14,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 14,
-      marginBottom: 12,
-      gap: 8,
+      paddingVertical: 16,
+      gap: 9,
+    },
+    botaoEnviarTexto: {
+      color: c.textoPrimaria,
+      fontSize: f(15),
+      fontWeight: 'bold',
     },
     botaoVoltar: {
-      backgroundColor: c.primaria,
+      backgroundColor: c.superficie,
+      borderWidth: 1,
+      borderColor: c.borda,
       borderRadius: 14,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: 14,
-      gap: 8,
+      paddingVertical: 15,
+      gap: 9,
     },
-    botaoTexto: { color: '#FFFFFF', fontSize: f(15), fontWeight: 'bold' },
+    botaoVoltarTexto: {
+      color: c.primaria,
+      fontSize: f(15),
+      fontWeight: 'bold',
+    },
+
+    rodape: {
+      color: c.textoSuave,
+      fontSize: f(12),
+      textAlign: 'center',
+      marginTop: 24,
+    },
   });

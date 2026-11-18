@@ -1,288 +1,552 @@
-import {View,Text,StyleSheet,ScrollView,TouchableOpacity,TextInput,} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
-import React from 'react';
 
-const PURPLE = '#673AB7';
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+
+type Ajuda = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  icone: keyof typeof Ionicons.glyphMap;
+};
+
+const PERGUNTAS: Ajuda[] = [
+  {
+    id: 'aprender',
+    titulo: 'Aprender',
+    descricao: 'Como funciona a jornada de aprendizado?',
+    icone: 'book-outline',
+  },
+  {
+    id: 'desafios',
+    titulo: 'Desafios',
+    descricao: 'Como entregar uma atividade?',
+    icone: 'trophy-outline',
+  },
+  {
+    id: 'projetos',
+    titulo: 'Meus Projetos',
+    descricao: 'Como criar e gerenciar meus projetos?',
+    icone: 'folder-open-outline',
+  },
+  {
+    id: 'ranking',
+    titulo: 'Ranking',
+    descricao: 'Como funcionam os pontos e o ranking?',
+    icone: 'podium-outline',
+  },
+  {
+    id: 'conta',
+    titulo: 'Minha conta',
+    descricao: 'Problemas com login ou cadastro?',
+    icone: 'person-outline',
+  },
+];
+
+type Estilos = ReturnType<typeof criarEstilos>;
 
 export default function AjudarScreen() {
-       const { cores, fonte } = useConfiguracao();
-   const styles = criarEstilos(cores, fonte);
-    
+  const { cores, fonte } = useConfiguracao();
+  const [pesquisa, setPesquisa] = useState('');
+
+  const styles = useMemo(
+    () => criarEstilos(cores, fonte),
+    [cores, fonte],
+  );
+
+  const perguntasFiltradas = PERGUNTAS.filter((item) => {
+    const termo = pesquisa.trim().toLocaleLowerCase();
+
+    if (!termo) return true;
 
     return (
-            <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      item.titulo.toLocaleLowerCase().includes(termo) ||
+      item.descricao.toLocaleLowerCase().includes(termo)
+    );
+  });
 
-                {/* CABEÇALHO */}
-                <View style={styles.cabecalho}>
-                    <View style={styles.iconeAjuda}>
-                        <Ionicons name="help" size={32} color="#FFFFFF"/>
-                    </View>
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* CABEÇALHO */}
+      <View style={styles.header}>
+        <View style={styles.headerTexto}>
+          <Text style={styles.titulo} accessibilityRole="header">
+            Central de Ajuda
+          </Text>
+          <Text style={styles.subtitulo}>
+            Encontre respostas para suas dúvidas.
+          </Text>
+        </View>
 
-                    <View>
-                        <Text style={styles.titulo}>
-                            Como podemos ajudar?
-                        </Text>
+        <View style={styles.headerIcone}>
+          <Ionicons
+            name="help"
+            size={28}
+            color={cores.textoPrimaria}
+          />
+        </View>
+      </View>
 
-                        <Text style={styles.subtitulo}>
-                            Encontre respostas para suas dúvidas.
-                        </Text>
-                    </View>
-                </View>
+      {/* BANNER */}
+      <View style={styles.banner}>
+        <View style={styles.bannerIcone}>
+          <Ionicons
+            name="chatbubbles"
+            size={28}
+            color={cores.textoPrimaria}
+          />
+        </View>
 
+        <View style={styles.bannerInfo}>
+          <Text style={styles.bannerTitulo}>
+            Como podemos ajudar?
+          </Text>
+          <Text style={styles.bannerTexto}>
+            Estamos aqui para ajudar você a aproveitar melhor o EducaTeach.
+          </Text>
+        </View>
 
-                {/* PESQUISA */}
-                <View style={styles.pesquisa}>
-                    <Ionicons name="search" size={21} color="#94A3B8"/>
+        <Ionicons
+          name="sparkles"
+          size={22}
+          color={cores.textoPrimaria}
+        />
+      </View>
 
-                    <TextInput style={styles.inputPesquisa} placeholder="Pesquise uma dúvida..." placeholderTextColor="#94A3B8"/>
-                </View>
+      {/* PESQUISA */}
+      <View style={styles.pesquisa}>
+        <Ionicons
+          name="search"
+          size={21}
+          color={cores.textoSuave}
+        />
 
+        <TextInput
+          style={styles.inputPesquisa}
+          placeholder="Pesquise uma dúvida..."
+          placeholderTextColor={cores.textoSuave}
+          value={pesquisa}
+          onChangeText={setPesquisa}
+          returnKeyType="search"
+          accessibilityLabel="Pesquisar perguntas frequentes"
+        />
 
-                {/* PERGUNTAS FREQUENTES */}
-                <Text style={styles.secaoTitulo}>
-                    Perguntas frequentes
+        {pesquisa.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setPesquisa('')}
+            accessibilityRole="button"
+            accessibilityLabel="Limpar pesquisa"
+          >
+            <Ionicons
+              name="close-circle"
+              size={20}
+              color={cores.textoSuave}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* PERGUNTAS FREQUENTES */}
+      <View style={styles.secaoHeader}>
+        <View>
+          <Text style={styles.secaoTitulo}>
+            Perguntas frequentes
+          </Text>
+          <Text style={styles.secaoSubtitulo}>
+            Encontre ajuda por assunto
+          </Text>
+        </View>
+
+        <View style={styles.contador}>
+          <Text style={styles.contadorTexto}>
+            {perguntasFiltradas.length}
+          </Text>
+        </View>
+      </View>
+
+      {/* LISTA DE CATEGORIAS */}
+      <View style={styles.lista}>
+        {perguntasFiltradas.length > 0 ? (
+          perguntasFiltradas.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.cardAjuda}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.titulo}. ${item.descricao}`}
+            >
+              <View style={styles.iconeCard}>
+                <Ionicons
+                  name={item.icone}
+                  size={23}
+                  color={cores.primaria}
+                />
+              </View>
+
+              <View style={styles.textosCard}>
+                <Text style={styles.tituloCard}>
+                  {item.titulo}
                 </Text>
 
+                <Text style={styles.descricaoCard}>
+                  {item.descricao}
+                </Text>
+              </View>
 
-                <TouchableOpacity style={styles.cardAjuda}>
+              <Ionicons
+                name="chevron-forward"
+                size={19}
+                color={cores.textoSuave}
+              />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.vazio}>
+            <View style={styles.vazioIcone}>
+              <Ionicons
+                name="search-outline"
+                size={30}
+                color={cores.textoSuave}
+              />
+            </View>
 
-                    <View style={styles.iconeCard}>
-                        <Ionicons name="book-outline" size={24} color={PURPLE}/>
-                    </View>
+            <Text style={styles.vazioTitulo}>
+              Nenhum resultado encontrado
+            </Text>
 
-                    <View style={styles.textosCard}>
+            <Text style={styles.vazioTexto}>
+              Tente pesquisar com outras palavras.
+            </Text>
 
-                        <Text style={styles.tituloCard}>
-                            Aprender
-                        </Text>
+            <TouchableOpacity
+              onPress={() => setPesquisa('')}
+              style={styles.limparBotao}
+            >
+              <Text style={styles.limparTexto}>
+                Limpar pesquisa
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
 
-                        <Text style={styles.descricaoCard}>
-                            Como funciona a jornada de aprendizado?
-                        </Text>
+      {/* CONTATO */}
+      <View style={styles.contato}>
+        <View style={styles.contatoIcone}>
+          <Ionicons
+            name="headset-outline"
+            size={28}
+            color={cores.primaria}
+          />
+        </View>
 
-                    </View>
+        <Text style={styles.contatoTitulo}>
+          Ainda precisa de ajuda?
+        </Text>
 
-                    <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color="#94A3B8"
-                    />
+        <Text style={styles.contatoTexto}>
+          Não encontrou o que procurava? Entre em contato com nossa equipe.
+        </Text>
 
-                </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.botaoContato}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+        >
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={18}
+            color={cores.textoPrimaria}
+          />
 
+          <Text style={styles.textoBotaoContato}>
+            Fale conosco
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-                <TouchableOpacity style={styles.cardAjuda}>
-
-                    <View style={styles.iconeCard}>
-                        <Ionicons name="trophy-outline" size={24} color={PURPLE}/>
-                    </View>
-
-                    <View style={styles.textosCard}>
-                        <Text style={styles.tituloCard}>
-                            Desafios
-                        </Text>
-
-                        <Text style={styles.descricaoCard}>
-                            Como entregar uma atividade?
-                        </Text>
-                    </View>
-
-                    <Ionicons name="chevron-forward" size={20} color="#94A3B8"/>
-
-                </TouchableOpacity>
-
-
-                <TouchableOpacity style={styles.cardAjuda}>
-                    <View style={styles.iconeCard}>
-                        <Ionicons name="folder-open-outline" size={24} color={PURPLE}/>
-                    </View>
-
-                    <View style={styles.textosCard}>
-                        <Text style={styles.tituloCard}>
-                            Meus Projetos
-                        </Text>
-
-                        <Text style={styles.descricaoCard}>
-                            Como criar e gerenciar meus projetos?
-                        </Text>
-                    </View>
-
-                    <Ionicons name="chevron-forward" size={20} color="#94A3B8"/>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.cardAjuda}>
-                    <View style={styles.iconeCard}>
-                        <Ionicons name="podium-outline" size={24} color={PURPLE}/>
-                    </View>
-
-                    <View style={styles.textosCard}>
-                        <Text style={styles.tituloCard}>
-                            Ranking
-                        </Text>
-
-                        <Text style={styles.descricaoCard}>
-                            Como funcionam os pontos e o ranking?
-                        </Text>
-                    </View>
-
-                    <Ionicons name="chevron-forward" size={20} color="#94A3B8"/>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.cardAjuda}>
-                    <View style={styles.iconeCard}>
-                        <Ionicons name="person-outline" size={24} color={PURPLE}/>
-                    </View>
-
-                    <View style={styles.textosCard}>
-                        <Text style={styles.tituloCard}>
-                            Minha conta
-                        </Text>
-
-                        <Text style={styles.descricaoCard}>
-                            Problemas com login ou cadastro?
-                        </Text>
-                    </View>
-
-                    <Ionicons name="chevron-forward" size={20} color="#94A3B8"/>
-                </TouchableOpacity>
-
-
-                {/* CONTATO */}
-                <View style={styles.contato}>
-                    <Ionicons name="chatbubbles-outline" size={30} color={PURPLE}/>
-
-                    <Text style={styles.contatoTitulo}>
-                        Ainda precisa de ajuda?
-                    </Text>
-
-                    <Text style={styles.contatoTexto}>
-                        Entre em contato com nossa equipe.
-                    </Text>
-
-                    <TouchableOpacity style={styles.botaoContato}>
-                        <Text style={styles.textoBotaoContato}>
-                            Fale conosco
-                        </Text>
-                    </TouchableOpacity>
-
-                </View>
-            </ScrollView>
-    );
+      {/* RODAPÉ */}
+      <Text style={styles.rodape}>
+        EducaTeach · Estamos aqui para ajudar!
+      </Text>
+    </ScrollView>
+  );
 }
 
 const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.fundo },
-    content: { padding: 25, paddingBottom: 40 },
+    container: {
+      flex: 1,
+      backgroundColor: c.fundo,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 40,
+    },
 
-        cabecalho: { flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 24 },
-        iconeAjuda: {
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: c.primaria,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        titulo: { fontSize: f(22), fontWeight: 'bold', color: c.texto },
-        subtitulo: { fontSize: f(14), color: c.textoSuave, marginTop: 4 },
-        pesquisa: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            backgroundColor: c.superficie,
-            borderWidth: 1,
-            borderColor: c.borda,
-            borderRadius: 12,
-            paddingHorizontal: 14,
-            marginBottom: 24,
-        },
-        inputPesquisa: { flex: 1, color: c.texto, fontSize: f(15), paddingVertical: 13 },
-        secaoTitulo: { fontSize: f(18), fontWeight: 'bold', color: c.texto, marginBottom: 12 },
-        cardAjuda: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: c.superficie,
-            borderWidth: 1,
-            borderColor: c.borda,
-            borderRadius: 14,
-            padding: 14,
-            marginBottom: 10,
-        },
-        iconeCard: {
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            backgroundColor: c.iconeFundo,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-        },
-        textosCard: { flex: 1 },
-        tituloCard: { fontSize: f(15), fontWeight: 'bold', color: c.texto },
-        descricaoCard: { fontSize: f(13), color: c.textoSuave, marginTop: 3 },
-        contato: {
-            alignItems: 'center',
-            backgroundColor: c.superficie,
-            borderWidth: 1,
-            borderColor: c.borda,
-            borderRadius: 16,
-            padding: 20,
-            marginTop: 18,
-        },
-        contatoTitulo: { fontSize: f(17), fontWeight: 'bold', color: c.texto, marginTop: 10 },
-        contatoTexto: { fontSize: f(14), color: c.textoSuave, marginTop: 5, textAlign: 'center' },
+    // Cabeçalho
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 18,
+    },
+    headerTexto: {
+      flex: 1,
+      paddingRight: 12,
+    },
+    titulo: {
+      fontSize: f(24),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+    subtitulo: {
+      fontSize: f(13),
+      color: c.textoSuave,
+      marginTop: 4,
+    },
+    headerIcone: {
+      width: 48,
+      height: 48,
+      borderRadius: 15,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
-    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
-    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
-    statsRow: { flexDirection: 'row', gap: 12 },
-    statBox: {
+    // Banner
+    banner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.primaria,
+      borderRadius: 20,
+      padding: 17,
+      marginBottom: 22,
+      gap: 12,
+    },
+    bannerIcone: {
+      width: 50,
+      height: 50,
+      borderRadius: 15,
       backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bannerInfo: {
       flex: 1,
     },
-    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
-    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
+    bannerTitulo: {
+      fontSize: f(16),
+      fontWeight: 'bold',
+      color: c.textoPrimaria,
+    },
+    bannerTexto: {
+      fontSize: f(12),
+      color: c.textoPrimaria,
+      marginTop: 5,
+      lineHeight: f(17),
+    },
 
-    trilhaSection: {
+    // Pesquisa
+    pesquisa: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
       backgroundColor: c.superficie,
-      borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 20,
-      marginBottom: 20,
+      borderRadius: 14,
+      paddingHorizontal: 14,
+      minHeight: 52,
+      marginBottom: 24,
     },
-    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
+    inputPesquisa: {
+      flex: 1,
+      color: c.texto,
+      fontSize: f(14),
+      paddingVertical: 12,
+    },
 
-    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
-    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    trilhaNumero: {
-      width: 32,
+    // Seção
+    secaoHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 13,
+    },
+    secaoTitulo: {
+      fontSize: f(19),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+    secaoSubtitulo: {
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginTop: 3,
+    },
+    contador: {
+      minWidth: 32,
       height: 32,
+      paddingHorizontal: 8,
+      borderRadius: 11,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    contadorTexto: {
+      color: c.primaria,
+      fontSize: f(13),
+      fontWeight: 'bold',
+    },
+
+    // Lista
+    lista: {
+      gap: 11,
+    },
+    cardAjuda: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderWidth: 1,
+      borderColor: c.borda,
       borderRadius: 16,
-      backgroundColor: c.primaria,
+      padding: 14,
+    },
+    iconeCard: {
+      width: 46,
+      height: 46,
+      borderRadius: 14,
+      backgroundColor: c.iconeFundo,
       alignItems: 'center',
       justifyContent: 'center',
       marginRight: 12,
     },
-    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
-    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
-    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
-    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
-    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: c.primaria },
-        botaoContato: {
-            backgroundColor: c.primaria,
-            borderRadius: 12,
-            paddingVertical: 12,
-            paddingHorizontal: 24,
-            alignItems: 'center',
-            marginTop: 16,
-        },
-        textoBotaoContato: { color: c.textoPrimaria, fontSize: f(15), fontWeight: 'bold' },
+    textosCard: {
+      flex: 1,
+      minWidth: 0,
+    },
+    tituloCard: {
+      fontSize: f(15),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+    descricaoCard: {
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginTop: 4,
+      lineHeight: f(17),
+    },
+
+    // Estado vazio
+    vazio: {
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 24,
+    },
+    vazioIcone: {
+      width: 58,
+      height: 58,
+      borderRadius: 18,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 12,
+    },
+    vazioTitulo: {
+      fontSize: f(15),
+      fontWeight: 'bold',
+      color: c.texto,
+      textAlign: 'center',
+    },
+    vazioTexto: {
+      fontSize: f(12),
+      color: c.textoSuave,
+      textAlign: 'center',
+      marginTop: 5,
+    },
+    limparBotao: {
+      marginTop: 15,
+      paddingHorizontal: 16,
+      paddingVertical: 9,
+      borderRadius: 10,
+      backgroundColor: c.iconeFundo,
+    },
+    limparTexto: {
+      color: c.primaria,
+      fontWeight: 'bold',
+      fontSize: f(13),
+    },
+
+    // Contato
+    contato: {
+      alignItems: 'center',
+      backgroundColor: c.superficie,
+      borderWidth: 1,
+      borderColor: c.borda,
+      borderRadius: 20,
+      padding: 22,
+      marginTop: 22,
+    },
+    contatoIcone: {
+      width: 58,
+      height: 58,
+      borderRadius: 18,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    contatoTitulo: {
+      fontSize: f(17),
+      fontWeight: 'bold',
+      color: c.texto,
+      marginTop: 13,
+      textAlign: 'center',
+    },
+    contatoTexto: {
+      fontSize: f(13),
+      color: c.textoSuave,
+      marginTop: 6,
+      textAlign: 'center',
+      lineHeight: f(19),
+    },
+    botaoContato: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: c.primaria,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 22,
+      marginTop: 17,
+    },
+    textoBotaoContato: {
+      color: c.textoPrimaria,
+      fontSize: f(14),
+      fontWeight: 'bold',
+    },
+
+    // Rodapé
+    rodape: {
+      color: c.textoSuave,
+      fontSize: f(11),
+      textAlign: 'center',
+      marginTop: 20,
+    },
   });

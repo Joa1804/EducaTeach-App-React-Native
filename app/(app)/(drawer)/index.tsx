@@ -1,11 +1,25 @@
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Cores, useConfiguracao} from '@/context/ConfiguracaoContext';
-import React from 'react';
+
+import { Cores, useConfiguracao } from '@/context/ConfiguracaoContext';
 import { useUsuario } from '@/context/UsuarioContext';
 import { useTrilha } from '@/hooks/use-trilha';
 import type { EtapaTrilha } from '@/lib/licoes/trilha';
+
+import {
+  Cartao,
+  Etiqueta,
+  BarraProgresso,
+} from '@/components/ui';
 
 const ROTULO_STATUS: Readonly<Record<EtapaTrilha['status'], string>> = {
   concluida: 'Concluída',
@@ -14,55 +28,147 @@ const ROTULO_STATUS: Readonly<Record<EtapaTrilha['status'], string>> = {
 };
 
 export default function HomeScreen() {
-  const {cores, fonte} = useConfiguracao();
+  const { cores, fonte } = useConfiguracao();
   const styles = criarEstilos(cores, fonte);
+
   const { usuario } = useUsuario();
   const router = useRouter();
+
   const { etapas, concluidas, total, carregando } = useTrilha();
 
   const primeiroNome = usuario?.nome.trim().split(/\s+/)[0] ?? '';
 
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <View style={styles.greetingCard}>
-          <Text style={styles.greeting}>Olá{primeiroNome ? `, ${primeiroNome}` : ''}! 👋</Text>
-          <Text style={styles.greetingSubtitle}>Continue sua jornada de programação!</Text>
-          <View style={styles.statsRow}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Cabeçalho de boas-vindas */}
+      <View style={styles.greetingCard}>
+        <View style={styles.greetingTop}>
+          <View style={styles.greetingTextContainer}>
+            <Text style={styles.greeting}>
+              Olá{primeiroNome ? `, ${primeiroNome}` : ''}! 👋
+            </Text>
 
-            <View style={styles.statBox}>
-              <Text style={styles.statValue}>{usuario?.pontos ?? 0}</Text>
-              <Text style={styles.statLabel}>Pontos</Text>
-            </View>
-
-            <View style={styles.statBox}>
-              <Text style={styles.statValue}>{usuario?.moedas ?? 0}</Text>
-              <Text style={styles.statLabel}>Moedas</Text>
-            </View>
-
-            <View style={styles.statBox}>
-              <Text style={styles.statValue}>{carregando ? '…' : `${concluidas}/${total}`}</Text>
-              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit>Lições</Text>
-            </View>
+            <Text style={styles.greetingSubtitle}>
+              Que tal aprender algo novo hoje?
+            </Text>
           </View>
-        </View>
 
-        <View style={styles.trilhaSection}>
-          <View style={styles.trilhaHeader}>
-            <Ionicons name="book" size={20} color={cores.texto} />
-            <Text style={styles.trilhaTitle}>Sua Trilha de Aprendizado</Text>
-          </View>
-          {etapas.map((etapa) => (
-            <TrilhaCard
-              key={etapa.licao.id}
-              styles={styles}
-              etapa={etapa}
-              onPress={() =>
-                router.push({ pathname: '/atividades/[id]', params: { id: etapa.licao.id } })
-              }
+          <View style={styles.greetingIcon}>
+            <Ionicons
+              name="school"
+              size={34}
+              color={cores.textoPrimaria}
             />
-          ))}
+          </View>
         </View>
-      </ScrollView>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Ionicons
+              name="star"
+              size={20}
+              color="#FFD45C"
+            />
+            <Text style={styles.statValue}>
+              {usuario?.pontos ?? 0}
+            </Text>
+            <Text style={styles.statLabel}>Pontos</Text>
+          </View>
+
+          <View style={styles.statBox}>
+            <Ionicons
+              name="wallet"
+              size={20}
+              color="#FFD45C"
+            />
+            <Text style={styles.statValue}>
+              {usuario?.moedas ?? 0}
+            </Text>
+            <Text style={styles.statLabel}>Moedas</Text>
+          </View>
+
+          <View style={styles.statBox}>
+            <Ionicons
+              name="book"
+              size={20}
+              color="#FFD45C"
+            />
+            <Text style={styles.statValue}>
+              {carregando ? '…' : `${concluidas}/${total}`}
+            </Text>
+            <Text
+              style={styles.statLabel}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              Lições
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Resumo da trilha */}
+      <View style={styles.sectionHeading}>
+        <View style={styles.sectionTitleContainer}>
+          <View style={styles.sectionIcon}>
+            <Ionicons
+              name="map"
+              size={22}
+              color={cores.primaria}
+            />
+          </View>
+
+          <View>
+            <Text style={styles.sectionTitle}>
+              Sua jornada
+            </Text>
+            <Text style={styles.sectionSubtitle}>
+              Continue de onde parou!
+            </Text>
+          </View>
+        </View>
+
+        <Etiqueta texto={`${concluidas}/${total}`} />
+      </View>
+
+      {/* Etapas da trilha */}
+      <View style={styles.trilhaSection}>
+        {etapas.map((etapa) => (
+          <TrilhaCard
+            key={etapa.licao.id}
+            etapa={etapa}
+            styles={styles}
+            cores={cores}
+            onPress={() =>
+              router.push({
+                pathname: '/atividades/[id]',
+                params: { id: etapa.licao.id },
+              })
+            }
+          />
+        ))}
+
+        {!carregando && etapas.length === 0 && (
+          <View style={styles.emptyState}>
+            <Ionicons
+              name="book-outline"
+              size={42}
+              color={cores.textoSuave}
+            />
+            <Text style={styles.emptyTitle}>
+              Sua jornada está começando!
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              As lições aparecerão aqui quando estiverem disponíveis.
+            </Text>
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -70,88 +176,340 @@ type PropsTrilhaCard = {
   etapa: EtapaTrilha;
   onPress: () => void;
   styles: ReturnType<typeof criarEstilos>;
+  cores: Cores;
 };
 
-function TrilhaCard({ etapa, onPress, styles }: PropsTrilhaCard) {
+function TrilhaCard({
+  etapa,
+  onPress,
+  styles,
+  cores,
+}: PropsTrilhaCard) {
   const { licao, indice, status, estrelas } = etapa;
+
   const bloqueada = status === 'bloqueada';
-  // Progresso da lição em estrelas: 0, 33, 67 ou 100%.
+  const concluida = status === 'concluida';
+
   const progresso = Math.round((estrelas / 3) * 100);
-  const info = `${licao.exercicios.length} exercícios · ${ROTULO_STATUS[status]}`;
+
+  const info = `${licao.exercicios.length} exercícios`;
+
+  const corStatus =
+    concluida
+      ? cores.sucesso
+      : bloqueada
+        ? cores.textoSuave
+        : cores.primaria;
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={bloqueada}
-      accessibilityRole="button"
-      accessibilityLabel={`${licao.titulo}, ${info}`}
-      accessibilityState={{ disabled: bloqueada }}
-      style={[styles.trilhaCard, bloqueada && styles.trilhaCardBloqueado]}
-    >
-      <View style={styles.trilhaCardTop}>
-        <View style={styles.trilhaNumero}>
-          <Text style={styles.trilhaNumeroText}>{indice + 1}</Text>
+    <View style={styles.trilhaCardWrapper}>
+      <Pressable
+        onPress={onPress}
+        disabled={bloqueada}
+        accessibilityRole="button"
+        accessibilityLabel={`${licao.titulo}, ${info} · ${ROTULO_STATUS[status]}`}
+        accessibilityState={{ disabled: bloqueada }}
+        style={({ pressed }) => [
+          styles.trilhaCard,
+          bloqueada && styles.trilhaCardBloqueado,
+          pressed && !bloqueada && styles.trilhaCardPressed,
+        ]}
+      >
+        <View style={styles.trilhaCardTop}>
+          <View
+            style={[
+              styles.trilhaNumero,
+              concluida && styles.trilhaNumeroConcluido,
+              bloqueada && styles.trilhaNumeroBloqueado,
+            ]}
+          >
+            <Ionicons
+              name={
+                concluida
+                  ? 'checkmark'
+                  : bloqueada
+                    ? 'lock-closed'
+                    : 'play'
+              }
+              size={19}
+              color={cores.textoPrimaria}
+            />
+          </View>
+
+          <View style={styles.trilhaCardText}>
+            <Text
+              style={styles.trilhaCardTitulo}
+              numberOfLines={2}
+            >
+              {licao.titulo}
+            </Text>
+
+            <Text style={styles.trilhaCardInfo}>
+              Etapa {indice + 1} · {info}
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={21}
+            color={cores.textoSuave}
+          />
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.trilhaCardTitulo}>{licao.titulo}</Text>
-          <Text style={styles.trilhaCardInfo}>{info}</Text>
+
+        <View style={styles.trilhaCardFooter}>
+          <View style={styles.trilhaStatus}>
+            <Etiqueta
+              texto={ROTULO_STATUS[status]}
+              cor={corStatus}
+            />
+          </View>
+
+          <View style={styles.estrelas}>
+            {[1, 2, 3].map((estrela) => (
+              <Ionicons
+                key={estrela}
+                name={estrela <= estrelas ? 'star' : 'star-outline'}
+                size={17}
+                color={estrela <= estrelas ? '#EBAF32' : cores.textoSuave}
+              />
+            ))}
+          </View>
         </View>
-        <Text style={styles.trilhaCardProgresso}>{progresso}%</Text>
-      </View>
-      <View style={styles.progressBarBg}>
-        <View style={[styles.progressBarFill, { width: `${progresso}%` }]} />
-      </View>
-    </Pressable>
+
+        <BarraProgresso
+          valor={estrelas / 3}
+          segmentos={3}
+          rotulo={`Progresso da lição: ${progresso}%`}
+        />
+      </Pressable>
+    </View>
   );
 }
 
-
-const criarEstilos = (c: Cores, f: (tamanho: number) => number) =>
+const criarEstilos = (
+  c: Cores,
+  f: (tamanho: number) => number
+) =>
   StyleSheet.create({
-    container: { flex: 1, backgroundColor: c.fundo },
-    content: { padding: 25, paddingBottom: 40 },
+    container: {
+      flex: 1,
+      backgroundColor: c.fundo,
+    },
 
-    greetingCard: { backgroundColor: c.primaria, borderRadius: 20, padding: 24, marginBottom: 20 },
-    greeting: { fontSize: f(22), fontWeight: 'bold', color: c.textoPrimaria },
-    greetingSubtitle: { fontSize: f(14), color: c.textoPrimaria, marginTop: 4, marginBottom: 20 },
-    statsRow: { flexDirection: 'row', gap: 12 },
-    statBox: {
+    content: {
+      padding: 20,
+      paddingBottom: 40,
+    },
+
+    // Cabeçalho
+    greetingCard: {
+      backgroundColor: c.primaria,
+      borderRadius: 24,
+      padding: 22,
+      marginBottom: 28,
+    },
+
+    greetingTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 24,
+    },
+
+    greetingTextContainer: {
+      flex: 1,
+      marginRight: 12,
+    },
+
+    greeting: {
+      fontSize: f(24),
+      fontWeight: 'bold',
+      color: c.textoPrimaria,
+    },
+
+    greetingSubtitle: {
+      fontSize: f(14),
+      color: c.textoPrimaria,
+      marginTop: 5,
+      opacity: 0.9,
+    },
+
+    greetingIcon: {
+      width: 58,
+      height: 58,
+      borderRadius: 18,
       backgroundColor: c.caixaSobrePrimaria,
-      borderRadius: 12,
-      paddingVertical: 12,
-      paddingHorizontal: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    // Estatísticas
+    statsRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+
+    statBox: {
+      flex: 1,
+      backgroundColor: c.caixaSobrePrimaria,
+      borderRadius: 16,
+      paddingVertical: 13,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+      gap: 4,
+    },
+
+    statValue: {
+      color: c.textoPrimaria,
+      fontSize: f(19),
+      fontWeight: 'bold',
+    },
+
+    statLabel: {
+      color: c.textoPrimaria,
+      fontSize: f(12),
+    },
+
+    // Cabeçalho da seção
+    sectionHeading: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+
+    sectionTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 11,
+    },
+
+    sectionIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      backgroundColor: c.iconeFundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    sectionTitle: {
+      fontSize: f(19),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+
+    sectionSubtitle: {
+      fontSize: f(13),
+      color: c.textoSuave,
+      marginTop: 2,
+    },
+
+    // Trilha
+    trilhaSection: {
+      gap: 12,
+    },
+
+    trilhaCardWrapper: {
+      marginBottom: 2,
+    },
+
+    trilhaCard: {
+      backgroundColor: c.superficie,
+      borderRadius: 19,
+      borderWidth: 1,
+      borderColor: c.borda,
+      padding: 16,
+      gap: 15,
+    },
+
+    trilhaCardBloqueado: {
+      opacity: 0.6,
+    },
+
+    trilhaCardPressed: {
+      opacity: 0.8,
+      transform: [{ scale: 0.985 }],
+    },
+
+    trilhaCardTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+
+    trilhaNumero: {
+      width: 43,
+      height: 43,
+      borderRadius: 15,
+      backgroundColor: c.primaria,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    trilhaNumeroConcluido: {
+      backgroundColor: c.sucesso,
+    },
+
+    trilhaNumeroBloqueado: {
+      backgroundColor: c.iconeFundo,
+    },
+
+    trilhaCardText: {
       flex: 1,
     },
-    statValue: { color: c.textoPrimaria, fontSize: f(20), fontWeight: 'bold' },
-    statLabel: { color: c.textoPrimaria, fontSize: f(13), marginTop: 2 },
 
-    trilhaSection: {
+    trilhaCardTitulo: {
+      fontSize: f(16),
+      fontWeight: 'bold',
+      color: c.texto,
+    },
+
+    trilhaCardInfo: {
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginTop: 4,
+    },
+
+    trilhaCardFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+
+    trilhaStatus: {
+      flex: 1,
+      alignItems: 'flex-start',
+    },
+
+    estrelas: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+    },
+
+    // Estado vazio
+    emptyState: {
       backgroundColor: c.superficie,
       borderRadius: 20,
       borderWidth: 1,
       borderColor: c.borda,
-      padding: 20,
-      marginBottom: 20,
-    },
-    trilhaHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
-    trilhaTitle: { fontSize: f(18), fontWeight: 'bold', color: c.texto },
-
-    trilhaCard: { backgroundColor: c.iconeFundo, borderRadius: 14, padding: 16, marginBottom: 12 },
-    trilhaCardBloqueado: { opacity: 0.6 },
-    trilhaCardTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-    trilhaNumero: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: c.primaria,
+      padding: 28,
       alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 12,
+      gap: 10,
     },
-    trilhaNumeroText: { color: c.textoPrimaria, fontWeight: 'bold', fontSize: f(14) },
-    trilhaCardTitulo: { fontWeight: 'bold', fontSize: f(15), color: c.texto },
-    trilhaCardInfo: { color: c.textoSuave, fontSize: f(13), marginTop: 2 },
-    trilhaCardProgresso: { fontWeight: 'bold', color: c.primaria, fontSize: f(15) },
-    progressBarBg: { height: 6, backgroundColor: c.primariaClara, borderRadius: 3, overflow: 'hidden' },
-    progressBarFill: { height: '100%', backgroundColor: c.primaria },
+
+    emptyTitle: {
+      fontSize: f(17),
+      fontWeight: 'bold',
+      color: c.texto,
+      textAlign: 'center',
+    },
+
+    emptySubtitle: {
+      fontSize: f(13),
+      color: c.textoSuave,
+      textAlign: 'center',
+      lineHeight: f(20),
+    },
   });
