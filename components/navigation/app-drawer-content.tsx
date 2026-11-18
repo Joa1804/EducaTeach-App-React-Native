@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { DrawerContentScrollView, type DrawerContentComponentProps } from 'expo-router/drawer';
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -141,7 +141,13 @@ function MenuItem({ item, ativo, onPress, cores, fonte }: MenuItemProps) {
       accessibilityLabel={item.title}
       accessibilityState={{ selected: ativo }}
     >
-      <Ionicons name={item.icon} size={21} color={cor} />
+      {/* O ícone é uma imagem PNG. O tintColor recolore o desenho para acompanhar o tema
+          (funciona com PNG de uma cor só e fundo transparente; se os sprites forem coloridos, remova o tintColor). */}
+      <Image
+        source={item.icon}
+        style={[styles.icone, { tintColor: cor }]}
+        resizeMode="contain"
+      />
       <Text
         style={[
           styles.itemText,
@@ -199,6 +205,10 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     paddingHorizontal: 12,
     borderRadius: 12,
+  },
+  icone: {
+    width: 24,
+    height: 24,
   },
   itemText: {
     marginLeft: 12,

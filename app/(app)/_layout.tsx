@@ -3,6 +3,8 @@ import React from 'react';
 
 import { useConfiguracao } from '@/context/ConfiguracaoContext';
 
+console.log('Stack =', typeof Stack, '| Stack.Screen =', typeof Stack.Screen);
+
 export const unstable_settings = {
   // Garante o menu por baixo ao abrir uma atividade direto por deep link.
   anchor: '(drawer)',

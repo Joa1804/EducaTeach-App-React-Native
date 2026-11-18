@@ -11,6 +11,12 @@ import {
 import { useConfiguracao } from '@/context/ConfiguracaoContext';
 import type { DrawerContentComponentProps } from 'expo-router/drawer';
 
+import * as RouterDrawer from 'expo-router/drawer';
+console.log(
+  'Drawer =', typeof RouterDrawer.Drawer,
+  '| DrawerContentScrollView =', typeof (RouterDrawer as any).DrawerContentScrollView
+);
+
 const SCREEN_NAMES = Object.keys(DRAWER_SCREEN_TITLES) as DrawerRouteName[];
 
 /** Menu lateral do app autenticado. Substitui o antigo AppShell repetido em cada tela. */

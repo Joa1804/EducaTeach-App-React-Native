@@ -1,10 +1,9 @@
-import type { Ionicons } from '@expo/vector-icons';
+import type { ImageSourcePropType } from 'react-native';
 import type { Href } from 'expo-router';
 
 /**
  * Fonte única dos itens do menu lateral.
- * `name` é o nome do arquivo da rota dentro de app/(app)/(drawer) e precisa
- * bater com o `Drawer.Screen` correspondente.
+ * O nome precisa corresponder ao Drawer.Screen.
  */
 export type DrawerRouteName =
   | 'index'
@@ -16,21 +15,25 @@ export type DrawerRouteName =
   | 'desafios'
   | 'configuracao';
 
+/**
+ * Tipo dos itens do menu.
+ * Os ícones agora são imagens PNG.
+ */
 export type DrawerMenuItem = {
   name: DrawerRouteName;
   href: Href;
   title: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: ImageSourcePropType;
 };
 
-/** Itens exibidos na lista principal do menu, na ordem em que aparecem. */
+/** Itens exibidos na lista principal do menu lateral. */
 export const DRAWER_MENU_ITEMS: readonly DrawerMenuItem[] = [
-  { name: 'index', href: '/', title: 'Início', icon: 'home' },
-  { name: 'aprender', href: '/aprender', title: 'Aprender', icon: 'book' },
-  { name: 'forum', href: '/forum', title: 'Fórum', icon: 'chatbubbles' },
-  { name: 'projetos', href: '/projetos', title: 'Meus Projetos', icon: 'folder-open' },
-  { name: 'ranking', href: '/ranking', title: 'Ranking', icon: 'podium' },
-  { name: 'ajudar', href: '/ajudar', title: 'Ajuda', icon: 'help-circle' },
+  { name: 'index', href: '/', title: 'Início', icon: require('../assets/images/Icon-House.png'),},
+  {name: 'aprender', href: '/aprender', title: 'Aprender', icon: require('../assets/images/icone-livror.png'),},
+  { name: 'forum', href: '/forum', title: 'Fórum', icon: require('../assets/images/icone-forum.png'),},
+  {name: 'projetos', href: '/projetos', title: 'Meus Projetos', icon: require('../assets/images/icone-pastar.png'),},
+  { name: 'ranking', href: '/ranking', title: 'Ranking', icon: require('../assets/images/icone-rank.png'),},
+  { name: 'ajudar', href: '/ajudar', title: 'Ajuda', icon: require('../assets/images/icone-pergutar.png'),},
 ];
 
 /** Item fixo no rodapé do menu. */
@@ -38,11 +41,13 @@ export const DRAWER_SETTINGS_ITEM: DrawerMenuItem = {
   name: 'configuracao',
   href: '/configuracao',
   title: 'Configuração',
-  icon: 'settings-outline',
+  icon: require('../assets/images/icone-configuracao.png'),
 };
 
-/** Títulos de cabeçalho de todas as telas do Drawer, inclusive as que não aparecem no menu. */
-export const DRAWER_SCREEN_TITLES: Readonly<Record<DrawerRouteName, string>> = {
+/** Títulos de cabeçalho de todas as telas do Drawer. */
+export const DRAWER_SCREEN_TITLES: Readonly<
+  Record<DrawerRouteName, string>
+> = {
   index: 'Início',
   aprender: 'Aprender',
   forum: 'Fórum',
@@ -53,5 +58,5 @@ export const DRAWER_SCREEN_TITLES: Readonly<Record<DrawerRouteName, string>> = {
   configuracao: 'Configuração',
 };
 
-/** Largura a partir da qual o menu fica fixo na lateral (tablet/web). */
+/** Largura mínima para o menu ficar fixo na lateral. */
 export const PERMANENT_DRAWER_MIN_WIDTH = 768;
