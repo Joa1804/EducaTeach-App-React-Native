@@ -11,7 +11,12 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useConfiguracao, type Cores } from '@/context/ConfiguracaoContext';
+import {
+  useConfiguracao,
+  type Cores,
+  type Tema,
+} from '@/context/ConfiguracaoContext';
+
 import { useUsuario } from '@/context/UsuarioContext';
 import { FONTES } from '@/constants/fontes';
 import { escurecer } from '@/lib/cores';
@@ -40,21 +45,12 @@ function OpcaoSwitch({
   return (
     <View style={styles.opcaoLinha}>
       <View style={styles.opcaoIcone}>
-        <Ionicons
-          name={icon}
-          size={20}
-          color={cores.primaria}
-        />
+        <Ionicons name={icon} size={20} color={cores.primaria} />
       </View>
 
       <View style={styles.opcaoInfo}>
-        <Text style={styles.opcaoTitulo}>
-          {titulo}
-        </Text>
-
-        <Text style={styles.opcaoDescricao}>
-          {descricao}
-        </Text>
+        <Text style={styles.opcaoTitulo}>{titulo}</Text>
+        <Text style={styles.opcaoDescricao}>{descricao}</Text>
       </View>
 
       <Switch
@@ -91,16 +87,10 @@ function Secao({
     <View style={styles.secao}>
       <View style={styles.secaoHeader}>
         <View style={styles.secaoIcone}>
-          <Ionicons
-            name={icon}
-            size={19}
-            color={cores.primaria}
-          />
+          <Ionicons name={icon} size={19} color={cores.primaria} />
         </View>
 
-        <Text style={styles.secaoTitulo}>
-          {titulo}
-        </Text>
+        <Text style={styles.secaoTitulo}>{titulo}</Text>
       </View>
 
       {children}
@@ -108,13 +98,93 @@ function Secao({
   );
 }
 
+// ============================================
+// OPÇÃO DE TEMA
+// ============================================
+
+type PropsTema = {
+  tema: Tema;
+  temaAtual: Tema;
+  titulo: string;
+  descricao: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  cores: Cores;
+  styles: Estilos;
+  aoSelecionar: (tema: Tema) => void;
+};
+
+function OpcaoTema({
+  tema,
+  temaAtual,
+  titulo,
+  descricao,
+  icon,
+  cores,
+  styles,
+  aoSelecionar,
+}: PropsTema) {
+  const selecionado = temaAtual === tema;
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.temaOpcao,
+        selecionado && styles.temaOpcaoSelecionada,
+      ]}
+      onPress={() => aoSelecionar(tema)}
+      activeOpacity={0.75}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: selecionado }}
+      accessibilityLabel={`${titulo}. ${descricao}`}
+    >
+      <View style={styles.temaOpcaoIcone}>
+        <Ionicons
+          name={icon}
+          size={22}
+          color={selecionado ? cores.primaria : cores.textoSuave}
+        />
+      </View>
+
+      <View style={styles.temaOpcaoInfo}>
+        <Text
+          style={[
+            styles.temaOpcaoTitulo,
+            selecionado && styles.temaOpcaoTituloSelecionado,
+          ]}
+        >
+          {titulo}
+        </Text>
+
+        <Text style={styles.temaOpcaoDescricao}>
+          {descricao}
+        </Text>
+      </View>
+
+      <View
+        style={[
+          styles.radio,
+          selecionado && styles.radioSelecionado,
+        ]}
+      >
+        {selecionado && <View style={styles.radioInterno} />}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+// ============================================
+// TELA DE CONFIGURAÇÕES
+// ============================================
+
 export default function ConfiguracaoScreen() {
   const {
+    tema,
     altoContraste,
     fonteGrande,
     notificacoes,
     som,
     alterar,
+    alterarTema,
     cores,
     fonte,
   } = useConfiguracao();
@@ -126,10 +196,9 @@ export default function ConfiguracaoScreen() {
     [cores, fonte],
   );
 
-  const coresGradiente =
-    altoContraste
-      ? [cores.primaria, cores.primaria] as const
-      : [cores.primaria, escurecer(cores.primaria, 0.3)] as const;
+  const coresGradiente = altoContraste
+    ? [cores.primaria, cores.primaria] as const
+    : [cores.primaria, escurecer(cores.primaria, 0.3)] as const;
 
   const nome = usuario?.nome ?? '';
   const inicial = nome.trim().charAt(0).toUpperCase() || '?';
@@ -143,10 +212,7 @@ export default function ConfiguracaoScreen() {
       {/* Cabeçalho */}
       <View style={styles.header}>
         <View style={styles.headerTexto}>
-          <Text
-            style={styles.titulo}
-            accessibilityRole="header"
-          >
+          <Text style={styles.titulo} accessibilityRole="header">
             Configurações
           </Text>
 
@@ -173,23 +239,15 @@ export default function ConfiguracaoScreen() {
       >
         <View style={styles.perfilTopo}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarLetra}>
-              {inicial}
-            </Text>
+            <Text style={styles.avatarLetra}>{inicial}</Text>
           </View>
 
           <View style={styles.perfilInfo}>
-            <Text
-              style={styles.perfilNome}
-              numberOfLines={1}
-            >
+            <Text style={styles.perfilNome} numberOfLines={1}>
               {nome || 'Usuário'}
             </Text>
 
-            <Text
-              style={styles.perfilEmail}
-              numberOfLines={1}
-            >
+            <Text style={styles.perfilEmail} numberOfLines={1}>
               {usuario?.email ?? ''}
             </Text>
           </View>
@@ -224,6 +282,56 @@ export default function ConfiguracaoScreen() {
 
         <View style={styles.perfilBase} />
       </LinearGradient>
+
+      {/* Aparência */}
+      <Secao
+        titulo="Aparência"
+        icon="color-palette-outline"
+        cores={cores}
+        styles={styles}
+      >
+        <Text style={styles.secaoDescricao}>
+          Escolha como deseja visualizar o aplicativo.
+        </Text>
+
+        <View style={styles.temasLista}>
+          <OpcaoTema
+            tema="claro"
+            temaAtual={tema}
+            titulo="Tema claro"
+            descricao="Visual tradicional e iluminado"
+            icon="sunny-outline"
+            cores={cores}
+            styles={styles}
+            aoSelecionar={alterarTema}
+          />
+
+          <View style={styles.divisor} />
+
+          <OpcaoTema
+            tema="escuro"
+            temaAtual={tema}
+            titulo="Tema escuro"
+            descricao="Cores escuras e mais suaves"
+            icon="moon-outline"
+            cores={cores}
+            styles={styles}
+            aoSelecionar={alterarTema}
+          />
+        </View>
+
+        <View style={styles.temaAviso}>
+          <Ionicons
+            name="information-circle-outline"
+            size={17}
+            color={cores.textoSuave}
+          />
+
+          <Text style={styles.temaAvisoTexto}>
+            O alto contraste pode ser ativado separadamente nas opções de acessibilidade.
+          </Text>
+        </View>
+      </Secao>
 
       {/* Acessibilidade */}
       <Secao
@@ -345,6 +453,10 @@ export default function ConfiguracaoScreen() {
     </ScrollView>
   );
 }
+
+// ============================================
+// ESTILOS
+// ============================================
 
 const criarEstilos = (
   c: Cores,
@@ -525,7 +637,105 @@ const criarEstilos = (
       color: c.texto,
     },
 
-    // Opções
+    secaoDescricao: {
+      fontFamily: FONTES.texto,
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginBottom: 12,
+      lineHeight: f(18),
+    },
+
+    // Opções de aparência
+    temasLista: {
+      gap: 0,
+    },
+
+    temaOpcao: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 13,
+      paddingHorizontal: 10,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: 'transparent',
+      gap: 11,
+    },
+
+    temaOpcaoSelecionada: {
+      backgroundColor: c.iconeFundo,
+      borderColor: c.primaria,
+    },
+
+    temaOpcaoIcone: {
+      width: 42,
+      height: 42,
+      borderRadius: 13,
+      backgroundColor: c.fundo,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    temaOpcaoInfo: {
+      flex: 1,
+    },
+
+    temaOpcaoTitulo: {
+      fontFamily: FONTES.destaque,
+      fontSize: f(14),
+      color: c.texto,
+    },
+
+    temaOpcaoTituloSelecionado: {
+      color: c.primaria,
+    },
+
+    temaOpcaoDescricao: {
+      fontFamily: FONTES.texto,
+      fontSize: f(12),
+      color: c.textoSuave,
+      marginTop: 4,
+    },
+
+    radio: {
+      width: 21,
+      height: 21,
+      borderRadius: 11,
+      borderWidth: 2,
+      borderColor: c.borda,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    radioSelecionado: {
+      borderColor: c.primaria,
+    },
+
+    radioInterno: {
+      width: 11,
+      height: 11,
+      borderRadius: 6,
+      backgroundColor: c.primaria,
+    },
+
+    temaAviso: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 7,
+      paddingTop: 12,
+      marginTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: c.borda,
+    },
+
+    temaAvisoTexto: {
+      flex: 1,
+      fontFamily: FONTES.texto,
+      fontSize: f(11),
+      color: c.textoSuave,
+      lineHeight: f(17),
+    },
+
+    // Opções gerais
     opcaoLinha: {
       flexDirection: 'row',
       alignItems: 'center',
