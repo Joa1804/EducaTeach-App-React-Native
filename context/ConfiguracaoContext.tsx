@@ -34,6 +34,7 @@ const CORES_NORMAL = {
   sucessoFundo: '#E6F6EF',
   estrela: '#F59E0B',
   bloqueado: '#B9B9C5',
+  acento: '#F59E0B',
   codigoFundo: '#1E1B2E',
   codigoTexto: '#ECE8F7',
   /** Texto sobre fundos de sucesso/perigo. */
@@ -59,6 +60,7 @@ const CORES_ALTO_CONTRASTE: Cores = {
   sucessoFundo: '#00331C',
   estrela: '#FFD600',
   bloqueado: '#5E5E5E',
+  acento: '#FFD600',
   codigoFundo: '#000000',
   codigoTexto: '#FFFFFF',
   textoSobreCor: '#000000',
