@@ -3,17 +3,18 @@ import React, { useCallback } from 'react';
 import { useWindowDimensions } from 'react-native';
 
 import { AppDrawerContent } from '@/components/navigation/app-drawer-content';
-import {
-  DRAWER_SCREEN_TITLES,
-  PERMANENT_DRAWER_MIN_WIDTH,
-  type DrawerRouteName,
-} from '@/constants/navigation';
+import {DRAWER_SCREEN_TITLES, PERMANENT_DRAWER_MIN_WIDTH, type DrawerRouteName,} from '@/constants/navigation';
 import { useConfiguracao } from '@/context/ConfiguracaoContext';
 import type { DrawerContentComponentProps } from 'expo-router/drawer';
 
+import * as RouterDrawer from 'expo-router/drawer';
+console.log(
+  'Drawer =', typeof RouterDrawer.Drawer,
+  '| DrawerContentScrollView =', typeof (RouterDrawer as any).DrawerContentScrollView
+);
+
 const SCREEN_NAMES = Object.keys(DRAWER_SCREEN_TITLES) as DrawerRouteName[];
 
-/** Menu lateral do app autenticado. Substitui o antigo AppShell repetido em cada tela. */
 export default function DrawerLayout() {
   const { cores, fonte } = useConfiguracao();
   const { width } = useWindowDimensions();
@@ -29,7 +30,6 @@ export default function DrawerLayout() {
       drawerContent={renderContent}
       screenOptions={{
         drawerType: permanente ? 'permanent' : 'front',
-        // Com o menu fixo na lateral o botão de abrir/fechar não tem função.
         headerLeft: permanente ? () => null : undefined,
         drawerStyle: {
           width: 240,
