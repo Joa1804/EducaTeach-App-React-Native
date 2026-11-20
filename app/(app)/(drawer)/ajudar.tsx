@@ -55,8 +55,6 @@ const PERGUNTAS: Ajuda[] = [
   },
 ];
 
-type Estilos = ReturnType<typeof criarEstilos>;
-
 export default function AjudarScreen() {
   const { cores, fonte, altoContraste } = useConfiguracao();
   const [pesquisa, setPesquisa] = useState('');
