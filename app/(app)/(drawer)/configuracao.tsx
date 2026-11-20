@@ -217,7 +217,7 @@ export default function ConfiguracaoScreen() {
           </Text>
 
           <Text style={styles.subtitulo}>
-            Personalize sua experiência no Tech.
+            Personalize sua experiência no EducaTech.
           </Text>
         </View>
 
@@ -269,7 +269,7 @@ export default function ConfiguracaoScreen() {
           />
 
           <Text style={styles.perfilRodapeTexto}>
-            Sua conta Tech
+            Sua conta EducaTech
           </Text>
         </View>
 
@@ -443,7 +443,7 @@ export default function ConfiguracaoScreen() {
         </View>
 
         <Text style={styles.versao}>
-          Tech · versão 1.0.0
+          EducaTech · versão 1.0.0
         </Text>
 
         <Text style={styles.versaoDescricao}>

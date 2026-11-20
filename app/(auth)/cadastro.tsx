@@ -105,7 +105,7 @@ export default function CadastroScreen() {
             </View>
 
             <Text style={styles.nomeApp}>
-              Tech
+              EducaTech
             </Text>
 
             <Text style={styles.descricaoApp}>

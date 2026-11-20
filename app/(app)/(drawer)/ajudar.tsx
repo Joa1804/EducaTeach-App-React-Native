@@ -127,7 +127,7 @@ export default function AjudarScreen() {
               </Text>
 
               <Text style={styles.bannerTexto}>
-                Estamos aqui para ajudar você a aproveitar melhor o Tech.
+                Estamos aqui para ajudar você a aproveitar melhor o EducaTech.
               </Text>
             </View>
 
@@ -293,7 +293,7 @@ export default function AjudarScreen() {
 
       {/* RODAPÉ */}
       <Text style={styles.rodape}>
-        Tech · Estamos aqui para ajudar!
+        EducaTech · Estamos aqui para ajudar!
       </Text>
     </ScrollView>
   );

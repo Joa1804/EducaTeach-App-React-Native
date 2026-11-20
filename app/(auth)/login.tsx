@@ -87,7 +87,7 @@ export default function LoginScreen() {
             </View>
 
             <Text style={styles.nomeApp}>
-              Tech
+              EducaTech
             </Text>
 
             <Text style={styles.descricaoApp}>

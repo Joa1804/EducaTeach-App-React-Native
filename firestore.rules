@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Regras do Tech. Modelo de dados em services/firebase/modelos.ts.
+// Regras do EducaTech. Modelo de dados em services/firebase/modelos.ts.
 // Testadas no emulador: npm run test:rules (firestore-tests/).
 service cloud.firestore {
   match /databases/{database}/documents {
