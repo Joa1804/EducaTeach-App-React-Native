@@ -65,7 +65,7 @@ export function AppDrawerContent(props: DrawerContentComponentProps) {
             <Ionicons name="code-slash" size={24} color={cores.textoPrimaria} />
           </View>
           <Text style={[styles.logoText, { color: cores.primaria, fontSize: fonte(20) }]}>
-            EducaTeach
+            Techs
           </Text>
         </View>
 
