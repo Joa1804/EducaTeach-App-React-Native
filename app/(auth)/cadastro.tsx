@@ -105,7 +105,7 @@ export default function CadastroScreen() {
             </View>
 
             <Text style={styles.nomeApp}>
-              Techs
+              Tech
             </Text>
 
             <Text style={styles.descricaoApp}>

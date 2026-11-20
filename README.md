@@ -94,7 +94,7 @@ Sugestões de capturas de tela:
 - Tela de progresso.
 - Tela de ranking.
 
-> As imagens podem ser adicionadas posteriormente para apresentar visualmente o funcionamento do Techs.
+> As imagens podem ser adicionadas posteriormente para apresentar visualmente o funcionamento do Tech.
 
 ## 📁 Estrutura do projeto
 
@@ -359,7 +359,7 @@ O EducaTech foi desenvolvido por:
 
 A licença do projeto ainda não foi definida pela equipe.
 
-Até que uma licença seja escolhida e adicionada ao repositório por meio de um arquivo `LICENSE`, não há uma licença de código aberto declarada para o Techs.
+Até que uma licença seja escolhida e adicionada ao repositório por meio de um arquivo `LICENSE`, não há uma licença de código aberto declarada para o Tech.
 
 ---
 

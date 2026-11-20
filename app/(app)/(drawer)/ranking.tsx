@@ -130,7 +130,7 @@ export default function RankingScreen() {
 
           <Text style={styles.headerFonte}>
             {fonteRanking === 'global'
-              ? 'Ranking global do Techs'
+              ? 'Ranking global do Tech'
               : 'Ranking deste aparelho'}
           </Text>
         </View>

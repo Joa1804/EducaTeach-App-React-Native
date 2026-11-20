@@ -217,7 +217,7 @@ export default function ConfiguracaoScreen() {
           </Text>
 
           <Text style={styles.subtitulo}>
-            Personalize sua experiência no Techs.
+            Personalize sua experiência no Tech.
           </Text>
         </View>
 
@@ -269,7 +269,7 @@ export default function ConfiguracaoScreen() {
           />
 
           <Text style={styles.perfilRodapeTexto}>
-            Sua conta Techs
+            Sua conta Tech
           </Text>
         </View>
 
@@ -443,7 +443,7 @@ export default function ConfiguracaoScreen() {
         </View>
 
         <Text style={styles.versao}>
-          Techs · versão 1.0.0
+          Tech · versão 1.0.0
         </Text>
 
         <Text style={styles.versaoDescricao}>
